@@ -1,0 +1,2 @@
+module StorecustomerHelper
+end

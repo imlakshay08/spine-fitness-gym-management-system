@@ -1,0 +1,77 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content" >
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">Print Faculty ID Card</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+					</div>
+       
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="card">
+								
+										<div class="card-body ">
+                  
+                    <%= form_tag({:action=>'create'} ,:multipart=>true,:id=>'myForms' ) do  %>
+                      <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                     
+
+                    <div class="row margin-top-10 m-b-20">
+                    <label class="col-sm-12 col-md-2">Faculty Code From
+                    <span class="text-danger"> * </span>
+                    </label>
+                    <div class="col-sm-12 col-md-3"> <input type="text" class="form-control " name="faculty_code" id="faculty_code" autocomplete="off"  placeholder="Faculty code From"  value="<% if @faculty_code %><%=@faculty_code%><% end %>"/></div>
+                 
+                 
+                    <label class="col-sm-12 col-md-1">Upto 
+                      <span class="text-danger"> * </span>
+                    </label>
+                    <div class="col-sm-12 col-md-3"> <input type="text" class="form-control " name="faculty_code_upto" id="faculty_code_upto" autocomplete="off"  placeholder=" Upto"  value="<% if @faculty_code_upto %><%=@faculty_code_upto%><% end %>"/></div>
+                    </div>
+                    </div>
+                    <div class="form-group row margin-top-10 m-b-20 text-center">
+
+                    <div class="col-md-12 m-t-20">
+                      <label for="mylic" class="rad-btn"> <input type="radio" checked="" name="id_detail" id="id_detail" value="ID">&nbsp;
+                      Print Id Card</label>
+                     
+                    </div>
+          
+                    
+                    <div class="col-md-12 text-center m-t-20"  >                      
+                    <a href="javascript:;" rel="faculty_id_card/1_prt_faculty_id_card.pdf" id="printexceled" data-placement="bottom" data-toggle="tooltip" data-original-title="Click for Pdf download" onclick="print_faculty_id();" > 
+                    <button type="button" class="btn btn-circle btn-success"><i class="fa fa-print"></i> Print </button>
+                    </a>   
+                    </div>   
+          
+                    </div>
+
+                      <%end%>
+
+										</div>
+									</div>
+								</div>
+
+                </div>
+                </div>
+                </div>
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+

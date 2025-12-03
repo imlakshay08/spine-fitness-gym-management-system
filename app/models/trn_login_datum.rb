@@ -1,0 +1,2 @@
+class TrnLoginDatum < ApplicationRecord
+end

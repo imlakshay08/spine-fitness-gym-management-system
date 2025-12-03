@@ -1,0 +1,2 @@
+class MstStudentDtl < ApplicationRecord
+end

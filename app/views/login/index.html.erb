@@ -1,0 +1,55 @@
+<!-- Main Wrapper -->
+        <div class="main-wrapper">
+		<section class="sign-in" style="margin-top: 50px;">
+		<div class="container">
+			<div class="signin-content" style="padding-bottom: 50px;">
+				<div class="signin-image">
+					<figure><img src="<%=root_url%>assets/img/pages/signin.jpg" alt="sing up image"></figure>
+					
+				</div>
+				 
+				<div class="signin-form">
+				<div class=" row">
+				<div class="col-md-12 text-center">
+					<img src="<%=root_url%>images/logo/ihmpusalogo.png" style="width:80px;">  
+					</div>
+					</div>
+				<div class="">
+					<h2 class="form-title">Login</h2>
+					</div>
+					<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+					<%= form_tag({:action=>'create'} ,:multipart=>true,:id=>:myforms ) do  %>
+					
+							<% if flash[:error] %>
+						 <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-danger<% end %>" id="successXMessage">
+						   <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+						   <%= flash[:error] %>
+						</div>		 
+						 <% end %>
+						<div class="form-group">
+							<div class="">
+								<input name="userName" id="userName" type="text" placeholder="User Name"
+									class="form-control input-height" /> </div>
+						</div>
+						<div class="form-group">
+							<div class="">
+								<input name="userPassword" type="password" id="userPassword" placeholder="Password"
+									class="form-control input-height" /> </div>
+						</div>
+						
+						<div class="form-group form-button">
+							<button class="btn btn-round btn-primary" onclick="user_logins();" name="" id="">Login</button>
+						</div>
+						</form>
+						<% end %>
+					<div class="social-login">
+					
+					</div>
+				</div>
+			</div>
+			<div class="footer-text text-center">
+	        <p style="padding-bottom: 11px;">Powered by <a class="" target="_blank" href="">Lakshay Tyagi</a></p>
+	        </div>
+		</div>
+	</section>
+</div>

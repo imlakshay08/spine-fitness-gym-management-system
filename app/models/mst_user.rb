@@ -1,0 +1,2 @@
+class MstUser < ApplicationRecord
+end

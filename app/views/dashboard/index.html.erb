@@ -1,0 +1,96 @@
+<%
+begin
+%>
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content">
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">Dashboard</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+					</div>
+							<%= form_tag({:action=>'index'} ,:multipart=>true,:id=>'myForms' ) do  %>
+       						<input type="hidden" id="rootXPath" value="<%=root_url%>">
+  						    <input type="hidden" id="server_request" name="server_request" value="Y" />					
+							<input type="hidden" name="" id="" value="" title=""/>
+
+					<div class="row">
+					<div class="col-md-3 col-sm-12">
+					<div class="card card-box">
+						<div class="card-head">
+						<header>Stock Summary</header>
+						</div>
+
+						<div class="card-body" style="max-height: 400px; overflow-y: auto;">
+						<ul class="list-group">
+
+							<% @stock_list.each do |stk| %>
+							<li class="list-group-item d-flex justify-content-between align-items-center">
+								<span><strong><%= stk.sl_name %></strong></span>
+								<span class="badge badge-info badge-pill">
+								<%= get_current_stock(stk.id) %>
+								</span>
+							</li>
+							<% end %>
+
+						</ul>
+						</div>
+					</div>
+					</div>
+
+						<div class="col-md-9 col-sm-12">
+							<div class="card">
+								<div class="card-head d-flex justify-content-between align-items-center">
+									
+									</div>				
+					
+								<div class="card-body">
+									<div class="panel-body">
+										<div id="calendar" class="has-toolbar"> </div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+        
+			</div>
+	 	</div>	 
+    </div>
+	<!-- End page container --><% end %>
+
+</div>
+<script>
+
+</script>
+
+
+
+
+
+
+<%
+message = ""
+ rescue ActiveRecord::RecordNotFound => e
+# Handle the specific exception when the record is not found
+message = "Record not found "##{e.message}
+isFlags  = false 
+
+rescue ActiveRecord::StatementInvalid => e
+	# Handle SQL syntax errors or invalid queries
+	message =  "Unknown error " ##{e.message}
+	isFlags  = false 
+rescue StandardError => e
+	# Handle any other errors
+	message =  "An error occurred " ##{e.message}
+	isFlags  = false 
+end
+%>
+<%=message%>

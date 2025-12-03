@@ -1,0 +1,43 @@
+  <%	
+								  
+                    i = 1
+            
+											if @adfeelist.length>0
+											 @adfeelist.each do |feelist|	
+
+										   %>
+ <tr>
+                  <td><%=i%></td>
+                  <td><%=feelist.fee_sem%></td>
+                  <td><%=feelist.fee_compt%></td>
+                  <td><%=feelist.fee_amt%></td>
+                <td >
+                 <a href="javascript:;" class="tblEditBtn" onclick="modify_fee_list('<%= feelist.id %>',
+                                       '<%= feelist.fee_year %>',
+                                       '<%= feelist.fee_crse %>',
+                                       '<%= feelist.fee_sem %>',
+                                       '<%= feelist.fee_compt %>',
+                                       '<%= feelist.fee_amt %>',
+                                       '<%= feelist.fee_currncy %>',
+                                       '<%= feelist.fee_catgry %>');">
+                                        <i class="fa fa-pencil"></i>
+</a>
+                
+                 <a class="tblDelBtn" onclick="delete_fee_list('<%=feelist.id%>');">
+               <i class="fa fa-trash-o"></i>
+                </a>
+                </td>
+                
+              </tr>
+               <% 
+								i+=1			
+												   end
+												   else
+                 
+               %>
+               <tr>
+               <td colspan="4">No record(s) found.</td>
+               </tr>
+            <%
+               end
+                 %>

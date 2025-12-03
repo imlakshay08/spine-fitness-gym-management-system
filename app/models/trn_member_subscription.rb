@@ -1,0 +1,2 @@
+class TrnMemberSubscription < ApplicationRecord
+end

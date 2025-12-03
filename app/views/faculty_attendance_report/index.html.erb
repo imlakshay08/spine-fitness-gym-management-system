@@ -1,0 +1,178 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Faculty Attendance Reports</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+		<div class="row">
+	       <div class="col-md-12 col-sm-12 hidden">
+		<a href="<%=root_url%>special_attendance_params/special_attendance_params_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<%= form_tag({action: 'index'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+
+	<div class="form-body">
+
+	<div class="form-group row">
+
+	<label class="col-md-2">Month
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+                <select class="form-select select-height"  name="report_month" id="report_month">
+                    <option value="">Select...</option>
+                    <% if @MonthsList && @MonthsList.length>0 %>
+                        <% @MonthsList.each do |m| %>
+                            <option value="<%= m[1] %>" <% if @report_month && @report_month.to_i == m[1].to_i %>selected<% end %>><%= m[0] %></option>
+                        <% end %>
+                    <% end %>
+                </select>
+				</div>
+					<label class="col-md-2">Year
+					
+				</label>
+				<div class="col-md-3 ">
+                <select class="form-select select-height"  name="report_year" id="report_year">
+                    <option value="">Select...</option>
+                    <% if @YearsList && @YearsList.length>0 %>
+                        <% @YearsList.each do |y| %>
+                            <option value="<%= y %>" <% if @report_year && @report_year.to_i == y.to_i %>selected<% end %>><%= y %></option>
+                        <% end %>
+                    <% end %>
+                </select>
+				</div>
+	</div>
+
+	<div class="form-group row">
+
+	<label class="col-md-2">Course
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+					<select class="form-select select-height"  name="report_course" id="report_course" onchange="updateSemester();" >
+							<option value="">Select...</option>
+							<%
+                        if @CourseList && @CourseList.length>0
+                            @CourseList.each do |course|
+                    %>
+                    <option value="<%=course.id%>" <% if @report_course && @report_course.to_i == course.id.to_i %>selected<% elsif session[:sess_report_course].to_s==course.id.to_i%>selected<% end %>><%=course.crse_descp%></option>
+                    <%
+                    end
+                    end
+                    %>
+						</select>
+				</div>
+						<label class="col-md-2">Semester
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+					<select class="form-select select-height" required name="report_semester" id="sub_sem" onchange="update_subject_list();">
+						<option value="">Select...</option>
+						  <% if @Listsemester && @Listsemester.any? %>
+    						<% @Listsemester.each do |semester| %>
+      							<option value="<%= semester %>" <% if @report_semester && @report_semester.to_i == semester.to_i %>selected<% end %>><%= "Semester #{semester}" %></option>
+								<% end %>
+							<% end %>
+					</select>
+				</div>
+	</div>
+
+					<div class="form-group row">
+					<label class="col-md-2">Subject
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height" name="report_subject" id="report_subject" >
+							<option value="">Select...</option>
+							
+						</select>
+					</div>
+                    </div>
+
+						<div class="form-group row hidden" id="fromdate_uptodate">
+					<label class="col-md-2">From Date
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+				<input name="asondated" id="from_dated" type="text" readonly placeholder="Select From date"
+				autocomplete="off" maxlength="20" class="form-control"  value="<% if @asondated != nil %><%=formatted_date(@asondated)%><% else %><%=formatted_date(@nbegindate)%><% end %>"/> 
+
+					</div>
+					
+					<label class="col-md-2">Upto Date
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+				<input name="uptodated" id="upto_dated" type="text" readonly placeholder="Select Upto date"
+				autocomplete="off" maxlength="20" class="form-control"  value="<% if @uptodated != nil %><%=formatted_date(@uptodated)%><% else %><%=formatted_date(@cdate)%><% end %>"/> 
+
+					</div>
+					</div>
+
+	<div class="form-group row hidden" id="club_dropdown">
+
+	<label class="col-md-2" >Club
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+					<select class="form-select select-height"  name="report_club" id="report_club"  >
+							<option value="">Select...</option>
+							<%
+                        if @HouseList && @HouseList.length>0
+                            @HouseList.each do |house|
+                    %>
+                    <option value="<%=house.id%>" <% if @report_club && @report_club.to_i == house.id.to_i %>selected<% elsif session[:sess_report_club].to_s==house.id.to_i%>selected<% end %>><%=house.hs_house_name%></option>
+                    <%
+                    end
+                    end
+                    %>
+						</select>
+				</div>
+					
+	</div>
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+											<button type="button" href="javascript:void(0);" type="button" id="printexcel" rel="<%= root_url %><%= @printexcelPath %>" onclick="print_contract_report_excel();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary no_loader" >Print</button>
+ 									<div class="col-sm-12 col-md-1 show_loader hidden">
+						 <br/>
+                    		  <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" ></div>
+						</div>
+								
+							<a href="<%=root_url%>dashboard">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

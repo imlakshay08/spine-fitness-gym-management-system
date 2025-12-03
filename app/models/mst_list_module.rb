@@ -1,0 +1,2 @@
+class MstListModule < ApplicationRecord
+end

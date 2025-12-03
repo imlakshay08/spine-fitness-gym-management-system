@@ -1,0 +1,40 @@
+<% 
+i = 1
+if mydata && mydata.length>0 
+mydata.each do |student| %>  
+
+<tr>
+
+<td><%= i %></td>
+<td><%= student.stdnt_fam_type %></td>
+<td><%= student.stdnt_fam_father %></td>
+<td><%= student.stdnt_fam_add1 %></td>
+<td><%= student.stdnt_fam_city%></td>
+<td><%= student.stdnt_fam_tel_res%></td>
+<td><%= student.stdnt_fam_occu%></td>
+<td>
+
+<a href="javascript:;"
+class="tblEditBtn" onclick="process_qualif_edit('<%=student.id%>',
+'<%=student.stdnt_fam_type%>',
+'<%=student.stdnt_fam_father%>',
+'<%=student.stdnt_fam_check%>',
+'<%=student.stdnt_fam_add1%>',
+'<%=student.stdnt_fam_add2%>',
+'<%=student.stdnt_fam_city%>',
+'<%=student.stdnt_fam_tel_res%>',
+'<%=student.stdnt_fam_tel_off%>',
+'<%=student.stdnt_fam_email%>',
+'<%=student.stdnt_fam_occu%>',
+'<%=student.stdnt_fam_income%>'
+);">
+<i class="fa fa-pencil"></i>
+</a>
+<a class="tblDelBtn" >
+<i class="fa fa-trash-o"></i>
+</a>
+</td>
+						</tr>
+<% i += 1 %>
+<% end %>
+<% end %>

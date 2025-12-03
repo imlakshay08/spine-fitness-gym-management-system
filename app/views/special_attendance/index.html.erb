@@ -1,0 +1,222 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Special Attendance</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+		
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+            <input type="hidden" name="mid" id="mid" value="<% if @special_attend %><%=@special_attend.id%><% end %>"/>
+			<input type="hidden" name="stdnt_code" id="stdnt_code" value="" />
+			 <input type="hidden" name="product_s_name" id="product_s_name" value=""/>
+			 			 <input type="hidden" name="specialAttendId" id="specialAttendId" value=""/>
+
+						<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+
+
+					<div class="form-body">
+					<div class="row">
+					<div class="col-md-8 col-sm-12">
+			        <div class="form-group row">
+					<label class="col-md-2">Date
+							<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+						<div class="input-group">
+						<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+						<input name="sp_att_date" id="sp_att_date" readonly type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @special_attend%><%=@special_attend.sp_att_date%><%else%><%=Date.today.strftime('%d-%b-%Y')%><% end %>" onchange="reset_all_fields();"/>
+						</div>
+						</div>
+						<label class="col-md-2">Course
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+						<select class="form-select select-height" required name="sp_att_crse" id="sp_att_crse" onchange="updateSemesters();">
+							<option value="">Select...</option>
+							<%
+                        if @CourseList && @CourseList.length>0
+                            @CourseList.each do |course|
+                    %>
+                    <option value="<%=course.id%>" <% if @special_attend && @special_attend.sp_att_crse.to_i == course.id.to_i %>selected<% elsif session[:sess_sp_att_crse].to_s==course.id.to_i%>selected<% end %>><%=course.crse_descp%></option>
+                    <%
+                    end
+                    end
+                    %>
+						</select>
+					</div>
+						</div>
+				 <div class="form-group row">
+					
+						<label class="col-md-2">Semester
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+						<select class="form-select select-height" required name="sp_att_sem" id="sp_att_sem" onchange="empty_faculty_club();">
+							<option value="">Select...</option>
+						
+						</select>
+					</div>
+					<label class="col-md-2">Faculty
+					<span class="required"> * </span>
+				</label>
+					<div class="col-md-4">
+						<select class="form-select select-height" autofocus="true" required name="sp_att_fclty" id="sp_att_fclty" onchange="get_club_list()">
+							<% if @faculty  %>
+								<option value="">Select...</option>
+								<% end %>
+									<%
+                        if @faculty && @faculty.length>0
+                            @faculty.each do |faculty|
+                    %>
+                    <option value="<%=faculty.id%>" <% if @special_attend && @special_attend.sp_att_fclty.to_i == faculty.id.to_i %>selected<% elsif session[:sess_sp_att_fclty].to_s==faculty.id.to_i%>selected<% end %>><%=faculty.fclty_name%></option>
+                    <%
+                    end
+                    end
+                    %>
+							</select>
+						</div>
+						
+					</div>
+					<div class="form-group row">
+					<label class="col-md-2">Club
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+						<select class="form-select select-height" required name="sp_att_house" id="sp_att_house" onchange="common_Acitivity_function();">
+							<option value="">Select...</option>
+						</select>
+					</div>
+						<label class="col-md-2">Activity
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+						<input name="sp_att_actvty" id="sp_att_actvty"  type="text"  placeholder="Enter Activity"
+					autocomplete="off" maxlength="50" class="form-control" required value="<% if @special_attend%><%=@special_attend.sp_att_actvty.to_s.downcase%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sp_att_actvty'] %><% end %>"/> 
+					<span id="activity_name"></span>
+					</div>
+					</div>
+					<div class="form-group row hidden">
+					<label class="col-md-2">Period
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+							<select class="form-select select-height hidden" required  name="" id="">
+							<option value="">Select...</option>
+							<option value="1">1</option>
+							<option value="2">2</option>
+							<option value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+							<option value="6">6</option>
+							<option value="7">7</option>
+							<option value="8">8</option>
+						
+						</select>
+					</div>
+					
+										</div>
+					</div>
+					
+									<div class="form-group row mt-4">
+									<div class="col-md-2" >
+					Student Name <span class="required"> * </span><br/>
+						<input name="sp_att_std_name" id="sp_att_std_name"  type="text"  placeholder="Enter Student Name"
+					autocomplete="off" maxlength="30" class="form-control"  value="<% if @special_attend%><%=@special_attend.sp_att_std_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sp_att_std_name'] %><% end %>"/> 
+					<span id="stdnt_name"></span>
+					</div>
+					<div class="col-md-2" >
+						Student Roll No.
+						<span class="required"> * </span><br/>
+						<input name="sp_att_std_rollno" id="sp_att_std_rollno"  type="text"  placeholder="Enter Student Roll No."
+					autocomplete="off" maxlength="10" class="form-control" onkeypress="return isNumberMyKeys();" value="<% if @special_attend%><%=@special_attend.sp_att_std_rollno%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sp_att_std_rollno'] %><% end %>"/> 
+					</div>
+		<div class="col-md-2" >
+			
+			<button type="button" class="btn btn-circle btn-info mt-4 no_loader" onclick="get_global_attendance();">Add to List</button>
+			<div class="mt-4  mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader loader hidden"></div>
+			</div>
+				</div>
+				
+					</div>
+                    <div class="col-md-4 col-sm-12"> </div>
+					</div>
+
+			        <input type="hidden" name="prepid" id="prepid" value=""/>
+				<input type="hidden" id="currprodcode" name="currprodcode" value=""/>
+						<div class="table-scrollable">
+												<table class="table">
+													<thead>
+														<tr>
+															<th>S.No.</th>
+															<th> Action </th>
+															<th >Student Roll No.</th>
+															<th >Name</th>
+															<th class="text-center">Period 1</th>
+															<th class="text-center">Period 2</th>
+															<th class="text-center">Period 3</th>
+															<th class="text-center">Period 4</th>
+															<th class="text-center">Period 5</th>
+															<th class="text-center">Period 6</th>
+															<th class="text-center">Period 7</th>
+															<th class="text-center">Period 8</th>
+															<th class="text-center">All Periods</th>
+														</tr>
+													</thead>
+													<tbody id="view_special_attendance">
+							
+                          
+													</tbody>
+												</table>
+											</div>
+                                      <div class="form-group row"> 
+											<div class="col-md-12">
+										
+                      <a href="javascript:void(0);" id="productexeclurl" rel="<%=@printpath%>" onclick="special_attendance_download_excel();" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
+                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
+                      
+											</div>
+											</div>
+							<div class="form-group form-button text-center  " style="margin-top: 20px;">
+								<button type="button"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-r-20 btn-circle btn-primary" onclick="isAttendanceMySubmit();">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+								
+							<a href="<%=root_url%>dashboard">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+					</form>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

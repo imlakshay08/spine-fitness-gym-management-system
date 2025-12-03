@@ -1,0 +1,2 @@
+class MstCompany < ApplicationRecord
+end

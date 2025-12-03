@@ -1,0 +1,247 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Student Profile</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>student_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+						<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+            <input type="hidden" name="mid" id="mid" value="<% if @studentadm %><%=@studentadm.id%><% end %>"/>
+			<input type="hidden" name="currcategoryimage" id="currcategoryimage" value="<% if @studentadm %><%=@studentadm.stdnt_img%><% end %>"/>
+			<input type="hidden" name="productServer" id="productServer" value=""/>
+			<input type="hidden" name="myattachpropfile" id="myattachpropfile" value=""/>
+			<input type="hidden" name="manualupdatecode" id="manualupdatecode" value=""/>
+			<input type="hidden" name="curregistno" id="curregistno" value="<% if @studentadm%><%=@studentadm.stdnt_reg_no%><% end %>"/>
+			<input type="hidden" name="cursignature" id="cursignature" value="<% if @studentadm %><%=@studentadm.stdnt_signature%><% end %>"/>
+			<input type="hidden" name="studentattach_file" id="studentattach_file" value=""/>
+<div class="form-body">
+						<%
+						image_url = "https://user.gadjian.com/static/images/personnel_boy.png"
+						pullimgpath = "https://ihm-inqerp.b-cdn.net"
+						if @studentadm
+							compcode = @studentadm.stdnt_compcode
+							img_path = @studentadm.stdnt_img
+						image_url = "#{pullimgpath}/#{compcode}/student/#{img_path}"
+						end
+					   %>
+					   	<div class="form-group row">
+					   <div class="col-md-2 mmb100">
+					<div class="profile-img-wrap edit-img">
+					<a href="<%= image_url %>" class="example-image-link" data-lightbox="example-1">
+						<img src="<%= image_url %>" class="img-responsive img-thumbnail" id="item-img-output" />
+					</a>
+					<div class="fileupload" style="position: absolute; bottom: 0px; left: 2px; background: #fff; color: #000; padding: 0px 20px; border-radius: 0px;">
+						<label class="custom-file-upload" style="margin: 0px;">
+						<input type="file" accept=".jpg,.png,.jpeg" class="upload item-img file center-block" name="stdnt_img" id="stdnt_img" style="display: none;" />
+						<p style="margin: 0 0 0px; font-size: 13px;" onclick="document.getElementById('stdnt_img').click();">Upload</p>
+						</label>
+					</div>
+					</div>
+
+					</div>
+					<div class="col-md-10">
+					<div class="form-group row">
+					<label class="col-md-3">Registration No.
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<% if @studentadm%>
+					<input name="stdnt_reg_no" id="stdnt_reg_no"  type="text"  placeholder="Enter Registration No."
+					autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @studentadm%><%=@studentadm.stdnt_reg_no%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_reg_no'] %><% end %>"/> 
+					<%
+					else
+					%>
+					<input name="stdnt_reg_no" id="stdnt_reg_no"  type="text"  placeholder="Enter Registration No."
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @studentadm%><%=@studentadm.stdnt_reg_no%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_reg_no'] %><% end %>"/> 
+					<% end %>
+					</div>
+
+						<label class=" col-md-3 col-6">Registration Date
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-3">
+						<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="stdnt_reg_date" id="stdnt_reg_date" readonly type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @studentadm%><%=formatted_date(@studentadm.stdnt_reg_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_reg_date'] %><% end %>"/>
+					</div>
+							
+						</div>
+
+					</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">First Name
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="stdnt_fname" id="stdnt_fname"  type="text"  placeholder="Enter First Name"
+					autocomplete="off" maxlength="50" class="form-control" required value="<% if @studentadm%><%=@studentadm.stdnt_fname%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_fname'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Last Name
+					</label>
+					<div class="col-md-3">
+					<input name="stdnt_lname" id="stdnt_lname"  type="text"  placeholder="Enter Last Name"
+					autocomplete="off" maxlength="50" class="form-control" required value="<% if @studentadm%><%=@studentadm.stdnt_lname%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_lname'] %><% end %>"/> 
+					</div>
+					</div>
+
+						<div class="form-group row">
+					<label class="col-md-3">Date of Birth
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="stdnt_dob" id="stdnt_dob" type="text" readonly placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @studentadm%><%=formatted_date(@studentadm.stdnt_dob)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_dob'] %><% end %>"/>
+					</div>
+						
+					</div>
+					<label class="col-md-3">Gender
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height"  name="stdnt_gender" id="stdnt_gender">
+							<option value="">Select...</option>
+							<option value="M" <% if @studentadm && @studentadm.stdnt_gender.to_s == 'M'%>selected<% end %>>Male</option>
+							<option value="F"<% if @studentadm && @studentadm.stdnt_gender.to_s == 'F'%>selected<% end %>>Female</option>
+							<option value="OTH"<% if @studentadm && @studentadm.stdnt_gender.to_s == 'OTH'%>selected<% end %>>Other</option>
+						
+						</select>
+					</div>
+					</div>
+
+
+						<div class="form-group row">
+				
+					<label class="col-md-3">Blood Group
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height"  name="stdnt_bloodgroup" id="stdnt_bloodgroup">
+							<option value="">Select...</option>
+						 <option value="A+" <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'A+'%>selected<% end %>>A+</option>
+						<option value="A-"  <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'A-'%>selected<% end %>>A-</option>
+						<option value="B+"  <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'B+'%>selected<% end %>>B+</option>
+						<option value="B-"  <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'B-'%>selected<% end %>>B-</option>
+						<option value="AB+" <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'AB+'%>selected<% end %>>AB+</option>
+						<option value="AB-" <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'AB-'%>selected<% end %>>AB-</option>
+						<option value="O+"  <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'O+'%>selected<% end %>>O+</option>
+						<option value="O-"  <% if @studentadm && @studentadm.stdnt_bloodgroup.to_s == 'O-'%>selected<% end %>>O-</option>
+						</select>
+					</div>
+						<%
+						pullimgpath = "https://ihm-inqerp.b-cdn.net"
+						if @studentadm
+							compcode = @studentadm.stdnt_compcode
+							img_path = @studentadm.stdnt_signature
+						image_url = "#{pullimgpath}/#{compcode}/studentsign/#{img_path}"
+						end
+					   %>
+					<label class="col-md-3">Signature	
+					<% if @studentadm%><% if @studentadm.stdnt_signature.present?%><a href="<%=image_url%>" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="View Signature"><i class="fa fa-eye"></i></a><%end %><%end %>
+					</label>
+					<div class="col-md-3"> 
+                     <input type="file" accept=".jpg,.png,.jpeg" name="stdnt_signature" id="stdnt_signature"/>
+				
+					</div>
+					</div>
+
+
+					</div>
+					</div>
+									
+					
+
+			
+					
+
+								
+
+				
+					<div class="mdl-tabs mdl-js-tabs">
+					<div class="mdl-tabs__tab-bar tab-left-side">
+						<a href="#student_detail"  id="student_detail_1" class="mdl-tabs__tab is-active">Student Details</a>
+						<a href="#parents_detail"  id="parents_detail_1" class="mdl-tabs__tab">Parents Info</a>
+						<a href="#general_details" id="general_details_1" class="mdl-tabs__tab">General Details </a>
+					</div>
+
+					<div class="mdl-tabs__panel is-active p-t-20" id="student_detail">
+					<%= render 'student_list/student_detail_list' %>
+
+					</div>
+					<% end %>	
+						<!--- START PARENT DETAIL --->	
+					<div class="mdl-tabs__panel  p-t-20" id="parents_detail" onclick="change_row_qualification();">
+					   	<%= render 'student_list/student_parents_detail' %>
+					</div>
+					<!--- END PARENT DETAIL --->
+					
+					<!--GENERAL DETAIL -->
+					<div class="mdl-tabs__panel p-t-20 general_details" id="general_details">
+					<%= render 'student_list/student_general_details' %>
+					</div>
+
+					</div>
+									
+
+							
+					</div>
+				
+				
+			</div>
+		</div>
+	</div>
+</div>
+ <input type="hidden" id="currImage" value=""/>
+
+				<div class="modal fade" id="cropImagePop" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+		<div class="modal-content" style="height: 500px;">
+		<div class="modal-header">
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		<h4 class="modal-title" id="myModalLabel">
+		<?=multiLanguage( "Edit Foto" , "Edit Photo" )?></h4>
+		</div>
+		<div class="modal-body m-b-20">
+		<div id="upload-demo" class="center-block"></div>
+		</div>
+		<div class="modal-footer " >
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" id="cropImageBtn" class="btn btn-primary">Crop</button>
+		</div>
+		</div>
+		</div>
+		</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

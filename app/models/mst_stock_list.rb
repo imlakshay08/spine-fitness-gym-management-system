@@ -1,0 +1,2 @@
+class MstStockList < ApplicationRecord
+end

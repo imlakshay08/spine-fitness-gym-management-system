@@ -1,0 +1,63 @@
+
+<%	
+								  
+                    i = 1
+            
+											if @adspecialattend
+											 @adspecialattend.each do |attndnce|	
+
+										   %>
+ <tr>
+                  <td><%=i%></td>
+                  <td>
+                        <a href="javascript:void(0)" 
+                            onclick="delete_student_from_list('<%= attndnce.sp_att_std_rollno %>', '<%= attndnce.sp_att_date %>', '<%= attndnce.sp_att_fclty %>', '<%= attndnce.sp_att_crse %>', '<%= attndnce.sp_att_sem %>', '<%= attndnce.sp_att_actvty %>');" 
+                            class="tblDelBtn" 
+                            id="student_<%= attndnce.sp_att_std_rollno %>" alt="Remove" title="Remove">
+                            <i class="fa fa-times"></i>
+                        </a>
+                 </td>
+                  <td><%=attndnce.sp_att_std_rollno%>
+                  <input type="hidden" name="student_rollno[]" id="student_rollno<%=i%>" value="<%=attndnce.sp_att_std_rollno%>">
+                  </td>
+                  <td><%=attndnce.sp_att_std_name%></td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd1[]"  id="sp_att_prd1<%=i%>"  value="Y" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd1 == 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd2[]"  id="sp_att_prd2<%=i%>" value="Y" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd2 == 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd3[]"  id="sp_att_prd3<%=i%>"  value="Y" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd3 == 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd4[]" id="sp_att_prd4<%=i%>" value="Y"  style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd4 == 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd5[]"  id="sp_att_prd5<%=i%>" value="Y" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd5 == 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd6[]"  id="sp_att_prd6<%=i%>" value="Y" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd6 == 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd7[]"  id="sp_att_prd7<%=i%>" value="Y" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd7== 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd8[]"  id="sp_att_prd8<%=i%>" value="Y" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd8 == 'Y' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="allperiod[]" id="allperiod<%=i%>" value="Y" style="width: 20px;height: 25px;" onclick="check_all_checkbox(<%=i%>);">
+                  </td>
+              </tr>
+               <% 
+								i+=1			
+												   end
+												   else
+                 
+               %>
+               <tr>
+               <td colspan="6">No record(s) found.</td>
+               </tr>
+            <%
+               end
+                 %>

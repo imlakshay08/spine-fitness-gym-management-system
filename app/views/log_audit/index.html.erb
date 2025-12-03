@@ -1,0 +1,155 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content" >
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">User Log</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+            
+					</div>
+          <div class="row">
+          <div class="col-md-12">
+            <div class="tabbable-line">
+              <div class="tab-content">
+									<div class="tab-pane active fontawesome-demo" id="tab1">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="card">
+								
+										<div class="card-body ">
+                    <% if flash[:error] %>
+                    <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                      <%= flash[:error] %>
+                    </div>
+                   <% end %>
+
+                    <%= form_tag({:action=>'index'} ,:multipart=>true,:id=>'myforms') do  %>
+					            <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                    <div class="row m-b-10">
+                    	<label class="col-md-2">From Date
+                      <input name="search_fromdated" id="search_fromdated" readonly  type="text" autocomplete="off" maxlength="20" placeholder="" class="form-control " value="<% if @search_fromdated.present?%><%=@search_fromdated%><% else %><%= @nbegindate %><% end%>" style="background: #fff;cursor: pointer;"/> 
+                    </label>
+                    
+                    
+                    <label class="col-md-2">Upto Date
+                    <input name="search_uptodated" id="search_uptodated" readonly type="text" autocomplete="off" maxlength="20" placeholder="" class="form-control " value="<% if @search_uptodated.present?%><%=@search_uptodated%><% else %><%= @enddate %><% end%>" style="background: #fff;cursor: pointer;"/> 
+                    </label>
+
+                  
+                    <div class="col-sm-12 col-md-3">
+                     <label class="">Search</label>
+                    <input type="text" class="form-control" name="user_search" id="user_search"  autocomplete="off" placeholder="Search User code,Event"  value="<% if @user_search %><%=@user_search%><% end %>"/></div>
+                    
+                    <div class="col-sm-12 col-md-3">  
+                     <label class="">Type</label>
+                    	<select class="form-select select-height"  name="search_login" id="search_login">
+							<option value="">Select</option>
+									
+									 <option value="AL" <%= 'selected' if @search_login == 'AL' %>>Activity List</option>
+                    <option value="LL" <%= 'selected' if @search_login == 'LL' %>>Login List</option>
+								</select>
+                    </div>
+                  
+                    <div class="col-sm-12 col-md-1">  
+                    <button data-bs-toggle="button" class="btn btn-circle btn-default" onclick="filter_user_log();"><i class="fa fa-search"></i>
+											</button>
+                    </div>
+                    <div class="col-sm-12 col-md-1">  
+                    <a href="<%=root_url%>log_audit/refresh_log_audit" class="float-right">
+                    <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
+                    </div>
+                    </div>  
+ 
+
+                      
+                      <div class="row">
+                      <div class="col-sm-12 col-md-9 hidden">  
+                      <a href="<%=root_url%>house_list/1_prt_house_list.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
+                      <button type="button" class="btn dark btn-outline m-b-10 hidden" style="float:right;">PDF</button> </a>
+                      </div>
+                    
+                      </div>
+											
+                      <table 
+                      class="table table-striped table-bordered table-hover "
+                      >
+													<thead>
+														<tr>
+															 <th>User</th>
+                                            <th>Activity Detail</th>
+                                          
+                                            <th>Date</th>                                                                                        
+                                            <th>Time</th>
+                                            <th class="hidden">Path</th>
+                                            <th class="hidden">Device/Browser ID</th>											
+											<th>User IP</th> 
+                                          
+														</tr>
+													</thead>
+													<tbody>
+                                             			 <% pagestart = params[:page] ? params[:page] : 1
+                            if pagestart.to_i <=1
+                              i = 1
+                            else
+                              i = ((pagestart.to_i-1)*50)+1
+                              i = i.to_i
+                            end
+                            if @UserLogList && @UserLogList.length >0
+                              @UserLogList.each do |listlog|
+                                urname = ""
+                                username = ""
+                                userobj = user_detail(listlog.ad_user)
+                                urname = userobj.firstname.to_s
+                                username = userobj.username
+                                if urname.blank?
+                                 urname = userobj.username.to_s
+                                  
+                                end
+                          %>                   
+								                   
+                              <tr  class="odd gradeX">
+														
+															<td><%=username%> - <%= urname.blank? ? userobj.userid : urname %></td>
+                           			<td><%= listlog.ad_event %>: <%= listlog.ad_module %> <br/> <%= listlog.ad_description %></td>
+                            
+                                    <td><%= formatted_date(listlog.ad_date) %></td>
+                                    <td><%= listlog.ad_time %></td>
+                                    <td class="hidden"><%= listlog.ad_path %></td>
+                                    <td class="hidden"><%= listlog.ad_device_id %></td>
+                                    <td><%= listlog.ad_ip %></td>
+														</tr>
+                          <% i += 1 %>
+                            <% end %>
+                            <% end %>
+													</tbody>
+												</table>
+										<%   if @UserLogList && @UserLogList.length >0 %>
+                    <div class="col-md-12 text-center"><%= will_paginate @UserLogList %></div>
+                    <% end %>
+										</div>
+									</div>
+								</div>
+
+                </div><%end%>
+                </div>
+                </div>
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+

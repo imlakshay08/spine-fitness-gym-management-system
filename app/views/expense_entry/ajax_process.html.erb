@@ -1,0 +1,394 @@
+<!-- BEGIN CONTAINER -->
+<div>
+	<!-- BEGIN CONTENT -->
+	<div class="page-content-wrapper">
+		<div class="page-content">
+			<!-- BEGIN SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+			<%= render "layouts/portlet-config" %>
+			<!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+			<!-- BEGIN STYLE CUSTOMIZER -->
+			<%= render "layouts/theme-panel" %>
+			<!-- END BEGIN STYLE CUSTOMIZER -->
+			<!-- BEGIN PAGE HEADER-->
+			<!--h3 class="page-title">
+			Setting
+			</h3-->
+			<% if flash[:error] %>
+                           <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                             <%= flash[:error] %>
+                           </div>
+                          <% end %>
+			<%= render "layouts/breadcrumbs" %>
+			<div>&nbsp;</div>
+			
+			
+			<!------------------text Being-------------->
+			<div class="row">
+				<div class="col-md-12">
+					<!-- BEGIN SAMPLE TABLE PORTLET-->
+				<div class="portlet">
+				<div class="portlet-body">
+				<div class="row">
+                                  <div class="col-md-12">
+                                    <label class="head_info">Expense Entry</label>
+                                  </div>
+				    <div class="col-md-12">
+					 <%= form_tag({:action=>'create'} ,:multipart=>true,:id=>'myForms' ) do  %>
+                                        <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+                                        <input type="hidden"  id="salessearchId" name="salessearchId" value=""/>
+                                        <input type="hidden"  id="currentgstno"  name="currentgstno" value="<% if @mstXEmpEdit!=nil %><%=@mstXEmpEdit.is_gst_no%><% end %>"/>
+                                        <input type="hidden"  id="currentpanno"  name="currentpanno" value="<% if @mstXEmpEdit!=nil %><%=@mstXEmpEdit.is_pan_number%><% end %>"/>
+                                        <input type="hidden"  id="insureId"      name="insureId" value="<% if @mstXEmpEdit!=nil %><%=@mstXEmpEdit.id%><% end %>"/>
+                                        <input type="hidden"  id="currentemail"  name="currentemail" value="<% if @mstXEmpEdit!=nil %><%=@mstXEmpEdit.is_email%><% end %>"/>
+                                        <input type="hidden"  id="currentmobile" name="currentmobile" value="<% if @mstXEmpEdit!=nil %><%=@mstXEmpEdit.is_mobile%><% end %>"/>
+                                        <input type="hidden"  id="currentadd"    name="currentadd" value="<% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.is_office.to_i%><% end %>"/>
+                                        <input type="hidden"  id="currentcomp"    name="currentcomp" value="<% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.is_company.to_i%><% end %>"/>
+                                       <div class="row">
+                                       <div class="col-md-2 wd14">
+                                       Expense No
+                                       </div>
+                                       <div class="col-md-2">
+                                       <input type="text" required readonly class="form-control" name="ed_number" id="ed_number" value="<%=@lastExpno%>"/>
+                                       </div>
+                                       </div>
+					<div class="row">
+					<div class="col-md-2 wd14">
+					File ID<span class="hrms_flag">[*]</span>
+					</div>
+					<div class="col-md-3">
+                                          <select class="form-control text_input_new" required name="ed_fileid" id="ed_fileid" onchange="get_all_expense_against_file();" >
+                                            <option value="">-Select-</option>
+                                            <%
+                                            if @allFiles.length >0
+                                             @allFiles.each do |exp|
+                                            %>
+                                             <option value="<%=exp.ns_file_id%>"><%=exp.ns_file_id%></option>
+                                             <%
+                                               end
+                                             end
+                                             %>
+                                             
+                                            
+                                          </select>
+                                         
+					</div>
+                                        <div class="col-md-2 ml10 wd14">
+					     Employee Name <span class="hrms_flag">[*]</span>
+					</div>
+					<div class="col-md-3">
+                                          <select class="form-control text_input_new" required name="ed_surveyors" id="ed_surveyors">
+                                            <option value="">-Select-</option>
+                                            <%
+                                            if @AllEmployee.length >0
+                                             @AllEmployee.each do |emp|
+                                            %>
+                                             <option value="<%=emp.id%>"><%=emp.emp_name%></option>
+                                             <%
+                                               end
+                                             end
+                                             %>
+                                          </select>
+                                          
+					
+					</div>
+					
+					</div>
+					<div class="row">
+                                          <div class="col-md-2 wd14">
+					Expense Dt.<span class="hrms_flag">[*]</span>
+					</div>
+					<div class="col-md-3">
+                                         <input type="text" required class="form-control" name="ed_date" id="billdate"/>
+					</div>
+					<div class="col-md-2 ml10 wd14">
+					Place of survey
+					</div>
+					<div class="col-md-3">
+					
+				           <input type="text" class="form-control" name="ed_placesurvey" id="ed_placesurvey"/>
+
+					</div>
+				
+					</div>
+					<div class="row">
+						<div class="col-md-2 wd14">
+							Type of Survey
+						</div>
+						<div class="col-md-3">
+							<select class="form-control" name="ed_locality" id="ed_locality">
+								<option value="Local">Local</option>
+								<option value="Domestic">Domestic</option>
+								<option value="International">International</option>
+							</select>
+						</div>
+							<div class="col-md-2 ml10 wd14">
+							Type of Trip
+						</div>
+						<div class="col-md-3">
+							<select class="form-control" name="ed_trips" id="ed_trips">
+                                                                <option value="">-Select-</option>
+								<option value="Office to Insured">Office to Insured</option>
+								<option value="Insured to Office">Insured to Office</option>
+                                                                <option value="Home to Insured">Home to Insured</option>
+								<option value="Insured to Home">Insured to Home</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-2 wd14">
+							Type of Expense
+						</div>
+						<div class="col-md-3">
+							<select class="form-control" name="ed_exptype" id="ed_exptype" onchange="check_expense_types();">
+                                                                <option value="">-Select-</option>
+								<option value="Travelling">Travelling</option>
+								<option value="Lodging">Lodging</option>
+								<option value="Meal">Meal</option>
+							</select>
+						</div>
+							<div class="col-md-2 ml10 wd14">
+							Payment Mode
+						</div>
+						<div class="col-md-3">
+							<select class="form-control" name="ed_paymode" id="ed_paymode">
+                                                                <option value="">-Select-</option>
+								<option value="Prepaid">Prepaid</option>
+								<option value="Reimbursement">Reimbursement</option>
+                                                                <option value="Advance">Advance</option>
+							
+							</select>
+						</div>
+					</div>
+						<div class="row mytravelling" style="display:none;">
+						<div class="col-md-2 wd14">
+							Primary Mode of Transport
+						</div>
+						<div class="col-md-3">
+							<select class="form-control" name="ed_primarymode" id="ed_primarymode">
+                                                                <option value="">-Select-</option>
+								<option value="Airplane">Airplane</option>
+								<option value="Train">Train</option>
+								<option value="Bus">Bus</option>
+								<option value="Metro">Metro</option>
+								<option value="Own-Vehicle">Own Vehicle</option>
+							</select>
+						</div>
+							<div class="col-md-2 ml10 wd14">
+								Secondary Mode of Transport
+						</div>
+						<div class="col-md-3">
+							<select class="form-control" name="ed_secondmode" id="ed_secondmode">
+                                                                <option value="">-Select-</option>
+								<option value="Bus">Bus</option>
+								<option value="Auto-Rickshaw">Auto Rickshaw</option>
+								<option value="E-Rickshaw">E-Rickshaw</option>
+								<option value="Metro">Metro</option>
+							</select>
+						</div>
+					</div>
+                       	<div class="row">
+						<div class="col-md-2 wd14 mymeals" style="display:none;">
+							Category of Meal
+						</div>
+						<div class="col-md-3 mymeals" style="display:none;">
+							<select class="form-control" name="ed_categorymeal" id="ed_categorymeal">
+                                                                 <option value="">-Select-</option>
+								<option value="Lunch">Lunch</option>
+								<option value="Breakfast">Breakfast</option>
+								<option value="Dinner">Dinner</option>
+								
+							</select>
+						</div>
+							<div class="col-md-2 ml10 wd14 myhotles" style="display:none;">
+							Name of Hotel
+						</div>
+						<div class="col-md-3 myhotles" style="display:none;">
+						 <input type="text" autocomplete="off" class="form-control" name="ed_hotlename" id="ed_hotlename"/>
+						</div>
+					</div> 
+					<div class="row">
+							<div class="col-md-2  wd14">
+							Expense Amount
+						</div>
+						<div class="col-md-3">
+                                                  <input type="text" onkeypress="return isNumberFloatKey(event);" autocomplete="off" class="form-control" name="ed_expenseamount" id="ed_expenseamount"/>
+						</div>
+					</div>                  
+    <div class="row">
+                                         <div class="col-md-6">
+                                         	  <label class="head_info">Attachments</label>
+                                      <table>
+                                                      <%
+                                                        myfilesid = ''
+                                                        fl = 1
+                                                        c1 = 0;
+                                                        if @FileNomb!=nil
+                                                            myfilesid = @FileNomb
+                                                        end
+                                                          obfile    = attached_survey_doc(myfilesid)
+                                                          if obfile!=nil && obfile.length >0
+                                                              obfile.each do |fila|
+
+                                                        %>
+                                                        <tr id="duplicates<%=fl%>">
+                                                         <input type="hidden" name="processedit[]"  value="<%=fila.id%>"/>
+                                                        <input type="hidden" name="myreceivedocumentid<%=c1%>" id="myreceivedocumentid<%=fl%>" value="<%=fila.id%>"/>
+                                                        <input type="hidden" name="removefiles<%=c1%>" id="removefiles<%=fl%>" value=""/>
+                                                        <input type="hidden" name="existfile<%=c1%>" id="existfile<%=fl%>" value="<%=fila.fat_attachment%>"/>
+                                                        <td width="30%"><input type="file" name="receivefile<%=c1%>" /></td>
+                                                        <td><input type="text" placeholder="File Description" title="<%=fila.fat_titles%>" class="doc_input" name="cfl_title<%=c1%>" maxlength="255" value="<%=fila.fat_titles%>" data-placement="bottom" data-toggle="tooltip" title="<%=fila.fat_titles%>"/></td>
+                                                        <%
+                                                        times = fila.created_at.to_s.split(" ")
+                                                         filsext   = Rails.root.join "public", "images", "fsrfile",fila.fat_attachment.to_s
+                                                        if File.exist?(filsext)
+                                                         %>
+                                                        <td><a href="<%=root_url%>images/fsrfile/<%=fila.fat_attachment%>" target="_blank"><%=fila.fat_attachment%></a>&nbsp;<%=formatted_date(fila.created_at)%>&nbsp;<%=times[1]%></td>
+                                                        <% else %>
+                                                        <td><%=fila.fat_attachment%>&nbsp;<%=formatted_date(fila.created_at)%>&nbsp;<%=times[1]%></td>
+                                                        <% end %>
+                                                        <td>&nbsp;<a id="myminus" href="javascript:;" rel="<%=fl%>"  class="delete btn btn-sm btn-danger ml10 mb5 mydeletes" >Delete</a>&nbsp;</td>
+
+                                                        </tr>
+                                                        <%
+                                                          fl +=1
+                                                          c1 +=1
+                                                        end
+                                                        end
+                                                       %>
+                                                     <tr id="duplicate">
+                                                        <input type="hidden" name="myreceivedocumentid[]" value=""/>
+                                                        <input type="hidden" name="removefiles[]"  value=""/>
+                                                        <input type="hidden" name="existfile[]" value=""/>
+                                                        <td width="30%"><input type="file" name="receivefile[]" /></td>
+                                                        <td><input type="text" placeholder="File Description" class="doc_input"  name="cfl_title[]" value=""/></td>
+                                                        <td><a id="minus" href="javascript:;"  class="delete btn btn-sm btn-danger mb5 ml10">Delete</a></td>
+                                                        <td><a id="plus" href="javascript:;" class="btn btn-sm btn-primary ml10">Add More Files</a></td>
+                                                      </tr>
+                                                      </table>
+                                  </div>
+                                         
+                                       </div>
+
+
+
+
+
+
+
+
+
+
+					        <br/>
+					<div class="row">
+					
+					<div class="col-md-2 col-xs-4">
+					<input type="image" src="<%=root_url%>images/addlist.png"/>
+					</div>
+					
+                                         
+					</div>
+                                        </div>
+                                      <div>&nbsp;</div>
+                                      <div>&nbsp;</div>
+                                      			
+		
+                                   
+<!-- END PAGE HEADER-->
+
+			<!-- BEGIN PAGE CONTENT-->
+			
+				<div class="col-md-12">
+			
+						
+                                                     
+							<div class="table-responsive">
+								<table class="table table-hover">
+								<thead>
+								<tr class="head_table">
+									<th>
+										SL.NO.
+									</th>
+                                                                        <th>
+										File No
+									</th>
+                                                                        <th>
+										Suveyor Name
+									</th>
+									<th>Expense Type</th>
+									<th>
+										Type of Trip
+									</th>
+									<th>
+									 Amount
+									</th>
+									
+								
+                                                                        <th>
+									  Action
+									</th>
+								</tr>
+								</thead>
+								<tbody>
+							
+								<tr>
+									<td id="center">
+									1
+									</td>
+                                                                        <td>
+									001
+									</td>
+                                                                         <td>
+                                                                         Mr XYZ
+									</td>
+									<td>Travelling</td>
+									<td>
+									Local
+									</td>
+									<td>
+									Rs 1000
+									</td>
+									
+									<td >
+									<a href="<%=root_url%>insurerinfo"><i class="fa fa-pencil-square-o hrmsfonts_size" aria-hidden="true"></i></a>
+                                                                         <a href="javascript:void(0);" rel="<%=root_url%>insurerinfo" onclick="confirmDeletion(this);"><i class="fa fa-trash-o hrmsfonts_size" aria-hidden="true"></i></a>-
+									</td>
+								</tr>
+								
+								</tbody>
+								</table>
+							</div>
+
+					
+						<div class="row">
+					
+					<div class="col-md-2 col-xs-4">
+					<input type="image" src="<%=root_url%>images/save.png"/>
+					</div>
+					<div class="col-md-3 col-xs-4">
+					<a href="<%=root_url%>dashboard">
+                                         &nbsp;<img src="<%=root_url%>images/Quit.png"/>
+                                        </a>
+					</div>
+                                         
+					</div>
+				
+					
+					<!-- END SAMPLE TABLE PORTLET-->
+				</div>
+					
+                                <% end %>
+			
+                                                    <!-- END PAGE CONTENT-->
+                                            </div>
+                                        </div>
+                                    <!-- END CONTENT -->
+                                  </div>
+                              </div>
+                            </div>
+                      </div>
+                </div>
+            </div>
+       
+<!-- END CONTAINER -->
+<%=render "layouts/popupforms"%>

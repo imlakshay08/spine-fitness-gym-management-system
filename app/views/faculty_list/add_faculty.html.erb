@@ -1,0 +1,421 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Members/Staff</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>faculty_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+						<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+            <input type="hidden" name="mid" id="mid" value="<% if @faculty %><%=@faculty.id%><% end %>"/>
+			<input type="hidden" name="cur_fclty_code" id="cur_fclty_code" value="<% if @faculty %><%=@faculty.fclty_code%><% end %>"/>
+			<input type="hidden" name="facultyimgeId" id="facultyimgeId" value="<% if @faculty %><%=@faculty.fclty_img%><% end %>"/>
+			<input type="hidden" name="new_fac_img" id="new_fac_img" value=""/>
+		<input type="hidden" name="myattachpropfile" id="myattachpropfile" value=""/>
+		<input type="hidden" name="manualupdatecode" id="manualupdatecode" value=""/>
+	<input type="hidden" name="cursignature" id="cursignature" value="<% if @faculty %><%=@faculty.fclty_signature%><% end %>"/>
+					<div class="form-body">
+						<%
+						image_url = "https://user.gadjian.com/static/images/personnel_boy.png"
+						pullimgpath = "https://ihm-inqerp.b-cdn.net"
+						if @faculty
+							compcode = @faculty.fclty_compcode
+							img_path = @faculty.fclty_img
+						image_url = "#{pullimgpath}/#{compcode}/faculty/#{img_path}"
+						end
+					   %>
+					   	<div class="form-group row">
+					   <div class="col-md-2 mmb100">
+						<div class="profile-img-wrap edit-img">
+						<a href="<%= image_url %>" class="example-image-link" data-lightbox="example-1">
+							<img src="<%= image_url %>" class="img-responsive img-thumbnail" name="item-img-output" id="item-img-output" />
+						</a>
+						<div class="fileupload" style="position: absolute; bottom: 0px; left: 2px; background: #fff; color: #000; padding: 0px 20px; border-radius: 0px;">
+							<label class="custom-file-upload" style="margin: 0px;">
+							<input type="file" accept=".jpg,.png,.jpeg" class="upload item-img file center-block" name="fclty_img" id="fclty_img" style="display: none;" />
+							<p style="margin: 0 0 0px; font-size: 13px;" onclick="document.getElementById('fclty_img').click();">Upload</p>
+							</label>
+						</div>
+						</div>
+					</div>
+					<div class="col-md-10">
+					<div class="form-group row">
+					<label class="col-md-3">Code
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+										<input name="fclty_code" id="fclty_code"  type="text"  placeholder="Enter Code"
+										autocomplete="off" maxlength="10" class="form-control" required value="<% if @faculty%><%=@faculty.fclty_code%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_code'] %><% end %>"/> 
+										
+					
+					</div>
+					<label class="col-md-3 age_calcualted">Date of Birth
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="fclty_dob" id="fclty_dob" type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @faculty%><%=formatted_date(@faculty.fclty_dob)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_dob'] %><% end %>"/>
+					</div>
+						
+					</div>
+
+					</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">Name
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_name" id="fclty_name"  type="text"  placeholder="Enter Name"
+					autocomplete="off" maxlength="50" class="form-control" required value="<% if @faculty%><%=@faculty.fclty_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_name'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Gender
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height" required name="fclty_gender" id="fclty_gender">
+							<option value="">Select...</option>
+							<option value="M" <% if @faculty && @faculty.fclty_gender.to_s == 'M'%>selected<% end %>>Male</option>
+							<option value="F"  <% if @faculty && @faculty.fclty_gender.to_s == 'F'%>selected<% end %>>Female</option>
+							<option value="Oth"  <% if @faculty && @faculty.fclty_gender.to_s == 'Oth'%>selected<% end %>>Other</option>
+						
+						</select>
+					</div>
+
+					</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">AEBAS ID
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_aebas_id" id="fclty_aebas_id"  type="text"  placeholder="Enter AEBAS ID"
+					autocomplete="off" maxlength="6" class="form-control" required  onkeypress="return isNumberMyKeys(event);" value="<% if @faculty%><%=@faculty.fclty_aebas_id%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_aebas_id'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Employee Code
+					<span class="required"> * </span>
+					</label>
+						<div class="col-md-3">
+					<input name="fclty_employee_code" id="fclty_employee_code"  type="text"  placeholder="Enter Employee Code"
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @faculty%><%=@faculty.fclty_employee_code%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_employee_code'] %><% end %>"/> 
+					</div>
+					</div>
+
+						<div class="form-group row">
+						<label class="col-md-3">Joining Date
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="fclty_join_date" id="fclty_join_date" type="text" placeholder="Select Join Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @faculty%><%=formatted_date(@faculty.fclty_join_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_join_date'] %><% end %>"/>
+					</div></div>
+					<label class="col-md-3">Leaving Date
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="fclty_leave_date" id="fclty_leave_date" type="text" placeholder="Select Leave Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @faculty%><%=formatted_date(@faculty.fclty_leave_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_leave_date'] %><% end %>"/>
+					</div>
+					</div>
+					
+					</div>
+
+
+
+					</div>
+					</div>
+									
+									
+
+				
+					<div class="mdl-tabs mdl-js-tabs">
+					<div class="mdl-tabs__tab-bar tab-left-side">
+						<a href="#student_detail" class="mdl-tabs__tab is-active">Basic Details</a>
+						
+					</div>
+
+					<div class="mdl-tabs__panel is-active p-t-20" id="student_detail">
+					<div class="card-box">
+					<div class="card-body ">
+					<div class="form-group row">
+					
+					
+				
+				
+				
+				</div>
+					<div class="form-group row">
+				
+					<label class="col-md-3">Aadhaar No.
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_aadhaar" id="fclty_aadhaar" onkeypress="return isNumberMyKeys(event);" type="text"  placeholder="Enter Aadhaar No"
+					autocomplete="off" maxlength="12" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_aadhaar%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_aadhaar'] %><% end %>"/> 
+					</div>
+						<label class="col-md-3">Email Id
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+						<span class="input-group-addon iconinput-pd"><i class="fa fa-envelope"></i></span>
+						<input name="fclty_email" id="fclty_email"  type="email"  placeholder="Enter Email Id"
+					autocomplete="off" maxlength="50" class="form-control" onchange="check_email_validation(this.value,'fclty_email');" value="<% if @faculty%><%=@faculty.fclty_email%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_email'] %><% end %>"/>
+					</div>
+					</div>
+					</div>
+
+					
+					<div class="form-group row">
+					<label class="col-md-3">Pan No.
+					
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_pan" id="fclty_pan"  type="text"  placeholder="Enter Pan No."
+					autocomplete="off" maxlength="10" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_pan%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_pan'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Contact No.
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
+					<input name="fclty_contact" id="fclty_contact" onkeypress="return isNumberMyKeys(event);"  type="text"  placeholder="Enter Contact No."
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @faculty%><%=@faculty.fclty_contact%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_contact'] %><% end %>"/> 
+					</div>
+					
+					</div>
+					</div>
+
+						<div class="form-group row">
+				
+					<label class="col-md-3">Address 1
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_addr1" id="fclty_addr1"  type="text"  placeholder="Enter Address 1"
+					autocomplete="off" maxlength="150" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_addr1%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_addr1'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Father's Name
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_father" id="fclty_father"  type="text"  placeholder="Enter Father's Name"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_father%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_father'] %><% end %>"/> 
+				</label>
+					</div>
+					</div>
+
+						<div class="form-group row">
+				
+					<label class="col-md-3">Address 2
+					
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_addr2" id="fclty_addr2"  type="text"  placeholder="Enter Address 2"
+					autocomplete="off" maxlength="150" class="form-control" value="<% if @faculty%><%=@faculty.fclty_addr2%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_addr2'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Mother's Name
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_mother" id="fclty_mother"  type="text"  placeholder="Enter Mother's Name"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_mother%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_mother'] %><% end %>"/> 
+				</label>
+					</div>	
+					</div>
+					
+					<div class="form-group row">
+				
+					<label class="col-md-3">State & Pincode
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_city" id="fclty_city"  type="text"  placeholder="Enter State & Pincode"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_city%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_city'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Spouse's Name
+					
+					</label>
+					<div class="col-md-3">
+						<input name="fclty_spouse" id="fclty_spouse"  type="text"  placeholder="Enter Spouse's Name"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_spouse%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_spouse'] %><% end %>"/> 
+					</div>
+					</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">Designation
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_desig" id="fclty_desig"  type="text"  placeholder="Enter Designation"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_desig%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_desig'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Marital Status
+					
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height"  name="fclty_mrtl_stats" id="fclty_mrtl_stats">
+							<option value="">Select...</option>
+							
+							<option value="M" <% if @faculty && @faculty.fclty_mrtl_stats.to_s == 'M'%>selected<% end %>>Married</option>
+
+							<option value="UM" <% if @faculty && @faculty.fclty_mrtl_stats.to_s == 'UM'%>selected<% end %>>UnMarried</option>
+
+							<option value="W" <% if @faculty && @faculty.fclty_mrtl_stats.to_s == 'W'%>selected<% end %>>Widow</option>
+
+							<option value="S" <% if @faculty && @faculty.fclty_mrtl_stats.to_s == 'S'%>selected<% end %>>Single Parent</option>
+						</select>
+					</div>
+					
+				
+				</div>
+					<div class="form-group row">
+					<label class="col-md-3">Qualification
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_qlf" id="fclty_qlf"  type="text"  placeholder="Enter Qualification"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_qlf%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_qlf'] %><% end %>"/> 
+					</div>
+
+				<label class="col-md-3">Blood Group
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height"  name="fclty_blood_group" id="fclty_blood_group">
+							<option value="">Select...</option>
+						 <option value="A+" <% if @faculty && @faculty.fclty_blood_group.to_s == 'A+'%>selected<% end %>>A+</option>
+						<option value="A-"  <% if @faculty && @faculty.fclty_blood_group.to_s == 'A-'%>selected<% end %>>A-</option>
+						<option value="B+"  <% if @faculty && @faculty.fclty_blood_group.to_s == 'B+'%>selected<% end %>>B+</option>
+						<option value="B-"  <% if @faculty && @faculty.fclty_blood_group.to_s == 'B-'%>selected<% end %>>B-</option>
+						<option value="AB+" <% if @faculty && @faculty.fclty_blood_group.to_s == 'AB+'%>selected<% end %>>AB+</option>
+						<option value="AB-" <% if @faculty && @faculty.fclty_blood_group.to_s == 'AB-'%>selected<% end %>>AB-</option>
+						<option value="O+"  <% if @faculty && @faculty.fclty_blood_group.to_s == 'O+'%>selected<% end %>>O+</option>
+						<option value="O-"  <% if @faculty && @faculty.fclty_blood_group.to_s == 'O-'%>selected<% end %>>O-</option>
+						</select>
+					</div>
+
+				</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">CGHS Beneficiary ID
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_cghs_id" id="fclty_cghs_id"  type="text"  placeholder="Enter CGHS ID"
+					autocomplete="off" maxlength="10" class="form-control" onkeypress="return isNumberMyKeys(event);" value="<% if @faculty%><%=@faculty.fclty_cghs_id%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_cghs_id'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Emergency Contact No.
+					</label>
+						<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
+					<input name="fclty_emergency_no" id="fclty_emergency_no" onkeypress="return isNumberMyKeys(event);"  type="text"  placeholder="Enter Emergency Contact No."
+					autocomplete="off" maxlength="10" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_emergency_no%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_emergency_no'] %><% end %>"/> 
+					</div>
+					</div>
+					</div>
+
+						<div class="form-group row">
+						<label class="col-md-3">Valid Upto
+					</label>
+					<div class="col-md-3">
+					
+					<input name="fclty_valid_upto" id="fclty_valid_upto" type="text" placeholder="Enter Valid Upto" autocomplete="off" maxlength="20" class="form-control" value="<% if @faculty%><%=@faculty.fclty_valid_upto%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_valid_upto'] %><% end %>"/>
+					</div>
+
+					<%
+						pullimgpath = "https://ihm-inqerp.b-cdn.net"
+						if @faculty
+							compcode = @faculty.fclty_compcode
+							signimg_path = @faculty.fclty_signature
+						sign_image_url = "#{pullimgpath}/#{compcode}/facultysign/#{signimg_path}"
+						end
+					   %>
+
+					<label class="col-md-3">Signature
+					<% if @faculty%><% if @faculty.fclty_signature.present?%><a href="<%=sign_image_url%>" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="View Signature"><i class="fa fa-eye"></i></a><%end %><%end %>
+					</label>
+					<div class="col-md-3">
+					 <input type="file" accept=".jpg,.png,.jpeg" name="fclty_signature" id="fclty_signature"/>
+					</div>
+
+					</div>
+
+					<div class="form-group row hidden">
+					<label class="col-md-3">Pay Level
+					</label>
+					<div class="col-md-3">
+					<input name="fclty_paylevel" id="fclty_paylevel"  type="text"  placeholder="Enter Pay Level"
+					autocomplete="off" maxlength="40" class="form-control"  value="<% if @faculty%><%=@faculty.fclty_paylevel%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['fclty_paylevel'] %><% end %>"/> 
+					</div>
+					
+					</div>
+					
+					</div>
+				<div class="form-group form-button text-center  m-b-10" style="margin-top: 50px;">
+							<button type="button" onclick="process_save_student_details();"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>faculty_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+
+
+					<div class="mdl-tabs__panel p-t-20" id="other_details">	</div>
+
+					</div>
+									
+
+							
+					</div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+									        <input type="hidden" id="currImage" value=""/>
+
+				<div class="modal fade" id="cropImagePop" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+		<div class="modal-content" style="height: 500px;">
+		<div class="modal-header">
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		<h4 class="modal-title" id="myModalLabel">
+		<?=multiLanguage( "Edit Foto" , "Edit Photo" )?></h4>
+		</div>
+		<div class="modal-body m-b-20">
+		<div id="upload-demo" class="center-block"></div>
+		</div>
+		<div class="modal-footer " >
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" id="cropImageBtn" class="btn btn-primary">Crop</button>
+		</div>
+		</div>
+		</div>
+		</div>
+        </form>
+				<% end %>
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

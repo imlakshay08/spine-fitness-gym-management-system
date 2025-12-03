@@ -1,0 +1,2 @@
+module CommonProcessHelper
+end

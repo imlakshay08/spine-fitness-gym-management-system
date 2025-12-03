@@ -1,0 +1,2 @@
+class TrnStockInventory < ApplicationRecord
+end

@@ -1,0 +1,171 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content" >
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">Student Status</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+            
+					</div>
+       
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="card">
+								
+										<div class="card-body ">
+                    <% if flash[:error] %>
+                    <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                      <%= flash[:error] %>
+                    </div>
+                   <% end %>
+
+                    <%= form_tag({:action=>'index'},:multipart=>true,:id=>'myForms') do  %>
+                      <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                  
+                  <div class="row m-b-10">
+                  <label class="col-sm-12 col-md-2">Transaction Type </label>
+                  <div class="col-sm-12 col-md-2">  
+                  <select class="form-select select-height"  name="transaction_search" id="transaction_search">
+                    <option value="" >Select...</option>
+                    <option value="RE"<%= 'selected' if params[:transaction_search] == 'RE' %>>Re-Admission</option>
+                    <option value="DET"<%= 'selected' if params[:transaction_search] == 'DET' %>>Detainee</option>
+                    <option value="WTD" <%= 'selected' if params[:transaction_search] == 'WTD' %>>Withdrawals</option>
+                    <option value="YD" <%= 'selected' if params[:transaction_search] == 'YD' %>>Year-Drop</option>
+
+                  </select>
+                    </div>
+                     <label class="col-sm-12 col-md-1">Roll No. </label>
+                    <div class="col-sm-12 col-md-2">  
+                    	<input type="text" autocomplete="offf" class="form-control" placeholder="Enter Roll number"  name="rollno_search" id="rollno_search" value="<% if @rollno_search %><%=@rollno_search%><% end %>" />
+                 
+                    </div>
+                 <label class="col-sm-12 col-md-1">Year</label>
+                    <div class="col-sm-12 col-md-2">  
+                    <select class="form-select select-height"  name="year_searhc" id="year_searhc">
+                  <option value="">Select...</option>
+                  <option value="2024"<%= 'selected' if params[:year_searhc] == '2024' %>>2024</option>
+                  <option value="2025"<%= 'selected' if params[:year_searhc] == '2025' %>>2025</option>
+                </select>
+                    </div>
+                    
+                    <div class="col-sm-12 col-md-1 no_loader">  
+                    <button data-bs-toggle="button" title="Search" class="btn btn-circle btn-default" onclick="filter_transaction();"><i class="fa fa-search"></i>
+											</button>
+                    </div>
+                  <div class="col-sm-12 col-md-1 show_loader hidden">
+                    <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner  " >
+                      <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
+                    </div>
+                    </div><% if @myAddAld %>
+                    <div class="col-sm-12 col-md-1">  
+                    <a href="<%=root_url%>student_transaction_list/referesh_student_transaction_list" class="float-right">
+                    <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
+                    </div><%end%>
+                    </div>  
+                    
+                      <%end%>
+                      <div class="row"> <% if @myPrintAld %>
+                      <div class="col-sm-12 col-md-3">  
+                      <a href="<%=root_url%>student_transaction_list/add_student_transaction"  class="">
+                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add Student Transaction</button> </a>
+                      </div><%end%>
+                      
+                      <div class="col-sm-12 col-md-9 hidden">  
+                      <a href="<%=root_url%>student_transaction_list/1_prt_student_transaction_list.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
+                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
+                      </div>
+                       <% if @student_transaction && @student_transaction.length>0 %>
+                      <div class="col-sm-12 col-md-9 ">  
+                      <a href="<%=root_url%>student_transaction_list/1_prt_student_transaction_list.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
+                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">PDF</button> </a>
+                      </div>
+                      <%end%>
+                      </div>
+                      <div class="table-scrollable">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>S.No</th>
+                            <th>Transaction No.</th>
+                            <th>Date</th>
+                            <th>Roll No.</th>
+                            <th>Name</th>
+                            <th>Year</th>
+                             <th>Transaction Type</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                                  					  <%  
+					  pagestart = params[:page].present? ? params[:page].to_i : 1
+                         i = pagestart <= 1 ? 1 : ((pagestart - 1) * 10) + 1
+					  
+					  if @student_transaction && @student_transaction.length>0 
+                        @student_transaction.each do |transaction|
+
+						%>              
+                          <tr>
+                         
+                            <td><%=i%></td>
+                            <td><%=transaction.trn_no%></td>
+                            <td><%=formatted_date(transaction.trn_date)%></td>
+                            <td><%=transaction.trn_stdnt_rollno%></td>
+                            <td><%=transaction.trn_stdnt_name%></td>
+                            <td><%=transaction.trn_year%></td>
+                            <%if transaction.trn_type == ''%>
+                          <td ></td>
+                          <%elsif transaction.trn_type == 'RE'%>
+                          <td >Re-Admission</td>
+                          <%elsif transaction.trn_type == 'DET'%>
+                          <td >Detainee</td>
+                          <%elsif transaction.trn_type == 'WTD'%>
+                          <td>Withdrawals</td>
+                          <%elsif transaction.trn_type == 'YD'%>
+                          <td>Year Drop</td>
+                          <%end%>
+                           <% if transaction.trn_cancel == 'C' %>   <td>
+                          
+                                                          <span style="color: red;">Cancelled</span></td>
+                                                        <% else %> <% if @myCancelAld %>
+                          <td>   <a href="<%= root_url %>student_transaction_list/add_student_transaction/<%= transaction.id %>" class="tblEditBtn" >
+                              <i class="fa fa-eye"></i>
+                            </a><%end%><%end%>
+                          </td>
+                          </tr>
+                          <% i += 1 %>
+                        <%end 
+                        end %>
+                        </tbody>
+                      </table>
+                    </div>
+										
+                     
+                    <div class="col-md-12 text-center"></div>
+                    
+										</div>
+									</div>
+								</div>
+
+                </div>
+                </div>
+                </div>
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+

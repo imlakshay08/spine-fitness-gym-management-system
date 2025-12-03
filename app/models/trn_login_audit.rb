@@ -1,0 +1,3 @@
+class TrnLoginAudit< ApplicationRecord
+end
+  

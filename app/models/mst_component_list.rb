@@ -1,0 +1,2 @@
+class MstComponentList < ApplicationRecord
+end

@@ -1,0 +1,156 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Member Subscription</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>member_subscriptions" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+             			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+			  <input type="hidden" name="mid" id="mid" value="<% if @subscription %><%=@subscription.id%><% end %>"/>         
+			<input type="hidden" name="cur_ms_sbscrptn_no" id="cur_ms_sbscrptn_no" value="<% if @subscription %><%=@subscription.ms_sbscrptn_no%><% end %>"/>
+
+					<div class="form-body">
+						
+					<div class="form-group row">
+					<label class="col-md-2">Subscription No.
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+										<input name="ms_sbscrptn_no" id="ms_sbscrptn_no"  type="text"  placeholder="Enter Code"
+										autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @subscription%><%=@subscription.ms_sbscrptn_no%><% else %><%=@Lastcode%><% end %>"/> 
+					</div>
+					<label class="col-md-2">Member Name
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-4">
+						<select class="form-select select-height " required name="ms_member_id" id="ms_member_id">
+                    <option value="">Select...</option>
+                    <%
+                        if @MemberList && @MemberList.length>0
+                            @MemberList.each do |member|
+                    %>
+                    <option value="<%=member.id%>" <% if @subscription && @subscription.ms_member_id.to_i == member.id.to_i %>selected<% elsif session[:sess_ms_member_id].to_s==member.id.to_i%>selected<% end %>><%=member.mmbr_name%></option>
+                    <%
+                    end
+                    end
+                    %>
+                </select>								
+				</div>
+					</div>
+				
+
+				
+
+						<div class="form-group row">
+				
+						<label class=" col-md-2">Plan Type
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+						<select class="form-select select-height " required name="ms_plan_id" id="ms_plan_id">
+                    <option value="">Select...</option>
+                    <%
+                        if @MemberPlanList && @MemberPlanList.length>0
+                            @MemberPlanList.each do |plan|
+                    %>
+                    <option value="<%=plan.id%>" <% if @subscription && @subscription.ms_plan_id.to_i == plan.id.to_i %>selected<% elsif session[:sess_ms_plan_id].to_s==plan.id.to_i%>selected<% end %>><%=plan.plan_name%></option>
+                    <%
+                    end
+                    end
+                    %>
+                </select>	
+						</div>
+					</div>
+
+		               <div class="form-group row">
+				
+						<label class=" col-md-2">Start Date
+					<span class="required"> * </span>
+						</label>
+					<div class="col-md-4">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="ms_start_date" id="ms_start_date" type="text" placeholder="Select Start Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @subscription%><%=formatted_date(@subscription.ms_start_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_start_date'] %><% end %>"/>
+					</div></div>
+						<label class=" col-md-2">End Date
+					<span class="required"> * </span>
+						</label>
+					<div class="col-md-4">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="ms_end_date" id="ms_end_date" type="text" placeholder="Select End Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @subscription%><%=formatted_date(@subscription.ms_end_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_end_date'] %><% end %>"/>
+					</div></div>
+					</div>
+
+					
+		               <div class="form-group row">
+				
+						<label class=" col-md-2">Amount Paid					
+						</label>
+						<div class="col-md-4">
+				        <input name="ms_amount_paid" id="ms_amount_paid" type="text" maxlength="6"  placeholder="Enter Amount Paid" class="form-control" value="<% if @subject%><%=@subscription.ms_amount_paid%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_amount_paid'] %><% end %>" />
+						</div>
+						<label class=" col-md-2">Payment Mode
+						</label>
+						<div class="col-md-4">
+						<input name="ms_payment_mode" id="ms_payment_mode"  type="text"  placeholder="Enter Payment Mode" autocomplete="off" maxlength="20" class="form-control"  value="<% if @subscription%><%=@subscription.ms_payment_mode%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_payment_mode'] %><% end %>"/> 
+						</div>
+					</div>
+
+		               <div class="form-group row">
+				
+						<label class=" col-md-2">Remarks				
+						</label>
+						<div class="col-md-4">
+				        <input name="ms_remarks" id="ms_remarks" type="text" maxlength="25"  placeholder="Enter Remarks" class="form-control" value="<% if @subject%><%=@subscription.ms_remarks%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_remarks'] %><% end %>" />
+						</div>
+					</div>
+
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+							<button type="button"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary" onclick="save_member_subscription();">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>member_subscriptions">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

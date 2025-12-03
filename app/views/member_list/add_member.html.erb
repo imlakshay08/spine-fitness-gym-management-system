@@ -1,0 +1,296 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Members</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>member_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+						<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+            <input type="hidden" name="mid" id="mid" value="<% if @member %><%=@member.id%><% end %>"/>
+			<input type="hidden" name="cur_mmbr_code" id="cur_mmbr_code" value="<% if @member %><%=@member.mmbr_code%><% end %>"/>
+
+					<div class="form-body">
+						
+					   	<div class="form-group row">
+					   <div class="col-md-2 mmb100 hidden">
+						<div class="profile-img-wrap edit-img">
+						<a href="" class="example-image-link" data-lightbox="example-1">
+							<img src="" class="img-responsive img-thumbnail" name="item-img-output" id="item-img-output" />
+						</a>
+						<div class="fileupload" style="position: absolute; bottom: 0px; left: 2px; background: #fff; color: #000; padding: 0px 20px; border-radius: 0px;">
+							<label class="custom-file-upload" style="margin: 0px;">
+							<input type="file" accept=".jpg,.png,.jpeg" class="upload item-img file center-block" name="" id="" style="display: none;" />
+							<p style="margin: 0 0 0px; font-size: 13px;" >Upload</p>
+							</label>
+						</div>
+						</div>
+					</div>
+					<div class="col-md-10">
+					<div class="form-group row">
+					<label class="col-md-3">Code
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+										<input name="mmbr_code" id="mmbr_code"  type="text"  placeholder="Enter Code"
+										autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @member%><%=@member.mmbr_code%><% else %><%=@Lastcode%><% end %>"/> 
+										
+					
+					</div>
+					<label class="col-md-3 age_calcualted">Date of Birth
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="mmbr_dob" id="mmbr_dob" type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @member%><%=formatted_date(@member.mmbr_dob)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_dob'] %><% end %>"/>
+					</div>
+						
+					</div>
+
+					</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">Name
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="mmbr_name" id="mmbr_name"  type="text"  placeholder="Enter Name"
+					autocomplete="off" maxlength="50" class="form-control" required value="<% if @member%><%=@member.mmbr_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_name'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Gender
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height" required name="mmbr_gender" id="mmbr_gender">
+							<option value="">Select...</option>
+							<option value="M" <% if @member && @member.mmbr_gender.to_s == 'M'%>selected<% end %>>Male</option>
+							<option value="F"  <% if @member && @member.mmbr_gender.to_s == 'F'%>selected<% end %>>Female</option>
+							<option value="Oth"  <% if @member && @member.mmbr_gender.to_s == 'Oth'%>selected<% end %>>Other</option>
+						
+						</select>
+					</div>
+
+					</div>
+
+						<div class="form-group row">
+						<label class="col-md-3">Joining Date
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="mmbr_join_date" id="mmbr_join_date" type="text" placeholder="Select Join Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @member%><%=formatted_date(@member.mmbr_join_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_join_date'] %><% end %>"/>
+					</div></div>
+					<label class="col-md-3">Leaving Date
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="mmbr_leave_date" id="mmbr_leave_date" type="text" placeholder="Select Leave Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @member%><%=formatted_date(@member.mmbr_leave_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_leave_date'] %><% end %>"/>
+					</div>
+					</div>
+					
+					</div>
+
+
+
+					</div>
+					</div>
+									
+									
+
+				
+					<div class="mdl-tabs mdl-js-tabs">
+					<div class="mdl-tabs__tab-bar tab-left-side">
+						<a href="#student_detail" class="mdl-tabs__tab is-active">Basic Details</a>
+						
+					</div>
+
+					<div class="mdl-tabs__panel is-active p-t-20" id="student_detail">
+					<div class="card-box">
+					<div class="card-body ">
+					<div class="form-group row">
+					
+					
+				
+				
+				
+				</div>
+					<div class="form-group row">
+				
+					<label class="col-md-3">Aadhaar No.
+					</label>
+					<div class="col-md-3">
+					<input name="mmbr_aadhaar" id="mmbr_aadhaar" onkeypress="return isNumberMyKeys(event);" type="text"  placeholder="Enter Aadhaar No"
+					autocomplete="off" maxlength="12" class="form-control"  value="<% if @member%><%=@member.mmbr_aadhaar%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_aadhaar'] %><% end %>"/> 
+					</div>
+						<label class="col-md-3">Email Id
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+						<span class="input-group-addon iconinput-pd"><i class="fa fa-envelope"></i></span>
+						<input name="mmbr_email" id="mmbr_email"  type="email"  placeholder="Enter Email Id"
+					autocomplete="off" maxlength="50" class="form-control" onchange="check_email_validation(this.value,'mmbr_email');" value="<% if @member%><%=@member.mmbr_email%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_email'] %><% end %>"/>
+					</div>
+					</div>
+					</div>
+
+					
+					<div class="form-group row">
+					<label class="col-md-3">Contact No.
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
+					<input name="mmbr_contact" id="mmbr_contact" onkeypress="return isNumberMyKeys(event);"  type="text"  placeholder="Enter Contact No."
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @member%><%=@member.mmbr_contact%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_contact'] %><% end %>"/> 
+					</div>
+					
+					</div>
+					</div>
+
+						<div class="form-group row">
+				
+					<label class="col-md-3">Address 1
+					</label>
+					<div class="col-md-3">
+					<input name="mmbr_addr1" id="mmbr_addr1"  type="text"  placeholder="Enter Address 1"
+					autocomplete="off" maxlength="150" class="form-control"  value="<% if @member%><%=@member.mmbr_addr1%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_addr1'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Father's Name
+					</label>
+					<div class="col-md-3">
+					<input name="mmbr_father" id="mmbr_father"  type="text"  placeholder="Enter Father's Name"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @member%><%=@member.mmbr_father%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_father'] %><% end %>"/> 
+				</label>
+					</div>
+					</div>
+
+						<div class="form-group row">
+				
+					<label class="col-md-3">Address 2
+					
+					</label>
+					<div class="col-md-3">
+					<input name="mmbr_addr2" id="mmbr_addr2"  type="text"  placeholder="Enter Address 2"
+					autocomplete="off" maxlength="150" class="form-control" value="<% if @member%><%=@member.mmbr_addr2%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_addr2'] %><% end %>"/> 
+					</div>
+					<label class="col-md-3">Mother's Name
+					</label>
+					<div class="col-md-3">
+					<input name="mmbr_mother" id="mmbr_mother"  type="text"  placeholder="Enter Mother's Name"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @member%><%=@member.mmbr_mother%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_mother'] %><% end %>"/> 
+				</label>
+					</div>	
+					</div>
+					
+					<div class="form-group row">
+				
+					<label class="col-md-3">State & Pincode
+					</label>
+					<div class="col-md-3">
+					<input name="mmbr_city" id="mmbr_city"  type="text"  placeholder="Enter State & Pincode"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @member%><%=@member.mmbr_city%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_city'] %><% end %>"/> 
+					</div>
+					</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">Marital Status
+					
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height"  name="mmbr_mrtl_stats" id="mmbr_mrtl_stats">
+							<option value="">Select...</option>
+							
+							<option value="M" <% if @member && @member.mmbr_mrtl_stats.to_s == 'M'%>selected<% end %>>Married</option>
+
+							<option value="UM" <% if @member && @member.mmbr_mrtl_stats.to_s == 'UM'%>selected<% end %>>UnMarried</option>
+
+							<option value="W" <% if @member && @member.mmbr_mrtl_stats.to_s == 'W'%>selected<% end %>>Widow</option>
+
+							<option value="S" <% if @member && @member.mmbr_mrtl_stats.to_s == 'S'%>selected<% end %>>Single Parent</option>
+						</select>
+					</div>
+					
+				
+				</div>
+					<div class="form-group row">
+
+				</div>
+					
+					</div>
+				<div class="form-group form-button text-center  m-b-10" style="margin-top: 50px;">
+							<button type="button" onclick="process_save_student_details();"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>member_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+
+
+					<div class="mdl-tabs__panel p-t-20" id="other_details">	</div>
+
+					</div>
+									
+
+							
+					</div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+									        <input type="hidden" id="currImage" value=""/>
+
+				<div class="modal fade" id="cropImagePop" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+		<div class="modal-content" style="height: 500px;">
+		<div class="modal-header">
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		<h4 class="modal-title" id="myModalLabel">
+		<?=multiLanguage( "Edit Foto" , "Edit Photo" )?></h4>
+		</div>
+		<div class="modal-body m-b-20">
+		<div id="upload-demo" class="center-block"></div>
+		</div>
+		<div class="modal-footer " >
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" id="cropImageBtn" class="btn btn-primary">Crop</button>
+		</div>
+		</div>
+		</div>
+		</div>
+        </form>
+				<% end %>
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

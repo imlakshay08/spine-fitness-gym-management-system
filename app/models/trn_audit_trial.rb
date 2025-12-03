@@ -1,0 +1,3 @@
+class TrnAuditTrial < ApplicationRecord
+end
+  

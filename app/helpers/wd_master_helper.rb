@@ -1,0 +1,2 @@
+module WdMasterHelper
+end

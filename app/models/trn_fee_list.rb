@@ -1,0 +1,2 @@
+class TrnFeeList < ApplicationRecord
+end

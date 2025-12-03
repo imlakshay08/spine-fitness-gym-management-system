@@ -1,0 +1,2 @@
+class MstFeeList < ApplicationRecord
+end

@@ -1,0 +1,44 @@
+Options +FollowSymLinks
+<IfModule mod_rewrite.c>
+RewriteEngine on
+#RewriteCond %{HTTP:X-Forwarded-Proto} !https 
+#RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+#RewriteCond %{HTTP:X-Forwarded-Proto} !https 
+#If neither above conditions are met, redirect to https
+#RewriteCond %{HTTPS} !=on
+#RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+#RewriteCond %{SERVER_PORT} 443
+#RewriteRule ^(.*) https://inqpos.com:443/$1 [P,L]
+#RewriteRule ^(.*) "http\:\/\/162\.144\.33\.151\:12001\/$1" [P,L]
+RewriteRule ^(.*) "http\:\/\/206\.189\.137\.48\:12001\/$1" [P,L]
+#[R=301,L,NE]
+#RewriteRule ^(.*) http://inqpos.com:12001/$1 [P,L]
+#RewriteRule ^(.*) "https\:\/\/127\.0\.0\.1\:12001\/$1" [P,L]
+#proxy_set_header X-Forwarded-Proto https;
+#RewriteRule ^(.*) http://inqpos.com:12001/$1 [P,L]
+#RewriteCond %{HTTP:X-Forwarded-Proto} !https
+#RewriteRule ^(.*)$ https://%{SERVER_NAME}/$1 [R,L]
+
+#SetEnvIf X_FORWARDED_PROTO https HTTPS=on
+
+#RewriteCond %{HTTP_HOST} !^www\. [NC]
+#RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [R=301,L]
+
+#RewriteCond %{HTTP:HTTPS} !on [NV]
+
+#RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+#RewriteCond %{HTTPS_HOST} ^inqpos\.com$ [OR]
+#RewriteCond %{HTTPS_HOST} ^www\.inqpos\.com$
+RewriteRule ^(.*) http://inqpos.com:12001/$1 [P,L]
+#RewriteCond %{ENV:HTTPS} !On [NC]
+#RewriteCond %{HTTP:X-Forwarded-Proto} !https 
+#RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+
+#RewriteCond %{HTTP_HOST} !^www\.inqpos\.com:12001$ [NC]
+#RewriteRule ^(.*) http://inqpos.com:12001/$1 [P,L]
+
+</IfModule>
+
+
+

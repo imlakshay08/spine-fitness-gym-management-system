@@ -1,0 +1,2 @@
+class MstCityAreaZone < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class MstMembersList < ApplicationRecord
+end

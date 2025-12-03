@@ -1,0 +1,100 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Membership Plan</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>membership_plan" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+             			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+			  <input type="hidden" name="mid" id="mid" value="<% if @memberplan %><%=@memberplan.id%><% end %>"/>         
+			<input type="hidden" name="cur_plan_name" id="cur_plan_name" value="<% if @memberplan %><%=@memberplan.plan_name%><% end %>"/>
+
+					<div class="form-body">
+						
+					<div class="form-group row">
+					<label class="col-md-2">Plan Name
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+					<input name="plan_name" id="plan_name"  type="text"  placeholder="Enter Plan Name"
+					autocomplete="off" maxlength="20" class="form-control" required value="<% if @memberplan%><%=@memberplan.plan_name%><% end %>"/> 
+					</div>
+					<label class="col-md-2">Plan Duration(In No. of Days)
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-4">
+					<input name="plan_duration_days" id="plan_duration_days"  type="text"  placeholder="Enter Plan Duration(In No. of Days)"
+					autocomplete="off" maxlength="5" class="form-control" onkeypress="return isNumberMyKeys(event);" required value="<% if @memberplan%><%=@memberplan.plan_duration_days%><% end %>"/> 
+									
+				</div>
+					</div>
+				
+						<div class="form-group row">
+				
+						<label class=" col-md-2">Plan Amount
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+					<input name="plan_amount" id="plan_amount"  type="text"  placeholder="Enter Plan Amount"
+					autocomplete="off" maxlength="6" class="form-control" onkeypress="return isNumberMyKeys(event);" required value="<% if @memberplan%><%=@memberplan.plan_amount%><% end %>"/> 
+					
+						</div>
+					</div>
+
+		               <div class="form-group row">
+						<label class=" col-md-2">Plan Description
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+						<input name="plan_description" id="plan_description" type="text" maxlength="45" placeholder="Enter Plan Description" class="form-control" value="<% if @memberplan%><%=@memberplan.plan_description%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['si_quantity'] %><% end %>" />
+						</div>
+					</div>
+
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+							<button type="submit"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>membership_plan">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

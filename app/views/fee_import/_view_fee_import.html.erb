@@ -1,0 +1,18 @@
+  <thead>
+    <tr>
+      <% if mydata.present? %>
+        <% mydata.first.keys.each do |header| %>
+          <th><%= header %></th>
+        <% end %>
+      <% end %>
+    </tr>
+  </thead>
+  <tbody>
+    <% mydata.each do |row| %>
+      <tr>
+        <% row.each do |_, value| %>
+          <td><%= value %></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>

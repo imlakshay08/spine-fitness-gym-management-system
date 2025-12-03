@@ -1,0 +1,2 @@
+module FaqhelpHelper
+end

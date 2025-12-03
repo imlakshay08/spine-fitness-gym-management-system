@@ -1,0 +1,184 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Student Status</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>student_transaction_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+						<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+            <input type="hidden" name="mid" id="mid" value="<% if @Liststdnttrnsctn %><%=@Liststdnttrnsctn.id%><% end %>"/>
+						<input type="hidden" class="form-control-sm" name="stdntTransactionId" id="stdntTransactionId" value="">
+						<input type="hidden" name="stdnt_code" id="stdnt_code" value="" />
+						<input type="hidden" name="cur_trn_year" id="cur_trn_year" value="<% if @Liststdnttrnsctn %><%=@Liststdnttrnsctn.trn_year%><% end %>" />
+
+						<input type="hidden" name="cur_trn_stdnt_rollno" id="cur_trn_stdnt_rollno" value="<% if @Liststdnttrnsctn %><%=@Liststdnttrnsctn.trn_stdnt_rollno%><% end %>" />
+					<div class="form-body">
+                <div class="row">
+					<div class="col-md-8 col-sm-12">
+						<div class="form-group row">
+						<label class="col-md-3">Transaction No.
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+						<input type="text" autocomplete="offf" readonly class="form-control"  maxlength="10" name="trn_no" id="trn_no" value="<% if @Liststdnttrnsctn%><%=@Liststdnttrnsctn.trn_no%><% else %><%=@Lastcode%><% end %>" />
+                 
+				</div>
+
+						<label class="col-md-3">Transaction Date
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="trn_date" id="trn_date" readonly type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @Liststdnttrnsctn%><%=formatted_date(@Liststdnttrnsctn.trn_date)%><%else%><%=Date.today.strftime('%d-%b-%Y')%><% end %>"/>
+					</div>
+				</div>
+               </div>
+
+			   <div class="form-group row">
+					<label class="col-md-3">Student Roll No.
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3"><% if @Liststdnttrnsctn %>
+											<input type="text" autocomplete="offf" class="form-control" readonly maxlength="10" name="trn_stdnt_rollno" id="trn_stdnt_rollno" value="<% if @Liststdnttrnsctn%><%=@Liststdnttrnsctn.trn_stdnt_rollno%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_stdnt_rollno'] %><% end %>" />
+
+					<%else%>
+						<input type="text" autocomplete="offf" class="form-control"  maxlength="10" name="trn_stdnt_rollno" id="trn_stdnt_rollno" value="<% if @Liststdnttrnsctn%><%=@Liststdnttrnsctn.trn_stdnt_rollno%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_stdnt_rollno'] %><% end %>" />
+                 <%end%>
+					</div>
+					<label class="col-md-3">Name
+						<span class="required" id="stdnt_name"> * </span>
+					</label>
+					<div class="col-md-3"><% if @Liststdnttrnsctn %>
+						<input type="text" autocomplete="offf"  class="form-control" readonly  maxlength="50" name="trn_stdnt_name" id="trn_stdnt_name" value="<% if @Liststdnttrnsctn%><%=@Liststdnttrnsctn.trn_stdnt_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_stdnt_name'] %><% end %>" />
+
+					<%else%>
+						<input type="text" autocomplete="offf"  class="form-control"  maxlength="50" name="trn_stdnt_name" id="trn_stdnt_name" value="<% if @Liststdnttrnsctn%><%=@Liststdnttrnsctn.trn_stdnt_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_stdnt_name'] %><% end %>" />
+                 
+                  <%end%>
+					</div>
+					
+					</div>
+					
+
+							<div class="form-group row">
+						<label class="col-md-3">Year
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3"><% if @Liststdnttrnsctn %>
+				<select class="form-select select-height"   name="trn_year" id="trn_year" disabled>
+				<%else%>
+					<select class="form-select select-height"  name="trn_year" id="trn_year">
+					<%end%>
+							<option value="">Select...</option>
+							<option value="2023" <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_year.to_s == '2023'%>selected<% end %>>2023</option>
+							<option value="2024" <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_year.to_s == '2024'%>selected<% end %>>2024</option>
+							<option value="2025" <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_year.to_s == '2025'%>selected<% end %>>2025</option>
+							<option value="2026" <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_year.to_s == '2026'%>selected<% end %>>2026</option>
+
+						</select>
+				</div>
+					<label class="col-md-3">Transaction Type
+					<span class="required"> * </span>
+					</label>
+				<div class="col-md-3" ><% if @Liststdnttrnsctn %>
+					<select class="form-select select-height"  name="trn_type" id="trn_type" disabled>
+					<%else%>
+					<select class="form-select select-height"  name="trn_type" id="trn_type">
+					<%end%>
+							<option value="">Select...</option>
+							<option value="RE" <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_type.to_s == 'RE'%>selected<% end %>>Re-Admission</option>
+							<option value="DET"  <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_type.to_s == 'DET'%>selected<% end %>>Detainee</option>
+							<option value="WTD"  <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_type.to_s == 'WTD'%>selected<% end %>>Withdrawals</option>
+							<option value="YD"  <% if @Liststdnttrnsctn && @Liststdnttrnsctn.trn_type.to_s == 'YD'%>selected<% end %>>Year Drop</option>
+						</select>
+				</div>
+
+	</div>
+					
+			<div class="form-group row">
+						<label class="col-md-3">Current Status
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3"><% if @Liststdnttrnsctn %>
+						<input type="text" autocomplete="offf"  class="form-control" readonly  maxlength="50" name="trn_cur_status" id="trn_cur_status" value="<% if @Liststdnttrnsctn%><%=@Liststdnttrnsctn.trn_cur_status%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_cur_status'] %><% end %>" />
+				<%else%>
+					<input type="text" autocomplete="offf"  class="form-control" readonly maxlength="50" name="trn_cur_status" id="trn_cur_status" value="<% if @Liststdnttrnsctn%><%=@Liststdnttrnsctn.trn_cur_status%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_cur_status'] %><% end %>" />
+                  <%end%>
+				</div>
+
+				</div>
+				</div>		
+
+		<div class="col-md-4 col-sm-12"> 
+						<div class="card mb-0" id="student-details-card" style="display: none;">
+								<div class="card-body" style="font-size: 14px;">
+                          <div class="stat-item"  name="course_text" id="course_text">
+											
+										</div>
+										<div class="stat-item">
+										
+										</div><br/>
+										<div class="stat-item">
+									
+										</div><br/>
+										<div class="stat-item" name="semester" id="semester">
+											
+										</div>
+								</div>
+						</div>
+					</div>	
+		</div>
+		</div>
+
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+							<% if @Liststdnttrnsctn %>
+							<a href="javascript:void(0)" onclick="alertChecked('<%= root_url %>student_transaction_list/add_student_transaction/<%= @Liststdnttrnsctn.id %>/deletes')">
+							<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">CANCEL</button>
+							</a><%else%>
+								<button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>student_transaction_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							<%end%>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

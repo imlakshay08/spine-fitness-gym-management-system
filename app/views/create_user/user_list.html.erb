@@ -1,0 +1,208 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content" >
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">User List</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+            
+					</div>
+       
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="card">
+								
+										<div class="card-body ">
+                    <% if flash[:error] %>
+                    <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                      <%= flash[:error] %>
+                    </div>
+                   <% end %>
+                    <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                    <%= form_tag({:action=>'create'} ,method: :get ,:multipart=>true,:id=>'myForms') do  %>
+                    <div class="row m-b-10">
+                   <label class="col-sm-12 col-md-2">User Name </label>
+                    <div class="col-sm-12 col-md-3">  <input type="text" class="form-control" placeholder="Enter Username" autocomplete="off" name="search_username" id="search_username" value="<% if @search_username %><%=@search_username%><% end %>"/></div>
+                  
+                    <div class="col-sm-12 col-md-1">  
+                    <button data-bs-toggle="button" class="btn btn-circle btn-default" onclick="filter_user_list();"><i class="fa fa-search"></i>
+											</button>
+                    </div>
+                    <div class="col-sm-12 col-md-6">  
+                    <a href="<%=root_url%>create_user/user_list_refresh" class="float-right">
+                    <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
+                    </div>
+                    </div>  
+
+                    
+                      <%end%>
+                      <div class="row">
+                      <div class="col-sm-12 col-md-3">  
+                      <a href="<%=root_url%>create_user"  class="">
+                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add User</button> </a>
+                      </div>
+                      <div class="col-sm-12 col-md-9 hidden">  
+                      <a href="javascript:;" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
+                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
+                      </div>
+                      </div>
+											<div class="table-scrollable">
+												<table class="table">
+													<thead>
+													<tr class="head_table">
+                          <th>S.No</th>
+											<th>Username</th>
+                      <th>Name</th>
+                       <th>Phone Number</th>									
+											<th>User Type</th>
+                      <th>Created Date</th>
+											<th class="text-center" colspan="2">Action</th>
+										</tr>
+													</thead>
+													<tbody>
+                                                
+                          <% pagestart = params[:page].present? ? params[:page].to_i : 1 %>
+                          <% i = pagestart <= 1 ? 1 : ((pagestart - 1) * 10) + 1 %>
+
+                          <%
+                          if @AllUsers && @AllUsers.length >0
+                           @AllUsers.each do |newusers|
+
+                           
+                            %>
+														<tr>
+                            <td><%=i%></td>
+                            <td><%=newusers.username%></td>
+                             <td><%=newusers.firstname%></td>
+                            
+															<td><%=newusers.phonenumber%></td>
+                               
+                            	<td>
+                              <%
+                              usertype = ""
+                              if newusers.usertype == 'adm'
+                                usertype = "Admin"
+                              elsif newusers.usertype == 'fac'
+                                usertype = "Faculty"
+                              
+                              else
+                                usertype = newusers.usertype
+                              
+                              end
+                             %>
+                            <%=usertype%>
+                              </td>
+                             
+                            	<td><%=formatted_date(newusers.updated_at)%></td>
+                              <td align="center">
+                              <a href="<%=root_url%>create_user/<%=newusers.id%>"
+                                class="tblEditBtn">
+                                <i class="fa fa-pencil"></i>
+                              </a>
+                           
+                            </td>
+                            <td align="center">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#exampleModal" title="Reset Password" onclick="reset_user_password('<%=newusers.id%>','<%=newusers.username%>','<%=newusers.firstname%>')"
+                            class="tblDelBtn">
+                            <i class="fa fa-refresh"></i>
+                          </a>
+                          </td>
+														</tr>
+                              <% i += 1 %>
+                            <%
+                          end
+                         else
+                        %>
+                         <tr>
+                           <td colspan="4">No record(s) found.</td>
+                         </tr>
+                         <%
+                          end
+                        %>
+													</tbody>
+												</table>
+											</div>
+                   
+                    <div class="col-md-12 text-center"><%= will_paginate @AllUsers %></div>
+                    
+										</div>
+									</div>
+								</div>
+
+                </div>
+                </div>
+                </div>
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h1 class="modal-title fs-5 mt0" id="exampleModalLabel" style="margin-top:0px;">Reset Password</h1>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+    <input type="hidden" id="popup_requestid" value=""/>
+    <div class="col-md-10 col-xs-8 mt5">
+    <div class="row">
+    <div class="head_info col-md-12 text-info" id="popup_userid" ></div>
+    
+    <div class="head_info  col-md-12 text-info" id="popup_username" ></div>
+</div>
+</div>
+
+
+<div class="password-options text-left mt5">
+<label class="options-title" style="font-size:14px;">Select a password reset option:</label>
+<div class="radio-options mt10">
+    <label class="radio-option">
+        <input type="radio" id="autoGeneratePassword" name="resetOption" value="autoGenerate" onclick="showHidePasswordFields('autoGenerate')"> Automatically generate a password
+    </label> &nbsp;
+    <label class="radio-option" >
+        <input type="radio" id="createNewPassword" name="resetOption" value="createNew" onclick="showHidePasswordFields('createNew')"> Create a new password
+    </label>
+</div>
+</div>
+
+    <div class="new-password mt10 mb5" style="margin-top: 10px;">
+    <div class="form-group mb5">
+    <div class="input-group">
+    <input type="password" class="form-control" autocomplete="off" required maxlength="50" placeholder="New Password" name="new_password" id="new_password" value=""  />
+												<span class="input-group-addon iconinput-pd"> <i class="fa text-info fa-eye" id="togglePassword" onclick="togglePasswordField()"></i></span>
+                        <span class="input-group-addon iconinput-pd">  <a href="javascript:;" onclick="copyPasswordToClipboard()">   <i class="fa text-info fa-copy"  title="Copy to Clipboard"></i> </a></span>
+											</div>
+   
+
+    </div>
+
+    </div>
+       
+      
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <button type="button" onclick="process_reset_user_password();" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+</div>
+

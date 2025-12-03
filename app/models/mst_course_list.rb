@@ -1,0 +1,2 @@
+class MstCourseList < ApplicationRecord
+end

@@ -1,0 +1,243 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Create User</div>
+		</div>
+	<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>create_user/user_list" style="float:right;">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+	
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+					<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+          <input type="hidden" name="mid" id="mid" value="<% if @ListUsers %><%=@ListUsers.id%><% end %>"/>
+          <input type="hidden" name="currentusername" id="currentusername" value="<% if @ListUsers %><%=@ListUsers.username%><% end %>"/>
+          <input type="hidden" name="mymodule_codes" id="selected_module">
+          <input type="hidden" name="mymoduledchecked" id="module_checked_status" value="0">
+				  <input type="hidden" name="selected_module_edit" id="selected_module_edit" value="<% if @ListUsers %><%=@ListUsers.listmodule%><% end %>"/>
+				  <input type="hidden" name="selected_module" id="selected_module" value="<% if @ListUsers %><%=@ListUsers.listmodule%><% end %>"/>
+          <input type="hidden" name="userdate" id="userdate" value="<% if @ListUsers%><%=formatted_date(@ListUsers.userdate)%><%else%><%=Date.today.strftime('%d-%b-%Y')%><% end %>"/>
+					<div class="form-body">
+					<div class="form-group row">
+					<label class="col-form-label col-md-2">User Type  <span class="required"> * </span></label>
+		 <div class="col-md-3">
+				 <select required class="form-select select-height" name="usertype" id="usertype" onchange="selected_users(this.value);">
+				   <option value="">-Select</option>
+                   <option value="adm" <% if @ListUsers && @ListUsers.usertype.to_s == 'adm'%>selected="selected" <% elsif session[:req_usertype] !=nil && session[:req_usertype].to_s== 'adm'%>selected="selected"<% end %>>Admin</option>
+				   <option value="fac" <% if @ListUsers && @ListUsers.usertype.to_s == 'fac'%>selected="selected"<% end %>>Faculty</option>
+
+				  
+			   </select>
+		 </div>
+
+		 <label class="col-form-label process_permission col-md-2">Faculty <span class="required"> * </span></label>
+		 <div class="col-md-3">
+				 <select required class="form-select process_permission select-height" name="faculty" id="faculty" >
+				   <option value="">-Select</option>
+				   <%
+                        if @Faculty && @Faculty.length>0
+                           @Faculty.each do |fclt|
+                    %>
+                    <option value="<%=fclt.id%>" <% if @ListUsers && @ListUsers.faculty.to_i == fclt.id.to_i %>selected<% elsif session[:sess_faculty].to_s==fclt.id.to_i%>selected<% end %>><%=fclt.fclty_name%></option>
+                    <%
+                    end
+                    end
+                    %>
+				</select>
+		 </div>			   
+		 </div>
+	
+			
+			   <div class="form-group row">
+			   
+			   <label class="col-form-label col-md-2">Username <span class="required"> * </span></label>
+			   <div class="col-md-3">
+				   <input type="text"  required autocomplete="off" class="form-control"  maxlength="25" name="username" id="username" value="<% if @ListUsers %><%=@ListUsers.username%><% elsif session[:req_username]!=nil %><%=session[:req_username]%><% end %>"/> </div>
+				   <label class="col-form-label col-lg-2 <%= 'hidden' if @ListUsers %>">Password</label>
+			   <div class="col-md-3 <%= 'hidden' if @ListUsers %>">
+				   <input type="password" autocomplete="off" maxlength="20" class="form-control" name="userpassword" id="userpassword" value=""/> </div>
+		   </div>				
+			   
+		
+
+		   <div class="form-group row">
+		      <label class="col-form-label col-md-2">Name</label>
+		   <div class="col-md-3">
+		   <input type="text"   autocomplete="off" maxlength="50" class="form-control"  name="firstname" id="firstname" value="<% if @ListUsers %><%=@ListUsers.firstname%><% end %>"/>
+		   </div>
+		   <label class="col-form-label col-md-2">Phone Number</label>
+		   <div class="col-md-3">
+		   <input type="text" autocomplete="off" maxlength="10" class="form-control" onkeypress="return isNumberMyKeys(event);" name="phonenumber" id="phonenumber" value="<% if @ListUsers %><%=@ListUsers.phonenumber%><% end %>"/>
+		   </div>
+							 
+		   </div>
+		   <div class="form-group row">
+
+		   <div class="card-body" id="" style="padding: 10px;">
+		   <div class="panel-group accordion" id="accordion3">
+<!-- Hidden input to store selected modules -->
+
+<!-- Loop through each module -->
+<% @ListModule.each do |mod| %>
+  <div class="panel-heading panel-heading-gray" style="padding:2px 15px;">
+    <h4 class="panel-title">
+      <a class="accordion-toggle accordion-toggle-styled" data-bs-toggle="collapse" data-parent="#accordion3" href="#collapse_<%= mod.id %>">
+        <%= mod.lm_modules %> <!-- Display module name -->
+      </a>
+      <!-- Add a unique class to the select all checkbox and a unique ID -->
+<input type="checkbox" class="boxsize select-all-module" 
+       data-module-id="<%= mod.id %>" 
+       id="process_common_select_<%= mod.id %>" 
+       value="<%= mod.lm_modulecode %>"
+       <% if @ListUsers && @ListUsers.listmodule.include?(mod.lm_modulecode) %> checked <% end %>>
+    </h4>
+  </div>
+
+  <div id="collapse_<%= mod.id %>" class="panel-collapse collapse">
+    <div class="panel-body">
+      <div class="table-scrollable">
+        <table class="table">
+          <thead>
+            <tr class="">
+              <th>Form Name</th>
+              <th class="text-center">Add</th>
+              <th class="text-center">Edit</th>
+              <th class="text-center">Delete</th>
+              <th class="text-center" width="10%">Print/Download</th>
+              <th class="text-center">Cancel</th>
+              <th class="text-center">View</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Loop through each menu entry that belongs to the current module -->
+            <% if @menus_with_access_grouped[mod.lm_modules] %>
+              <% @menus_with_access_grouped[mod.lm_modules].each do |menu| %>
+                <%
+                  menu_name      = menu.me_menuname
+                  listnewmodule  = menu.me_access.to_s.split(",")
+                  controllername = menu.me_controller_name
+                  actionnames    = menu.me_action_name
+                  combine_name   = "#{controllername}_#{menu.id}"
+                  
+                  # Fetch the user's specific access for this module
+                  modulesingecheck = get_user_global_access_list(@selected_user_id, controllername, mod.lm_modulecode, actionnames)
+                  viewcheckbox     = modulesingecheck ? modulesingecheck.ua_action.to_s.split(",") : []
+                %>
+
+                <tr class="process_insder_checker">
+                  <input type="hidden" name="ua_formname[]" value="<%= controllername %>"> 
+                  <input type="hidden" name="ua_combine_name[]" value="<%= combine_name %>">                                            
+                  <input type="hidden" name="ua_subheading[]" value="">   
+                  <input type="hidden" name="ua_actionname[]" value="<%= actionnames %>">
+                   <!-- Hidden input for module code -->
+                  <input type="hidden" name="ua_module_code[]" value="<%= mod.lm_modulecode %>"> <!-- Add this line -->
+                  <td id="center"><%= menu_name %></td>
+
+                  <!-- Add Checkbox -->
+                  <td class="text-center">
+                    <% if listnewmodule.include?('AD') %>
+                      <input type="checkbox" class="module-checkbox module-checkbox-<%= mod.id %>" <% if viewcheckbox.include?('AD') %>checked<% end %> name="ua_action[<%= combine_name %>][]" value="AD">
+                    <% end %>
+                  </td>
+
+                  <!-- Edit Checkbox -->
+                  <td class="text-center">
+                    <% if listnewmodule.include?('ED') %>
+                      <input type="checkbox" class="module-checkbox module-checkbox-<%= mod.id %>" <% if viewcheckbox.include?('ED') %>checked<% end %> name="ua_action[<%= combine_name %>][]" value="ED">
+                    <% end %>
+                  </td>
+
+                  <!-- Delete Checkbox -->
+                  <td class="text-center">
+                    <% if listnewmodule.include?('DL') %>
+                      <input type="checkbox" class="module-checkbox module-checkbox-<%= mod.id %>" <% if viewcheckbox.include?('DL') %>checked<% end %> name="ua_action[<%= combine_name %>][]" value="DL">
+                    <% end %>
+                  </td>
+
+                  <!-- Print/Download Checkbox -->
+                  <td class="text-center">
+                    <% if listnewmodule.include?('PR') %>
+                      <input type="checkbox" class="module-checkbox module-checkbox-<%= mod.id %>" <% if viewcheckbox.include?('PR') %>checked<% end %> name="ua_action[<%= combine_name %>][]" value="PR">
+                    <% end %>
+                  </td>
+
+                  <!-- Cancel Checkbox -->
+                  <td class="text-center">
+                    <% if listnewmodule.include?('CL') %>
+                      <input type="checkbox" class="module-checkbox module-checkbox-<%= mod.id %>" <% if viewcheckbox.include?('CL') %>checked<% end %> name="ua_action[<%= combine_name %>][]" value="CL">
+                    <% end %>
+                  </td>
+
+                  <!-- View Checkbox -->
+                  <td class="text-center">
+                    <% if listnewmodule.include?('VW') %>
+                      <input type="checkbox" class="module-checkbox module-checkbox-<%= mod.id %>" <% if viewcheckbox.include?('VW') %>checked<% end %> name="ua_action[<%= combine_name %>][]" value="VW">
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <!-- If no menus are available for this module, show a message -->
+              <tr>
+                <td colspan="7" class="text-center">No forms available for <%= mod.lm_modules %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+			   </div>
+		  </div>
+
+		   </div>
+		
+		
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+						<button type="button" 
+        class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary" 
+        onclick="handleFormSubmit()">SUBMIT</button>
+
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>create_user/user_list?page=<%=params[:page] %>">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

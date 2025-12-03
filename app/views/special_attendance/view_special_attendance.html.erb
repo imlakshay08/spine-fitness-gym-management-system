@@ -1,0 +1,58 @@
+  <%	
+								  
+                    i = 1
+            
+											if @specialattndnce.length>0
+											 @specialattndnce.each do |attndnce|	
+
+										   %>
+ <tr>
+                  <td><%=i%></td>
+                  <td><%=attndnce.sp_att_std_rollno%></td>
+                  <td><%=attndnce.sp_att_std_name%></td>
+                  <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P1" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P1' ? 'checked' : '' %>>
+                  </td>
+                <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P2" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P2' ? 'checked' : '' %>>
+                  </td>
+                  <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P3" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P3' ? 'checked' : '' %>>
+                  </td>
+                  <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P4" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P4' ? 'checked' : '' %>>
+                  </td>
+                  <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P5" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P5' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P6" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P6' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P7" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P7' ? 'checked' : '' %>>
+                  </td>
+              <td class="text-center">
+                  <input type="hidden" name="sp_att_prd[]" id="sp_att_prd" value="">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P8" style="width: 20px;height: 25px;" <%= attndnce&.sp_att_prd == 'P8' ? 'checked' : '' %>>
+                  </td>
+              
+              </tr>
+               <% 
+								i+=1			
+												   end
+												   else
+                 
+               %>
+               <tr>
+               <td colspan="6">No record(s) found.</td>
+               </tr>
+            <%
+               end
+                 %>

@@ -1,0 +1,2 @@
+class MstMenuEntry < ApplicationRecord
+end

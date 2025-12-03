@@ -1,0 +1,287 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Company</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+						<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+
+            <input type="hidden" name="mid" id="mid" value=""/>
+					<div class="form-body">
+					
+					   	<div class="form-group row">
+					  
+					<div class="col-md-12">
+					<div class="form-group row">
+					<label class="col-md-2">Company Code
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="cmp_companycode" id="cmp_companycode" readonly type="text"  placeholder="Enter Company Code"
+					autocomplete="off" maxlength="10" tabindex="1" class="form-control" required value="<% if @companyItems!=nil %><%=@companyItems.cmp_companycode%><% elsif session[:cmp_companycode]!=nil %><%=session[:cmp_companycode]%><% end %>"/> 
+					</div>
+					<label class="col-md-1">Name
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+					
+					<input name="cmp_companyname" id="cmp_companyname" type="text" required tabindex="2" placeholder="Enter Company Name" autocomplete="off" maxlength="60" class="form-control"  value="<% if session[:postedpamams]!=nil %><%=session[:postedpamams]['cmp_companyname']%><% elsif @companyItems!=nil%><%=@companyItems.cmp_companyname%><% elsif session[:cmp_companyname]!=nil %><%=session[:cmp_companyname]%><% end %>"/>
+					
+					</div>
+
+					</div>
+
+
+					</div>
+					</div>
+									
+									
+
+				
+					<div class="mdl-tabs mdl-js-tabs">
+					<div class="mdl-tabs__tab-bar tab-left-side">
+						<a href="#personal_detail" class="mdl-tabs__tab is-active">Perosnal Details</a>
+						<a href="#company_rules" class="mdl-tabs__tab">Rules</a>
+					</div>
+
+					<div class="mdl-tabs__panel is-active p-t-20" id="personal_detail">
+					<div class="card-box">
+					<div class="card-body ">
+					
+					<div class="form-group row">
+				
+					<label class="col-md-3">Address 1 <span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="cmp_addressline1" id="cmp_addressline1" tabindex="3" type="text"  placeholder="Enter Address 1"
+					autocomplete="off" maxlength="225" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_addressline1.length >1 %><%=@companyItems.cmp_addressline1%><% elsif session[:cmp_addressline1]!=nil %><%=session[:cmp_addressline1]%><% end %>"/> 
+					</div>
+					<label class="col-md-3">Tel. No.
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+				
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
+					<input name="cmp_telephonenumber" id="cmp_telephonenumber" onkeypress="return isNumberKeys(event);" type="text" tabindex="8" placeholder="Enter Telephone No."
+					autocomplete="off" maxlength="12" class="form-control" required value="<% if @companyItems!=nil && @companyItems.cmp_telephonenumber.length >1 %><%=@companyItems.cmp_telephonenumber%><% elsif session[:cmp_telephonenumber]!=nil %><%=session[:cmp_telephonenumber]%><% end %>"/> 
+					</div>
+					</div>
+					</div>
+
+					
+					<div class="form-group row">
+					<label class="col-md-3">Address 2
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="cmp_addressline2" id="cmp_addressline2"  type="text" tabindex="4" placeholder="Enter Address 2"
+					autocomplete="off" maxlength="225" class="form-control" required value="<% if @companyItems!=nil && @companyItems.cmp_addressline2.length >1 %><%=@companyItems.cmp_addressline2%><% elsif session[:cmp_addressline2]!=nil %><%=session[:cmp_addressline2]%><% end %>"/> 
+					</div>
+					<label class="col-md-3">Mobile No.
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
+					<input name="cmp_cell_number" id="cmp_cell_number" onkeypress="return isNumberKeys(event);" tabindex="9" type="text"  placeholder="Enter Mobile No."
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @companyItems!=nil && @companyItems.cmp_cell_number.length >1 %><%=@companyItems.cmp_cell_number%><% elsif session[:cmp_cell_number]!=nil %><%=session[:cmp_cell_number]%><% end %>"/> 
+					</div>
+					
+					</div>
+					</div>
+					<div class="form-group row">
+				
+					<label class="col-md-3">Address 3
+					
+					</label>
+					<div class="col-md-3">
+					<input name="cmp_addressline3" id="cmp_addressline3"  type="text"  placeholder="Enter Address 3"
+					autocomplete="off" maxlength="225" class="form-control" tabindex="5" required value="<% if @companyItems!=nil && @companyItems.cmp_addressline3.length >1 %><%=@companyItems.cmp_addressline3%><% elsif session[:cmp_addressline3]!=nil %><%=session[:cmp_addressline3]%><% end %>"/> 
+					</div>
+					<label class="col-md-3">Email Id
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<div class="input-group">
+						<span class="input-group-addon iconinput-pd"><i class="fa fa-envelope"></i></span>
+						<input name="cmp_email" id="cmp_email"  type="email" required tabindex="10" placeholder="Enter Email Id"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_email.length >1 %><%=@companyItems.cmp_email%><% elsif session[:cmp_email]!=nil %><%=session[:cmp_email]%><% end %>"/>
+					</div>
+					</div>
+					</div>
+						<div class="form-group row">
+				
+					<label class="col-md-3">Country
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height" required tabindex="6" name="cmp_countrycode" id="cmp_countrycode" >
+                                           <option value="">-Select-</option>
+										   <% if @companyCountry.count >0
+										   @companyCountry.each do |mstcountry|
+										   %>
+										   <option value="<%=mstcountry.cid.to_i%>" <% if @companyItems!=nil &&@companyItems!='' && @companyItems.cmp_countrycode!=nil && @companyItems.cmp_countrycode!='' &&  mstcountry.cid.to_i ==@companyItems.cmp_countrycode.to_i %>selected="selected" <% elsif mstcountry.cid.to_i == 99 %> selected="selected" <% elsif session[:cmp_countrycode]!=nil && session[:cmp_countrycode].to_i == mstcountry.cid.to_i %> selected="selected" <% end %>><%=mstcountry.country_name%></option>
+										   <% end end %>
+					</select>
+					</div>
+						
+					<label class="col-md-3">Aadhar No.
+					</label>
+					<div class="col-md-3">
+					<input name="cmp_adharnumber" id="cmp_adharnumber" tabindex="11" type="text"  placeholder="Enter Aadhar No."
+					autocomplete="off" maxlength="12" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_adharnumber.length >1 %><%=@companyItems.cmp_adharnumber%><% elsif session[:cmp_adharnumber]!=nil %><%=session[:cmp_adharnumber]%><% end %>"/> 
+					</div>
+					</div>
+
+					
+					
+					<div class="form-group row">
+					<label class="col-md-3">State
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height" tabindex="7" required name="cmp_stateandcode" id="cmp_stateandcode" >
+                  <option value="">-Select-</option>
+						<% if @companyState.count >0
+						 @companyState.each do | mstate |
+						%>
+						<option value="<%=mstate.scid%>" <% if @companyItems!=nil && @companyItems.cmp_stateandcode.to_i == mstate.scid.to_i %>selected="selected" <% elsif session[:cmp_stateandcode]!=nil && session[:cmp_stateandcode].to_i == mstate.scid.to_i %> selected="selected"<% end %>><%=mstate.state_name%></option>
+						<% end end%>
+					</select>
+					</div>
+					<label class="col-md-3">Pan No.
+					</label>
+					<div class="col-md-3">
+					<input name="cmp_pannumber" id="cmp_pannumber" tabindex="12" type="text"  placeholder="Enter Pan No."
+					autocomplete="off" maxlength="10" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_pannumber.length >1 %><%=@companyItems.cmp_pannumber%><% elsif session[:cmp_pannumber]!=nil %><%=session[:cmp_pannumber]%><% end %>"/> 
+				</label>
+					</div>	
+
+					</div>
+
+					<div class="form-group row">
+					
+					<label class="col-md-3">Logo
+				</label>
+				<div class="col-md-3" tabindex="13" style="overflow: hidden;">
+				<input name="cmp_logos" id="cmp_logos" class="img-thumbnail" type="file" /> 
+				</br>
+				
+				<% if @companyItems!=nil && @companyItems.cmp_logos!='' && @companyItems.cmp_logos!=nil %>
+					   
+				<img src="<%=root_url%>images/logo/<%=@companyItems.cmp_logos%>" class="img-thumbnail" width="70px;" height="70px;" id="previewCompFile"/>
+
+			   <% end %>
+				</div>
+				 <div class="col-md-3"><input type="hidden" name="currentcomplogo" id="currentcomplogo" value="<% if @companyItems!=nil%><%=@companyItems.cmp_logos%><% end %>"/></div>
+
+				</div>
+
+				<div class="form-group row">
+				
+				<label class="col-md-3">Principal Sign.</label>
+				<div class="col-md-3" tabindex="14" style="overflow: hidden;">
+				<input name="cmp_signs" id="cmp_signs" class="img-thumbnai" type="file" /> 
+				<br/>
+				<% if @companyItems != nil && @companyItems.cmp_signs != '' && @companyItems.cmp_signs != nil %>
+					<img src="<%= root_url %>images/signs/<%= @companyItems.cmp_signs %>" class="img-thumbnai" width="70px;" height="70px;" id="previewSignFile"/>
+				<% end %>
+				</div>
+				<div class="col-md-3">
+				<input type="hidden" name="currentcompsigns" id="currentcompsigns" value="<% if @companyItems != nil %><%= @companyItems.cmp_signs %><% end %>"/>
+				</div>
+
+
+					</div>
+					</div>
+
+					</div>
+					</div>
+
+					<div class="mdl-tabs__panel p-t-20" id="company_rules">	
+					<div class="card-box">
+					<div class="card-body ">
+
+					<div class="form-group row">
+				
+					<label class="col-md-12" style="display:flex;">Maximum
+					<input name="cmp_max_workdays" id="cmp_max_workdays" onkeypress="return isNumberKeys(event);"  type="text"  
+					autocomplete="off" maxlength="2" class="form-control mr-1 ml-1"  value="<% if @companyItems%><%=@companyItems.cmp_max_workdays%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['cmp_max_workdays'] %><% end %>" style="width: 5%;margin: 0 5px;"/> 
+					working days given to faculty entered their attendance in ERP.
+					</label>
+
+					</div>
+					</div>
+
+					</div>
+
+					</div>
+									
+
+							<div class="form-group form-button text-center  m-b-10" style="margin-top: 50px;">
+							<button type="submit"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>dashboard">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+
+
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+					 <input type="hidden" id="currImage" value=""/>
+    <input type="hidden" id="companylogoId" value=""/>
+
+				<div class="modal fade" id="cropImagePop" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+		<div class="modal-content" style="height: 500px;">
+		<div class="modal-header">
+		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		<h4 class="modal-title" id="myModalLabel">
+		<?=multiLanguage( "Edit Foto" , "Edit Photo" )?></h4>
+		</div>
+		<div class="modal-body m-b-20">
+		<div id="upload-demo" class="center-block"></div>
+		</div>
+		<div class="modal-footer " >
+		<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+		<button type="button" id="cropImageBtn" class="btn btn-primary">Crop</button>
+		</div>
+		</div>
+		</div>
+		</div>

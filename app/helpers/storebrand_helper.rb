@@ -1,0 +1,2 @@
+module StorebrandHelper
+end

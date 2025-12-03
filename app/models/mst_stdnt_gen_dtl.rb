@@ -1,0 +1,2 @@
+class MstStdntGenDtl < ApplicationRecord
+end

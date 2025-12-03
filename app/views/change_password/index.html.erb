@@ -1,0 +1,116 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Change Password</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+		
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>"  id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+            <input type="hidden" name="mid" id="mid" value=""/>
+					<div class="form-body">
+						<div class="">
+			
+									<label class="fnt14" style="color: #0d638f;">Strong Passwords include number, letter, and Punctuation marks. </label>
+									</div>
+					<div class="form-group row mt-3">
+					<label class="col-md-3">Old password
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+					<div class="input-group">
+						<input type="password" autocomplete="off" placeholder="Enter Old Password" required class="form-control" name="old_password" id="old_password" value="" />
+						<span class="input-group-addon iconinput-pd"><i class="fa fa-eye text-danger" id="togglePassword" onclick="togglePasswordField()"></i></span>
+					</div>
+					</div>
+				
+					</div>
+					<div class="form-group row mt-3 mb-3">
+					
+					<div class="col-md-4">
+					<div class="password-options">
+								<div class="">
+									<label class="" >
+									<a href="javascript:;" class="btn btn-primary  " title="Click for Automatically generate a password " onclick="showHidePasswordFields('autoGenerate')"> Automatically generate a password </a>
+									
+									</label> &nbsp;
+								</div>
+							</div>
+							</div>
+					</div>
+					<div class="form-group row">
+					<label class="col-md-3">New Password
+					<span class="required"> * </span>
+				</label>
+					<div class="col-md-4">
+					<div class="input-group">
+						 <input type="password" autocomplete="off" placeholder="Enter New Password" required maxlength="50" class="form-control" name="user_password" id="user_password"  />
+						
+						<span class="input-group-addon iconinput-pd"> <a href="javascript:;" onclick="copyPasswordToClipboard()">   <i class="fa text-info fa-copy"  title="Copy to Clipboard"></i> </a></span>
+						<span class="input-group-addon iconinput-pd"><i class="fa fa-eye text-danger" id="togglePasswordnew" onclick="togglePasswordnewField()"></i></span>
+					</div>
+				</div>
+
+					</div>
+				
+						<div class="form-group row">
+					<label class="col-md-3">Confirm Password
+					<span class="required"> * </span>
+				</label>
+					<div class="col-md-4">
+					<div class="input-group">
+						 <input type="password" autocomplete="off" required placeholder="Enter Confirm Password" maxlength="50" class="form-control" name="new_password" id="new_password" />
+						<span class="input-group-addon iconinput-pd"><i class="fa fa-eye text-danger" id="togglePasswordconfirm" onclick="togglePasswordconfirmField()"></i></span>
+					</div>
+				</div>
+
+					</div>
+
+							<div class="form-group form-button text-center  m-b-10" style="margin-top: 50px;">
+							<button type="submit"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary" onclick="return change_password_validation();">CHANGE PASSWORD</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							
+							</div>
+					</div>
+				</form>
+				<% end %>
+					  <div class="form-group row">
+				<div class="col-md-12">
+									<label class="fnt14" style="color: #0d638f;">Note:- Upon changing the password, the system will automatically log out the user and redirect them to the login screen. </label>
+									</div>
+									</div>
+			</div>
+		
+		</div>
+	</div>
+</div>
+					
+      
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

@@ -1,0 +1,196 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Fee Structure</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>fee_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+            <input type="hidden" name="mid" id="mid" value="<% if @FeeList %><%=@FeeList.id%><% end %>"/>
+			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+			<input type="hidden" class="form-control-sm" name="FeelsitId" id="FeelsitId" value="">
+
+					<div class="form-body">
+
+							<div class="form-group row">
+						<label class="col-md-2">Year
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+					<select class="form-select select-height"  name="fee_year" id="fee_year" onchange="changeFeeList()">
+							<option value="">Select...</option>
+							<option value="2024"<% if @FeeList && @FeeList.fee_year.to_s == '2024'%>selected<% end %>>2024</option>
+							<option value="2025"<% if @FeeList && @FeeList.fee_year.to_s == '2025'%>selected<% end %>>2025</option>
+
+						</select>
+				</div>
+					
+	</div>
+					<div class="form-group row">
+					<label class="col-md-2">Course
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height "  name="fee_crse" id="fee_crse" onchange="get_global_semester()" >
+						<option value="">Select...</option>
+<%
+                        if @CourseList && @CourseList.length>0
+                            @CourseList.each do |course|
+                    %>
+                    <option value="<%=course.id%>" <% if @FeeList && @FeeList.fee_crse.to_i == course.id.to_i %>selected<% elsif session[:sess_fee_crse].to_s==course.id.to_i%>selected<% end %>><%=course.crse_descp%></option>
+                    <%
+                    end
+                    end
+                    %>
+						</select>
+		<div class="mt-4  mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader loade hidden"></div>
+
+						</div>
+					
+
+					<label class="col-md-2">Currency
+						
+					</label>
+					<div class="col-md-3">
+						<select class="form-select select-height"  name="fee_currncy" id="fee_currncy" onchange="changeFeeList()">
+						<%
+                                                        if @CurrencyList && @CurrencyList.length>0
+                                                            @CurrencyList.each do |currency|
+                                                        %>
+                                                        <option value="<%=currency.id%>" <% if @FeeList && @FeeList.fee_currncy.to_i == currency.id.to_i %>selected<% elsif session[:sess_fee_currncy].to_s==currency.id.to_i%>selected<% end %>><%=currency.cc_symbols%>-<%=currency.cc_name%></option>
+                                                        <%
+                                                        end
+                                                        end
+                                                        %>
+							
+						</select>
+					</div>
+					</div>
+					
+					</div>
+				
+					
+				<div class="form-group row mt-4">
+									<div class="col-md-2" >
+									Semester <span class="required"> * </span><br/>
+									<select class="form-select select-height"  name="fee_sem" id="fee_sem" onchange="changeFeeList()">
+				<option value="">Select...</option>
+				  <% if @Listsemester && @Listsemester.any? %>
+    <% @Listsemester.each do |semester| %>
+      <option value="<%= semester %>" <% if @FeeList && @FeeList.fee_sem.to_i == semester.to_i %>selected<% end %>><%= "Semester #{semester}" %></option>
+    <% end %>
+  <% end %>
+						
+						</select>
+				</div>
+				
+			<div class="col-md-2" >
+			Component <span class="required"> * </span><br/>
+			<select class="form-select select-height"   name="fee_compt" id="fee_compt">
+							<option value="">Select...</option>
+														 <%
+                                                        if @CompnentList && @CompnentList.length>0
+                                                            @CompnentList.each do |compnent|
+                                                        %>
+                                                        <option value="<%=compnent.compt_code%>"><%=compnent.compt_descp%></option>
+                                                        <%
+                                                        end
+                                                        end
+                                                        %>
+						
+						</select>
+			</div>
+			<div class="col-md-2" >
+			Fees <span class="required"> * </span><br/>
+			<input name="fee_amt" id="fee_amt"  type="text" onkeypress="return isNumberMyKeys(event);" autocomplete="off" maxlength="50" class="form-control"  value=""/> 
+			
+			</div>
+			<div class="col-md-2" >
+			
+			<button type="button" class="btn btn-circle btn-info mt-4 no_loader" onclick="save_fee_list();">Save</button>
+			<div class="mt-4  mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader loader hidden"></div>
+			</div>
+				</div>
+						<div class="table-scrollable">
+												<table class="table">
+													<thead>
+														<tr>
+															<th>S.No</th>
+															<th>Semester</th>
+															<th>Component</th>
+															<th>Fees</th>
+															<th >Action</th>
+														</tr>
+													</thead>
+													<tbody id="fee_list">
+                        
+ <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                <td >
+                 <a href="javascript:;" class="tblEditBtn" >
+                                        <i class="fa fa-pencil"></i>
+</a>
+                
+                 <a class="tblDelBtn" >
+               <i class="fa fa-trash-o"></i>
+                </a>
+                </td>
+                
+              </tr>
+               
+               
+            
+                          
+													</tbody>
+												</table>
+											</div>
+
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+							
+								
+							<a href="<%=root_url%>fee_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

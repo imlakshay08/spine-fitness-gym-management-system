@@ -1,0 +1,2 @@
+module SchemetypeHelper
+end

@@ -1,0 +1,120 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content" >
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">City List</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+            
+					</div>
+       
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="card">
+								
+										<div class="card-body ">
+                    <% if flash[:error] %>
+                    <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                      <%= flash[:error] %>
+                    </div>
+                   <% end %>
+                    <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                    <%= form_tag({:action=>'index'} ,method: :get ,:multipart=>true,:id=>'myForms' ) do  %>                    
+                    <div class="row m-b-10">
+                   <label class="col-sm-12 col-md-2">City Name </label>
+                    <div class="col-sm-12 col-md-3">  <input type="text" class="form-control" name="City" id="City" autocomplete="off" placeholder="Enter City Name"  value="<% if @city_list_search %><%=@city_list_search%><% end %>"/></div>
+                  
+                    <div class="col-sm-12 col-md-1">  
+                    <button data-bs-toggle="button" class="btn btn-circle btn-default" onclick="filter_city_list();"><i class="fa fa-search"></i>
+											</button>
+                    </div>
+                    <div class="col-sm-12 col-md-6">  
+                    <a href="<%=root_url%>city_list/referesh_city_list" class="float-right">
+                    <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
+                    </div>
+                    </div>  
+
+                      <%end%>
+                      <div class="row">
+                      <div class="col-sm-12 col-md-3">  
+                      <a href="<%=root_url%>city_list/add_city"  class="">
+                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add City</button> </a>
+                      </div>
+                      <div class="col-sm-12 col-md-9 hidden">  
+                      <a href="javascript:;" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
+                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
+                      </div>
+                      </div>
+											<div class="table-scrollable">
+												<table class="table">
+													<thead>
+														<tr>
+															<th>S.No</th>
+															<th>Agency</th>
+															<th>City</th>
+                            	<th>Branch</th>
+                              <th>Active</th>
+                              <th>Action</th>
+														</tr>
+													</thead>
+                        <tbody>
+                          <% pagestart = params[:page].present? ? params[:page].to_i : 1 %>
+                          <% i = pagestart <= 1 ? 1 : ((pagestart - 1) * 10) + 1 %>
+
+                          <% if @cityList.any? %>
+                            <% @cityList.each do |city| %>
+                              <tr>
+                                <td><%= i %></td>
+                                <td><%= MstAgency.find_by(Id: city.Ref_Agency_Id)&.Agency_Short %></td>
+                                <td><%= city.City %></td>
+                                <td><%= MstBranch.find_by(Id: city.Ref_Branch_id)&.Branch_Code %></td>
+                                <td><%= city.Isactive == 'Y' ? 'Y' : 'N' %></td>
+                                <td>
+                                  <a href="<%= root_url %>city_list/add_city/<%= city.Id %>?page=<%=params[:page] %>" class="tblEditBtn">
+                                    <i class="fa fa-pencil"></i>
+                                  </a>
+                                  <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>city_list/<%= city.Id %>/deletes')">
+                                    <i class="fa fa-trash-o"></i>
+                                  </a>
+                                </td>
+                              </tr>
+                              <% i += 1 %>
+                            <% end %>
+                          <% else %>
+                            <tr>
+                              <td colspan="6">No data available</td>
+                            </tr>
+                          <% end %>
+                        </tbody>
+												</table>
+											</div>
+                     
+                    <div class="col-md-12 text-center"><%= will_paginate @cityList %></div>
+                    
+										</div>
+									</div>
+								</div>
+
+                </div>
+                </div>
+                </div>
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+

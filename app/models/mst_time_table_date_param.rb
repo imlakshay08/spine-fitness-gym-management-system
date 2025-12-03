@@ -1,0 +1,2 @@
+class MstTimeTableDateParam < ApplicationRecord
+end

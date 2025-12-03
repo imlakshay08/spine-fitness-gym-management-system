@@ -1,0 +1,2 @@
+class MstListOutletDetail < ApplicationRecord
+end

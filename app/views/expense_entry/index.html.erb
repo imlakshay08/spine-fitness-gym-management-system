@@ -1,0 +1,360 @@
+<!-- BEGIN CONTAINER -->
+<div>
+	<!-- BEGIN CONTENT -->
+	<div class="page-content-wrapper">
+		<div class="page-content">
+			<!-- BEGIN SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+			<%= render "layouts/portlet-config" %>
+			<!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+			<!-- BEGIN STYLE CUSTOMIZER -->
+			<%= render "layouts/theme-panel" %>
+			<!-- END BEGIN STYLE CUSTOMIZER -->
+			<!-- BEGIN PAGE HEADER-->
+			<!--h3 class="page-title">
+			Setting
+			</h3-->
+			<% if flash[:error] %>
+                           <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                             <%= flash[:error] %>
+                           </div>
+                          <% end %>
+			<%= render "layouts/breadcrumbs" %>
+		
+			<div class="row">
+			
+			<div class="col-md-10">
+			<a href="<%=root_url%>expense_entry/expense_entry_list"><img src="<%=root_url%>images/backtolistblue.png" class="mb5 nmt9"  width="140" height="35"/></a>
+			</div>
+			<div class="col-lg-2  col-xs-12 ">
+			<a href="<%=root_url%>expense_entry/expense_entry_refresh" class="float-right"><img  class="mt9" src="<%=root_url%>images/newbutt.png"/></a>
+			  </div>
+			  </div> 
+			
+			<!------------------text Being-------------->
+			<div class="row">
+				<div class="col-md-12">
+					<!-- BEGIN SAMPLE TABLE PORTLET-->
+				<div class="portlet">
+				<div class="portlet-body">
+				<div class="row">
+				<div class="col-md-9">
+				<div class="row">
+			
+                                  <div class="col-md-10">
+                                    <label class="head_info">Expense Entry</label>
+                                  </div>
+								 
+									</div>          
+				    <div class="" >
+					 <%= form_tag({:action=>'create'} ,:multipart=>true,:id=>'myForms' ) do  %>
+                                        <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+                                        <input type="hidden"  id="mid" name="mid" value="<% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.id%><% end %>"/>
+                                        <input type="hidden"  id="ed_emprmkstatus" name="ed_emprmkstatus" value="N"/>
+                                       <div class="row">
+                                       <div class="col-md-3 col-xs-6">
+                                       Expense No <span class="hrms_flag">[*]</span>
+                                       </div>
+                                       <div class="col-md-3 col-xs-6">
+                                       <input type="text" required readonly class="form-control" name="ed_number" id="ed_number" value="<% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.ed_number%><% else %><%=@lastExpno%><% end %>"/>
+                                       </div>
+                                       
+                                       </div>
+					<div class="row">
+					<div class="col-md-3 col-xs-6 ">
+					Expense Date <span class="hrms_flag">[*]</span>
+					</div>
+					<div class="col-md-3 col-xs-6">
+                                         <input type="text" required class="form-control" name="ed_date" id="billdate" value="<% if @mstXEmpEdit!=nil%><%=formatted_date(@mstXEmpEdit.ed_date)%><% else %><%=formatted_date(@cdate)%><% end %>"/>
+                                         
+					</div>
+                                        <div class="col-md-3  col-xs-6 ">
+					     Employee Name <span class="hrms_flag">[*]</span>
+					</div>
+					<div class="col-md-3 col-xs-6">
+                                          <select class="form-control text_input_new" required name="ed_surveyors" id="ed_surveyors">
+                                          <option value="">--Select--</option>
+                                            <%
+                                            if @AllEmployee.length >0
+                                             @AllEmployee.each do |emp|
+                                            %>
+                                             <option value="<%=emp.id%>" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_surveyors.to_i == emp.id.to_i%>selected="selected"<% elsif session[:autherizedLoginId] && session[:autherizedLoginId].to_i ==emp.id.to_i%>selected="selected"<% end %>><%=emp.emp_name%></option>
+                                             <%
+                                               end
+                                             end
+                                             %>
+                                           
+                                          </select>
+                                          
+					
+					</div>
+					
+					</div>
+					<div class="row">
+                       
+					<div class="col-md-3 col-xs-6">
+					Visit Detail
+					</div>
+					<div class="col-md-3 col-xs-6">
+					
+				           <input type="text" class="form-control" name="ed_placesurvey" id="ed_placesurvey" value="<% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.ed_placesurvey%><% end %>"/>
+
+					</div>
+					<div class="col-md-3 col-xs-6 ">
+							Type of visit
+						</div>
+						<div class="col-md-3 col-xs-6">
+							<select class="form-control" name="ed_locality" id="ed_locality">
+								<option value="Local" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_locality.to_s == 'Local'%>selected="selected"<% end %>>Local</option>
+								<option value="Domestic" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_locality.to_s == 'Domestic'%>selected="selected"<% end %>>Domestic</option>
+								<option value="International" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_locality.to_s == 'International'%>selected="selected"<% end %>>International</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+					
+							<div class="col-md-3 col-xs-6 ">
+                                                	Type of Trip
+						</div>
+						<div class="col-md-3 col-xs-6">
+							<select class="form-control" name="ed_trips" id="ed_trips">
+                                                                <option value="">-Select-</option>
+								<option value="Office to Client" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_trips.to_s == 'Office to Client'%>selected="selected"<% end %>>Office to Client</option>
+								<option value="Client to Office" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_trips.to_s == 'Client to Office'%>selected="selected"<% end %>>Client to Office</option>
+                                                                <option value="Home to Client" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_trips.to_s == 'Home to Client'%>selected="selected"<% end %>>Home to Client</option>
+								<option value="Client to Home" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_trips.to_s == 'Client to Home'%>selected="selected"<% end %>>Client to Home</option>
+							</select>
+						</div>
+						<div class="col-md-3 col-xs-6 ">
+							Type of Expense
+						</div>
+						<div class="col-md-3 col-xs-6">
+							<select class="form-control" name="ed_exptype" id="ed_exptype" onchange="check_expense_types();">
+                                                                <option value="">-Select-</option>
+								<option value="Travelling" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_exptype.to_s == 'Travelling'%>selected="selected"<% end %>>Travelling</option>
+								<option value="Lodging" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_exptype.to_s == 'Lodging'%>selected="selected"<% end %>>Lodging</option>
+								<option value="Meal" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_exptype.to_s == 'Meal'%>selected="selected"<% end %>>Meal</option>
+                                                                <option value="Petrol" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_exptype.to_s == 'Petrol'%>selected="selected"<% end %>>Petrol</option>
+								<option>Others</option>
+							</select>
+						</div>
+					</div>
+
+                                        <%
+                                          @mytravelling = 'none;'
+                                          @mymeals      = 'none'
+                                          @myhotles     = 'none'
+                                         if  @mstXEmpEdit!=nil && @mstXEmpEdit.ed_exptype.to_s == 'Travelling'
+                                           @mytravelling ='block'
+                                         end
+                                         if  @mstXEmpEdit!=nil && @mstXEmpEdit.ed_exptype.to_s == 'Meal'
+                                           @mymeals ='block'
+                                         end
+                                         if  @mstXEmpEdit!=nil && @mstXEmpEdit.ed_exptype.to_s == 'Lodging'
+                                           @myhotles ='block'
+                                         end
+                                       %>
+					<div class="row">
+						<div class="col-md-3 col-xs-6">
+						Expense Amount
+						</div>
+						<div class="col-md-3 col-xs-6">
+						 <input type="text" style="text-align:right;" onkeypress="return isNumberFloatKey(event);" autocomplete="off" class="form-control" name="ed_expenseamount" id="ed_expenseamount" value="<% if @mstXEmpEdit!=nil%><%=currency_formatted(@mstXEmpEdit.ed_expenseamount)%><% end %>"/>
+						</div>
+							<div class="col-md-3 col-xs-6 ">
+							Payment Mode
+						</div>
+						<div class="col-md-3 col-xs-6">
+							<select class="form-control" name="ed_paymode" id="ed_paymode">
+                                                                <option value="">-Select-</option>
+								<option value="Prepaid" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_paymode.to_s == 'Prepaid'%>selected="selected"<% end %>>Prepaid</option>
+								<option value="Reimbursement" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_paymode.to_s == 'Reimbursement'%>selected="selected"<% end %>>Reimbursement</option>
+                                                                <option value="Advance" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_paymode.to_s == 'Advance'%>selected="selected"<% end %>>Advance</option>
+							
+							</select>
+						</div>
+					</div>
+					
+						<div class="row mytravelling" style="display:<%=@mytravelling%>;">
+						<div class="col-md-3 col-xs-6 ">
+							Primary Mode of Transport
+						</div>
+						<div class="col-md-3 col-xs-6">
+							<select class="form-control" name="ed_primarymode" id="ed_primarymode">
+                                                                <option value="">-Select-</option>
+								<option value="Airplane" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_primarymode.to_s == 'Airplane'%>selected="selected"<% end %>>Airplane</option>
+								<option value="Train" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_primarymode.to_s == 'Train'%>selected="selected"<% end %>>Train</option>
+								<option value="Bus" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_primarymode.to_s == 'Bus'%>selected="selected"<% end %>>Bus</option>
+								<option value="Metro" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_primarymode.to_s == 'Metro'%>selected="selected"<% end %>>Metro</option>
+								<option value="Own-Vehicle" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_primarymode.to_s == 'Own-Vehicle'%>selected="selected"<% end %>>Own Vehicle</option>
+							</select>
+						</div>
+							<div class="col-md-3 col-xs-6 ">
+								Secondary Mode of Transport
+						</div>
+						<div class="col-md-3 col-xs-6">
+							<select class="form-control" name="ed_secondmode" id="ed_secondmode">
+                                                                <option value="">-Select-</option>
+								<option value="Bus" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_secondmode.to_s == 'Bus'%>selected="selected"<% end %>>Bus</option>
+								<option value="Auto-Rickshaw" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_secondmode.to_s == 'Auto-Rickshaw'%>selected="selected"<% end %>>Auto Rickshaw</option>
+								<option value="E-Rickshaw" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_secondmode.to_s == 'E-Rickshaw'%>selected="selected"<% end %>>E-Rickshaw</option>
+								<option value="Metro" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_secondmode.to_s == 'Metro'%>selected="selected"<% end %>>Metro</option>
+							</select>
+						</div>
+					</div>
+                                        
+                       	               <div class="row">
+						<div class="col-md-3 col-xs-6  mymeals" style="display:<%=@mymeals%>;">
+							Category of Meal
+						</div>
+						<div class="col-md-3 col-xs-6  mymeals" style="display:<%=@mymeals%>;">
+							<select class="form-control" name="ed_categorymeal" id="ed_categorymeal">
+                                                                 <option value="">-Select-</option>
+								<option value="Lunch" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_categorymeal.to_s == 'Lunch'%>selected="selected"<% end %>>Lunch</option>
+								<option value="Breakfast" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_categorymeal.to_s == 'Breakfast'%>selected="selected"<% end %>>Breakfast</option>
+								<option value="Dinner" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_categorymeal.to_s == 'Dinner'%>selected="selected"<% end %>>Dinner</option>
+								
+							</select>
+						</div>
+							<div class="col-md-3 col-xs-6  myhotles" style="display:<%=@myhotles%>;">
+							Name of Hotel
+						</div>
+						<div class="col-md-3 col-xs-6  myhotles" style="display:<%=@myhotles%>;">
+						 <input type="text" autocomplete="off" class="form-control" name="ed_hotlename" id="ed_hotlename" value="<% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.ed_hotlename%><% end %>"/>
+						</div>
+					</div> 
+				            	<div class="row">
+						<div class="col-md-3 col-xs-6 ">
+						Employee Remarks
+						</div>
+						<div class="col-md-3 col-xs-6">
+						<textarea class="form-control" maxlength="450" name="ed_empremark" id="ed_empremark" style="height: 50px !important"><% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.ed_empremark%><% end %></textarea>
+							
+						
+						</div>
+							<div class="col-md-3 col-xs-6 ">
+							Account Remarks
+						</div>
+						<div class="col-md-3 col-xs-6">
+							<textarea class="form-control"  id="ed_acctremark" readonly style="height: 50px !important"><% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.ed_acctremark%><% end %></textarea>
+							
+						
+						</div>
+					</div>    
+    <div class="row">
+                                         <div class="col-md-6">
+                                         	  <label class="head_info">Attachments</label>
+                                      <table>
+                                      	<div class="row">
+                                      		<div class=""> 
+                                      			<div class="col-md-7 col-xs-6">
+                                      				Attachment Type
+                                      			</div>
+                                      			<div class="col-md-5 col-xs-6" style="padding-left: 0px;">
+                                      				<select required class="form-control" name="ed_doctype" id="ed_doctype">
+                                      					<option value="File" <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_doctype=='File'%>selected<% end %>>File</option>
+                                      					<option value="Image"  <% if @mstXEmpEdit!=nil && @mstXEmpEdit.ed_doctype=='Image'%>selected<% end %>>Image</option>
+                                      				</select>
+                                      			</div>
+                                      		</div>
+                                      	</div>
+                                                     
+                                                     <tr id="duplicate">
+                                                     <input type="hidden" name="currentimage" id="currentimage" value=""/>
+                                                        <td width="30%"><input type="file" name="ed_attachment" /></td>
+                                                        <td><input type="text" placeholder="File Description" class="doc_input form-control"  name="ed_imagetitle" value="<% if @mstXEmpEdit!=nil%><%=@mstXEmpEdit.ed_imagetitle%><% end %>"/></td>
+                                                        <% if @mstXEmpEdit !=nil
+                                                          if @mstXEmpEdit.ed_attachment !=nil && @mstXEmpEdit.ed_attachment !=''
+                                                           extens = @mstXEmpEdit.ed_attachment.to_s.split(".")
+                                                          %>
+                                                        <td>
+                                                          <%
+                                                           if extens[1] =='jpg' ||  extens[1] =='jpeg' ||  extens[1] =='png'
+                                                          %>
+                                                            <a href="<%=root_url%>images/expense/<%=@mstXEmpEdit.ed_attachment%>" target="_blank">
+                                                              <img src="<%=root_url%>images/expense/<%=@mstXEmpEdit.ed_attachment%>" width="75px;"/>
+                                                            </a>
+                                                          <% else %>
+                                                             <a href="<%=root_url%>images/expense/<%=@mstXEmpEdit.ed_attachment%>" target="_blank">
+                                                             <%=@mstXEmpEdit.ed_attachment%>
+                                                            </a>
+                                                          <% end %>
+                                                        </td>
+                                                        <%
+                                                             end
+                                                           end
+                                                        %>
+                                                        
+                                                        
+                                                      </tr>
+                                                      </table>
+                                  </div>
+                                         
+                                       </div>
+
+
+
+									   </div>
+									   </div>
+
+									   <div class="col-lg-3 ">
+									   <div class="card flex-fill">
+                
+									   <div class="card-body" style="background:azure;">
+									   <div class="row m-b-5">
+									   <div class="col-md-7 lbl_name">Expense Balance: </div>
+									   <div class="col-md-6 lbl_value " name="ff_designation" id="ff_designation"> </div>
+									   </div>
+									
+									  </div>			
+									</div>
+
+									   </div>
+
+									 
+                                         
+                                       </div>
+                                       
+
+       
+                                      	<div class="row mt20">
+
+					<div class="col-md-2 col-xs-6">
+					<input type="image" src="<%=root_url%>images/save.png"/>
+					</div>
+					<div class="col-md-3 col-xs-6">
+					<a href="<%=root_url%>expense_entry/expense_entry_list">
+                                         &nbsp;<img src="<%=root_url%>images/Quit.png"/>
+                                        </a>
+					</div>
+
+					</div>
+					 
+					</div>  
+
+					</div>
+                                        </div>
+                                      
+                              
+                                       
+                                   
+<!-- END PAGE HEADER-->
+
+			<!-- BEGIN PAGE CONTENT-->
+             
+                                  <div align="center"></div>
+                                <% end %>
+			
+                                                    <!-- END PAGE CONTENT-->
+                                            </div>
+                                        </div>
+                                    <!-- END CONTENT -->
+                                  </div>
+                              </div>
+                            </div>
+                      </div>
+                </div>
+            </div>
+       
+<!-- END CONTAINER -->
+<%=render "layouts/popupforms"%>

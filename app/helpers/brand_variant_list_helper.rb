@@ -1,0 +1,2 @@
+module BrandVariantListHelper
+end

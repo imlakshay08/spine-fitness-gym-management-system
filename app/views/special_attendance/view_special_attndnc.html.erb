@@ -1,0 +1,50 @@
+  <%	
+								  
+                    i = 1
+            
+											if @adspecialattend.length>0
+											 @adspecialattend.each do |attndnce|	
+
+										   %>
+ <tr>
+                  <td><%=i%></td>
+                  <td><%=attndnce.sp_att_std_rollno%></td>
+                  <td><%=attndnce.sp_att_std_name%></td>
+                          <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P1" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P1') %>>
+                  </td>
+                <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P2" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P2') %>>
+                  </td>
+                  <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P3" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P3') %>>
+                  </td>
+                  <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P4" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P4') %>>
+                  </td>
+                  <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P5" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P5') %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P6" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P6') %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P7" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P7') %>>
+                  </td>
+              <td class="text-center">
+                  <input type="checkbox" name="sp_att_prd[]" id="sp_att_prd" value="P8" style="width: 20px;height: 25px;" <%= 'checked' if attndnce.sp_att_prd&.include?('P8') %>>
+                  </td>
+              
+              </tr>
+               <% 
+								i+=1			
+												   end
+												   else
+                 
+               %>
+               <tr>
+               <td colspan="6">No record(s) found.</td>
+               </tr>
+            <%
+               end
+                 %>

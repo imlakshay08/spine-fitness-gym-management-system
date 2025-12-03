@@ -1,0 +1,2 @@
+module StockListHelper
+end

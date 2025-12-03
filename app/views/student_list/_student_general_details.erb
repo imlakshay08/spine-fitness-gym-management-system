@@ -1,0 +1,176 @@
+<form id="student_general_detail" method="post">
+					<div class="card-box">
+					<div class="card-body ">
+					<div class="form-group row">
+					<input type="hidden" id="myselected_classname" value="">
+					<input type="hidden" class="form-control-sm" name="gendetailsId" id="gendetailsId" value="">
+					<input type="hidden" class="form-control-sm" name="stdnt_gn_status" id="stdnt_gn_status" value="">
+
+
+										
+					<label class=" col-md-3 col-6">NCHM No.
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="stdnt_gn_nhmc" id="stdnt_gn_nhmc"  type="text"  placeholder="Enter NCHM No."
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @studentadmgen%><%=@studentadmgen.stdnt_gn_nhmc%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_gn_nhmc'] %><% end %>"/> 
+					</div>
+	
+					<label class=" col-md-3 col-6">Current Semester
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height"  name="stdnt_gn_cur_sem" id="stdnt_gn_cur_sem">
+						<option value="">Select...</option>
+						<% if @Listsemester && @Listsemester.any? %>
+							<% @Listsemester.each do |semester| %>
+							<option value="<%= semester %>" <% if @studentadmgen && @studentadmgen.stdnt_gn_cur_sem.to_i == semester.to_i %>selected<% end %>><%= "Semester #{semester}" %></option>
+							<% end %>
+						<% end %>
+					</select>
+					</div>
+					</div>
+	
+	
+								<div class="form-group row">
+						<label class="col-md-3">JNU/IGNOU No.
+						</label>
+						<div class="col-md-3">
+						<input name="stdnt_gn_jnu_ignou" id="stdnt_gn_jnu_ignou"  type="text"  placeholder="Enter JNU/IGNOU No."
+						autocomplete="off" maxlength="30" class="form-control" required value="<% if @studentadmgen%><%=@studentadmgen.stdnt_gn_jnu_ignou%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_gn_jnu_ignou'] %><% end %>"/> 
+						</div>
+						<label class="col-md-3">AI Rank
+						</label>
+						<div class="col-md-3">
+						<input name="stdnt_gn_rank" id="stdnt_gn_rank"  type="text"  placeholder="Enter AE Rank"
+						autocomplete="off" maxlength="10" class="form-control" required value="<% if @studentadmgen%><%=@studentadmgen.stdnt_gn_rank%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_gn_rank'] %><% end %>"/> 
+						</div>
+						</div>
+	
+					<div class="form-group row">
+					<label class="col-md-3">Theory Group
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height"  required name="stdnt_gn_thry_grp" id="stdnt_gn_thry_grp">
+					<option value="">Select...</option>
+					<option value="1"<% if @studentadmgen && @studentadmgen.stdnt_gn_thry_grp.to_s == '1'%>selected<% end %>>1</option>
+					<option value="2"<% if @studentadmgen && @studentadmgen.stdnt_gn_thry_grp.to_s == '2'%>selected<% end %>>2</option>
+					<option value="3"<% if @studentadmgen && @studentadmgen.stdnt_gn_thry_grp.to_s == '3'%>selected<% end %>>3</option>
+					<option value="4"<% if @studentadmgen && @studentadmgen.stdnt_gn_thry_grp.to_s == '4'%>selected<% end %>>4</option>
+				    	<option value="5"<% if @studentadmgen && @studentadmgen.stdnt_gn_thry_grp.to_s == '5'%>selected<% end %>>5</option>
+
+				</select>
+					</div>
+					<label class="col-md-3">Status
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height"   name="stdnt_gn_status" id="stdnt_gn_status" disabled>
+					<option value="A"<% if @studentadmgen && @studentadmgen.stdnt_gn_status.to_s == 'A'%>selected<% end %>>Active</option>
+					<option value="IA"<% if @studentadmgen && @studentadmgen.stdnt_gn_status.to_s == 'IA'%>selected<% end %>>Inactive</option>
+					<option value="RE" <% if @studentadmgen && @studentadmgen.stdnt_gn_status.to_s == 'RE'%>selected<% end %>>Re-Admission</option>
+					<option value="DET"  <% if @studentadmgen && @studentadmgen.stdnt_gn_status.to_s == 'DET'%>selected<% end %>>Detainee</option>
+				 	<option value="WTD"  <% if @studentadmgen && @studentadmgen.stdnt_gn_status.to_s == 'WTD'%>selected<% end %>>Withdrawals</option>
+					<option value="YD"  <% if @studentadmgen && @studentadmgen.stdnt_gn_status.to_s == 'YD'%>selected<% end %>>Year Drop</option>
+					<option value="PO"  <% if @studentadmgen && @studentadmgen.stdnt_gn_status.to_s == 'PO'%>selected<% end %>>Pass Out</option>
+
+
+				</select>
+					</div>
+					
+					</div>
+
+						<div class="form-group row">
+				
+					<label class="col-md-3">Practical Group
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height"  required name="stdnt_gn_prac" id="stdnt_gn_prac">
+					<option value="">Select...</option>
+					<option value="A"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'A'%>selected<% end %>>A</option>
+					<option value="B"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'B'%>selected<% end %>>B</option>
+					<option value="C"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'C'%>selected<% end %>>C</option>
+					<option value="D"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'D'%>selected<% end %>>D</option>
+					<option value="E"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'E'%>selected<% end %>>E</option>
+					<option value="F"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'F'%>selected<% end %>>F</option>
+					<option value="G"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'G'%>selected<% end %>>G</option>
+					<option value="H"<% if @studentadmgen && @studentadmgen.stdnt_gn_prac.to_s == 'H'%>selected<% end %>>H</option>
+
+				
+				</select>
+					</div>
+						<label class="col-md-3">Admission Year
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height"   name="stdnt_gn_admy" id="stdnt_gn_admy">
+					<option value="">Select...</option>
+					<option value="2023" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2023'%>selected<% end %>>2023</option>
+					<option value="2024" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2024'%>selected<% end %>>2024</option>
+					<option value="2025" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2025'%>selected<% end %>>2025</option>
+					<option value="2026" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2026'%>selected<% end %>>2026</option>
+					<option value="2027" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2027'%>selected<% end %>>2027</option>
+					<option value="2028" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2028'%>selected<% end %>>2028</option>
+					<option value="2029" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2029'%>selected<% end %>>2029</option>
+					<option value="2030" <% if @studentadmgen && @studentadmgen.stdnt_gn_admy.to_s == '2030'%>selected<% end %>>2030</option>
+
+			     	</select>
+					</div>
+					</div>
+
+						<div class="form-group row">
+				
+					<label class="col-md-3">ABC ID
+					</label>
+					<div class="col-md-3">
+					<input name="stdnt_gn_abc_id" id="stdnt_gn_abc_id"  type="text"  placeholder="Enter ABC ID"
+						autocomplete="off"  onkeypress="return isNumberMyKeys(event);" maxlength="12" class="form-control" required value="<% if @studentadmgen%><%=@studentadmgen.stdnt_gn_abc_id%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stdnt_gn_abc_id'] %><% end %>"/> 
+						</div>
+					<label class="col-md-3">Pass out Year
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height"   name="stdnt_gn_poy" id="stdnt_gn_poy" disabled>
+					<option value="">Select...</option>
+					<option value="2023" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2023'%>selected<% end %>>2023</option>
+					<option value="2024" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2024'%>selected<% end %>>2024</option>
+					<option value="2025" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2025'%>selected<% end %>>2025</option>
+					<option value="2026" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2026'%>selected<% end %>>2026</option>
+					<option value="2027" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2027'%>selected<% end %>>2027</option>
+					<option value="2028" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2028'%>selected<% end %>>2028</option>
+					<option value="2029" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2029'%>selected<% end %>>2029</option>
+					<option value="2030" <% if @studentadmgen && @studentadmgen.stdnt_gn_poy.to_s == '2030'%>selected<% end %>>2030</option>
+
+			     	</select>
+					</div>
+					</div>
+
+					<div class="form-group row">
+					<label class="col-md-3">Optional Subject
+					</label>
+					<div class="col-md-3">
+					<select class="form-select select-height"   name="stdnt_gn_opt_sub" id="stdnt_gn_opt_sub">
+					<option value="">Select...</option>
+					<%
+                        if @SubjectList && @SubjectList.length>0
+                            @SubjectList.each do |subject|
+                    %>
+                    <option value="<%=subject.id%>" <% if @studentadmgen && @studentadmgen.stdnt_gn_opt_sub.to_i == subject.id.to_i %>selected<% elsif session[:sess_stdnt_gn_opt_sub].to_s==subject.id.to_i%>selected<% end %>><%=subject.sub_code%> - <%=subject.sub_name%></option>
+                    <%
+                    end
+                    end
+                    %>
+			     	</select>
+					</div>
+					</div>
+
+					<div class="form-group form-button text-center  m-b-10 process_save" style="margin-top: 50px;">
+					 <% if @myAddAld || @myEditAld %>
+							<button type="button" onclick="process_sewdar_office_step_second();"
+							class=" nogloader mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary process_save">SAVE</button>
+							<% end %>
+								<div class="gloader mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>student_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+							
+					</div>
+					</div>
+					</div>
+                    </form>

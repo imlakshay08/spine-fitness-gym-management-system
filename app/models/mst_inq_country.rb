@@ -1,0 +1,2 @@
+class MstInqCountry < ApplicationRecord
+end

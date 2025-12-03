@@ -1,0 +1,2 @@
+class TrnVerifyOtp < ApplicationRecord
+end

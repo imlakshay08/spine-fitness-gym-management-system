@@ -1,0 +1,2 @@
+class MstMembershipPlan < ApplicationRecord
+end

@@ -1,0 +1,120 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content" style="margin-left: 235px;">
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">Import Data</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+					</div>
+       
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-sm-12 col-12">
+									<div class="card">
+								
+										<div class="card-body ">
+                  
+                    <%= form_tag({:action=>'create'} ,:multipart=>true,:id=>'myForms' ) do  %>
+                      <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                      	 <input type="hidden"  id="process_file_data" name="process_file_data" value="employee"/>
+                      <div class="form-group row">
+ 		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+ 		<% if flash[:success] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:success] %>
+            </div>
+        <% end %>
+			
+                    <!-- BEGIN ACCORDION PORTLET-->
+                    <div class="panel-body">
+                      <div class="form-group row">
+                        <div class="col-md-2">Type <span class="text-danger">*</span></div>
+                        <div class="col-md-3">
+                          <select name="checkscale_updated" id="checkscale_updated" class="form-select select-height" required >
+                            <option value="NEW">Upload New Students Data</option>
+                            <option value="UPDATE">Update only Groups</option>
+                          
+                          </select>
+                        </div>
+                      
+                        <div class="col-md-2">
+                       
+                        </div>
+                      </div>
+
+                      <div class="form-group row">
+                        <div class="col-md-2">Upload Sheet</div>
+                        <div class="col-md-3">
+                            <input type="file" required name="file" id="file" accept=".csv" style="width: 100%;overflow: hidden;" />
+                                     </div>
+                        <div class="col-md-5">
+                       <button type="submit" class="btn btn-sm btn-success" >Import</button>
+                      </div>
+                                                            <!-- Note section -->
+                <div class="">
+                  <strong>Note:</strong> You can upload only CSV files.
+                  <a href="<%= root_url %>images/ihm-students.csv" target="_blank" class="btn btn-link">
+                    <i class="fa fa-download"></i> Download the required File Format for importing Student Data.</a>
+                
+                </div>
+                      </div>
+
+                
+
+                  
+                      <div class="form-group form-button text-center m-b-20" style="margin-top: 50px;">
+                
+
+                  <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+
+                  <a href="<%= root_url %>dashboard">
+                      <button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">
+                          Quit
+                      </button>
+                  </a>
+              </div>
+
+                    </div>
+                  </div>
+
+                      <%end%>
+
+										</div>
+									</div>
+								</div>
+
+                
+
+                    </div>
+                    </div>
+                    </div>
+
+                </div>
+                </div>
+                </div>
+        
+			</div>
+
+     
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+

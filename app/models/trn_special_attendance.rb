@@ -1,0 +1,2 @@
+class TrnSpecialAttendance < ApplicationRecord
+end

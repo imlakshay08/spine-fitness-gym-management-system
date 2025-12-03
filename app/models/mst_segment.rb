@@ -1,0 +1,2 @@
+class MstSegment < ApplicationRecord
+end

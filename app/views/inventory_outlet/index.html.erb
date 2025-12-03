@@ -1,0 +1,330 @@
+<!-- BEGIN CONTAINER -->
+<div>
+  <!-- BEGIN CONTENT -->
+  <div class="page-content-wrapper">
+    <div class="page-content">
+      <!-- BEGIN SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+      <!-- END SAMPLE PORTLET CONFIGURATION MODAL FORM-->
+      <!-- BEGIN STYLE CUSTOMIZER -->
+      <%= render "layouts/theme-panel" %>
+      <!-- END BEGIN STYLE CUSTOMIZER -->
+      <!-- BEGIN PAGE HEADER-->
+      <!--h3 class="page-title">
+      Setting
+      </h3-->
+      <% if flash[:error] %>
+                           <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                             <%= flash[:error] %>
+                           </div>
+                          <% end %>
+      <%= render "layouts/breadcrumbs" %>
+      <div>
+
+        <a href="<%=root_url%>inventory_outlet/referesh_inventory_outlet"><img src="<%=root_url%>images/newbutt.png"  class="mb5" style="float: right;margin-left:20px"/></a>
+      </div>
+      
+      <!------------------text Being-------------->
+      <div class="row">
+        <div class="col-md-12">
+          <!-- BEGIN SAMPLE TABLE PORTLET-->
+        <div class="portlet">
+        <div class="portlet-body">
+                                   <div class="row">
+                                      <div class="col-md-4">
+                                        <label class="cust_info">Inventory List</label>
+                                      </div>
+                                   
+                                    </div>
+        <div class="row">
+            <div class="col-md-12">
+           <%= form_tag({:action=>'create'} ,:multipart=>true,:id=>'myForms' ) do  %>
+            <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+            <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                                        
+                                       
+
+          <!-- BEGIN SAMPLE TABLE PORTLET-->
+          <div class="">
+                                                          <div class="col-md-12">
+        
+          <label class="col-md-1 hidden">City <span  style="color:red">*</span></label>
+           <div class="col-md-2 hidden">
+         <select class="form-control" name="my_cityname" id="my_cityname" onchange="get_zone_name_by_city_listed();" >
+              <option value="">-Select-</option>
+              <%
+                if @city && @city.length >0
+                 @city.each do |newcity|
+              %>
+              <option value="<%=newcity.caz_city%>" <% if @my_cityname && @my_cityname.to_s == newcity.caz_city.to_s%>selected="selected"<% end %>><%=newcity.caz_city.upcase%></option>
+              <%
+           end
+                end
+              %>
+            
+            </select>
+          </div>
+        <label class="col-md-2 hidden">
+           Zone
+          </label>
+          <div class="col-md-2 wd14 hidden">
+              <select class="form-control" name="my_zonename" id="my_zonename" onchange="get_area_name_by_city_zone();" >
+              <option value="">-Select-</option>
+              <%
+                if @ZonelIst && @ZonelIst.length >0
+                 @ZonelIst.each do |zone|
+              %>
+              <option value="<%=zone.caz_zone%>" <% if @my_zonename && @my_zonename.to_s == zone.caz_zone.to_s%>selected="selected"<% end %>><%=zone.caz_zone.upcase%></option>
+              <%
+           end
+                end
+              %>
+            
+              
+            
+            </select>
+          </div>
+                    <label class="col-md-2 hidden">
+                     Area 
+          
+          </label>
+          <div class="col-md-2 wd14 hidden">
+               <select class="form-control" name="my_areaname" id="my_areaname" >
+              <option value="">-Select-</option>
+             <%
+                if @AreaList && @AreaList.length >0
+                 @AreaList.each do |area|
+              %>
+              <option value="<%=area.caz_area%>" <% if @my_areaname && @my_areaname.to_s == area.caz_area.to_s%>selected="selected"<% end %>><%=area.caz_area.upcase%></option>
+              <%
+           end
+                end
+              %>
+            
+            </select>
+          </div>
+          <label class="col-md-3 " style="font-size: 12px !important;padding-left: 0px;">Inventory No./Outlet name/ID/Reference Code<span  style="color:red">*</span></label>
+          <div class="col-md-2 ">
+           <input type="text" class="form-control" autocomplete="off"  name="my_outletname" id="my_outletname" value="<% if @my_outletname %><%=@my_outletname%><% end %>"/>
+     
+            
+          </div>
+          <label class="col-md-1 mt10 hidden"  >UPI Status</label>
+                 <div class="col-md-2  mt10 hidden">
+                
+     <select class="form-control" required name="my_approved_status" id="my_approved_status">
+              <option value="" >--Select--</option>
+              <option value="V" <% if @my_approved_status && @my_approved_status.to_s == 'V'%>selected="selected"<% end %>> Verified</option>
+              <option value="UV" <% if @my_approved_status && @my_approved_status.to_s == 'UV'%>selected="selected"<% end %>> Unverified</option>
+              <option value=" " <% if @my_approved_status && @my_approved_status.to_s == ' '%>selected="selected"<% end %>>Pending</option>
+            </select>
+            
+          </div>  
+          <label class="col-md-2 mt10 hidden" style="padding-right: 0;" >Outlet Permission</label>
+          <div class="col-md-2 wd14 mt10 hidden">
+         
+<select class="form-control" required name="my_outlet_permission" id="my_outlet_permission">
+       <option value="">--Select--</option>
+       <option value="Permission Granted" <% if @my_outlet_permission && @my_outlet_permission.to_s == 'Permission Granted'%>selected="selected"<% end %>> Permission Granted</option>
+       <option value="Permission Denied" <% if @my_outlet_permission && @my_outlet_permission.to_s == 'Permission Denied'%>selected="selected"<% end %>> Permission Denied</option>
+      
+     </select>
+     
+   </div>  
+    <label class="col-md-1 wd14 " style="font-size: 12px !important;">From Date<span  style="color:red">*</span></label>
+           <div class="col-md-2 ">
+    <input type="text" class="form-control" name="asondated" id="from_dated" autocomplete="off"  placeholder="From Date"  value="<% if @asondated != nil %><%=formatted_date(@asondated)%><% else %><%=formatted_date(@nbegindate)%><% end %>"/>
+   
+   </div>
+             <label class="col-md-1 wd14 " style="font-size: 12px !important;">Upto Date<span  style="color:red">*</span></label>
+      <div class="col-md-3 wd14 ">
+    <input type="text" class="form-control" name="uptodated" id="upto_dated" autocomplete="off" placeholder="To Date"  value="<% if @uptodated != nil %><%=formatted_date(@uptodated)%><% else %><%=formatted_date(@cdate)%><% end %>"/>
+   </div>
+                                                           
+                                        <div class="col-md-1 col-xs-4">
+           <a href="javascript:;" data-original-data-placement="bottom" data-toggle="tooltip" title="Click to search">
+                                          <img src="<%=root_url%>images/search.png" class="" onclick="search_filter();" />
+                                         </a>
+          </div>
+
+                               
+          </div>   
+         
+         <div class="row d-flex justify-content-end"> 
+    <div class="col-md-12 d-flex align-items-center justify-content-end">  
+        <div class="col-md-2 text-end">
+            <b>Report Type:</b>
+        </div>
+
+        <div class="col-md-2  col-sm-6">
+            <div class="form-check">
+                <input class="form-check-input" checked type="radio" name="inventoryoutlet" id="inventoryoutlet1" value="DET">
+                <label class="form-check-label" for="inventoryoutlet1">Detailed</label>
+            </div>
+        </div>
+
+        <div class="col-md-2  col-sm-6">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="inventoryoutlet" id="inventoryoutlet2" value="SUM">
+                <label class="form-check-label" for="inventoryoutlet2">Summary</label>
+            </div>
+        </div>
+
+        <div class="col-md-6 text-end text-right">
+            <a href="javascript:void(0);" id="productexeclurl" rel="<%=@printpath%>" onclick="inventory_outlet_download_excel();" 
+                data-toggle="tooltip" title="Click for Excel download">
+                <img src="<%=root_url%>images/excelicon.png" width="50px" alt="Download Excel">
+            </a>
+        </div>
+    </div>
+</div>
+
+
+             </div>
+          <div class="col-md-12" >
+            <div class="table-responsive mt10" style="overflow:auto">
+ <table class="table " id="">
+    <thead class="head_table">
+        <tr>
+            <th>S.No.</th>
+      
+            <th>Entry Date</th>
+            <th>Entry Time</th>
+            <th>PSE ID</th>
+            <th>PSE Name</th>
+             <th>City </th>
+            <th>Outlet Reference ID </th>
+            <th>Outlet Name</th>
+            <th>Address</th>
+            <th>UPI Id</th>
+            <th>UPI Image</th>
+            <th>Issue</th>
+            <th>Return</th>
+            <th>Balance</th>
+             <th>UPI Transaction Id</th>
+             <th>Transaction Status</th>
+            <th>Amt</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% 
+        pagestart = params[:page] ? params[:page].to_i : 1
+        i = (pagestart <= 1) ? 1 : ((pagestart - 1) * 10) + 1
+        
+        if @outletlist.present?
+            @outletlist.each do |outlet|
+
+            pse_id=""
+            pse_name=""
+            objsuser = get_user_city_logged_detail(outlet.irm_createdby)
+                                                if objsuser
+                                                    pse_id   = objsuser.username
+                                                    pse_name = objsuser.firstname
+                                                end
+            referncno=""
+            city      = ""
+            address   = ""
+            referncobj = get_outlet_reference(outlet.irm_outletid)
+                    if referncobj
+                        referncno = referncobj.lod_outlet_refno
+                        city      = referncobj.lod_city
+                        address   = referncobj.lod_area
+                    end
+                    transid = ""
+                    transmessage = ""
+                    transamt     = ""
+                    paymentdt = get_payment_transaction_detail(outlet.irm_outletid)
+                    if paymentdt
+                        transid = paymentdt.pmt_transactno
+                        transmessage = paymentdt.pmt_message
+                        transamt = paymentdt.pmt_amts
+                    end
+        %>
+        <tr>
+             <td><%= i %></td>
+           
+            <td><%= formatted_date(outlet.irm_dated) %></td>
+            <td class="hidden">
+               <%if outlet.irm_type == 'I'%>
+                Issue
+                 <%elsif outlet.irm_type == 'R'%>
+                 Return
+                 <%else%>
+                 <%end%>
+            </td>
+              <td class=""> <%= outlet.irm_insttime%></td>
+            <td><%=pse_id.present? ? pse_id : "N/A" %></td>
+            <td><%= pse_name.present? ? pse_name : "N/A" %></td>
+             <td> <%=city%> </td>
+            <td> <%= referncno %> </td>
+            <td><%= outlet.irm_outletname.split('-')[1]&.strip %></td>
+             <td><%= address %></td>
+            <td><%= outlet.irm_upid.present? ? outlet.irm_upid : "N/A" %></td>
+            <td>
+                <%
+                     imagelink = ''
+                     img_path = Rails.root.join("public", "images", "consumers",  outlet.irm_imgpath.to_s, outlet.irm_image.to_s)
+                     if outlet.irm_image.present? && File.exist?(img_path)
+                            imagelink = "https://rrpoutlets.com/images/consumers/#{outlet.irm_imgpath}/#{outlet.irm_image}"
+                     end
+                %>
+                <% if imagelink.present? %>
+                        <a class="example-image-link" data-lightbox="<%=imagelink %>" href="<%=imagelink %>" target="_blank">
+                    <img src="<%=imagelink %>" alt="UPI Image"  width="50" height="50">
+                <% else %>
+                    No Image
+                <% end %>
+            </td>
+            <td><%= outlet.total_issues.to_i %></td>
+            <td><%= outlet.total_returns.to_i %></td>   
+             <td><%= outlet.irm_totalbalance %></td>   
+            <td><%= transid %></td>  
+             <td><%= transmessage %></td>   
+              <td><%= transamt %></td>   
+            
+            </tr>
+        <% 
+            i += 1
+            end 
+        else 
+        %>
+        <tr>
+            <td colspan="11">No record(s) found.</td>
+        </tr>
+        <% end %>
+    </tbody>
+</table>
+
+
+                 </div>
+              <%
+                if @outletlist && @outletlist.length >0
+                    %>
+              <div style="text-align:center;"><%= will_paginate(@outletlist)%></div>
+              <% end %>
+            </div>
+                 
+             
+          
+        
+                                        <% end %>
+                                 
+                  
+                        
+                                          
+      
+
+    
+      
+                                                    <!-- END PAGE CONTENT-->
+                                            </div>
+                                              
+                                        </div>
+                                    <!-- END CONTENT -->
+                                  </div>
+                              </div>
+                            </div>
+                      </div>
+                </div>
+            </div>
+       

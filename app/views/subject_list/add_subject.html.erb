@@ -1,0 +1,171 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Subject</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>subject_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+             			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+			  <input type="hidden" name="mid" id="mid" value="<% if @subject %><%=@subject.id%><% end %>"/>         
+			<input type="hidden" name="cur_sub_code" id="cur_sub_code" value="<% if @subject %><%=@subject.sub_code%><% end %>"/>
+
+					<div class="form-body">
+						
+					<div class="form-group row">
+					<label class="col-md-2">Subject Code
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+					<% if @subject %>
+					<input name="sub_code" id="sub_code"  type="text"  placeholder="Enter Subject Code"
+					autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @subject%><%=@subject.sub_code%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sub_code'] %><% end %>"/> 
+					<% else %>
+					<input name="sub_code" id="sub_code"  type="text"  placeholder="Enter Subject Code"
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @subject%><%=@subject.sub_code%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sub_code'] %><% end %>"/> 
+					<%end%>
+					</div>
+					<label class="col-md-2">Subject Name 
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-4">
+				<input name="sub_name" id="sub_name"  type="text"  placeholder="Enter Subject Name"
+				autocomplete="off" maxlength="50" class="form-control" required value="<% if @subject%><%=@subject.sub_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sub_name'] %><% end %>"/> 
+				</div>
+					</div>
+				
+
+				
+
+						<div class="form-group row">
+				
+						<label class=" col-md-2">Type
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+						<select class="form-select select-height " required name="sub_type" id="sub_type">
+							<option value="">Select...</option>
+							<option value="Theory" <% if @subject && @subject.sub_type.to_s =='Theory'%>selected="selected"<% end %>>Theory</option>
+							<option value="Practical"<% if @subject && @subject.sub_type.to_s =='Practical'%>selected="selected"<% end %>>Practical</option>
+						</select>
+						</div>
+					</div>
+
+		               <div class="form-group row">
+				
+						<label class=" col-md-2">Course
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+						<select class="form-select select-height " required name="sub_crse" id="sub_crse" onchange="updateSemesters()">
+                    <option value="">Select...</option>
+                    <%
+                        if @CourseList && @CourseList.length>0
+                            @CourseList.each do |course|
+                    %>
+                    <option value="<%=course.id%>" <% if @subject && @subject.sub_crse.to_i == course.id.to_i %>selected<% elsif session[:sess_sub_crse].to_s==course.id.to_i%>selected<% end %>><%=course.crse_descp%></option>
+                    <%
+                    end
+                    end
+                    %>
+                </select>
+						</div>
+						<label class=" col-md-2">Semester
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+						<select class="form-select select-height" required name="sub_sem" id="sub_sem">
+  <option value="">Select...</option>
+  <% if @Listsemester && @Listsemester.any? %>
+    <% @Listsemester.each do |semester| %>
+      <option value="<%= semester %>" <% if @subject && @subject.sub_sem.to_i == semester.to_i %>selected<% end %>><%= "Semester #{semester}" %></option>
+    <% end %>
+  <% end %>
+</select>
+
+						</div>
+					</div>
+
+					
+		               <div class="form-group row">
+				
+						<label class=" col-md-2">Hours Per Semester
+					
+						</label>
+						<div class="col-md-4">
+				        <input name="sub_sem_hrs" id="sub_sem_hrs" type="text" maxlength="2"  placeholder="Enter Hours Per Semester"onkeypress="return isNumberMyKeys(event);" class="form-control" value="<% if @subject%><%=@subject.sub_sem_hrs%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sub_sem_hrs'] %><% end %>" />
+						</div>
+						<label class=" col-md-2">Hours Per Week
+					
+						</label>
+						<div class="col-md-4">
+						<input name="sub_week_hrs" id="sub_week_hrs"  type="text"  placeholder="Enter Hours Per Week" autocomplete="off" onkeypress="return isNumberMyKeys(event);" maxlength="2" class="form-control"  value="<% if @subject%><%=@subject.sub_week_hrs%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['sub_week_hrs'] %><% end %>"/> 
+						</div>
+					</div>
+
+					<div class="form-group row">
+					<label class=" col-md-2">Is Optional
+					</label>
+					<div class="col-md-4">
+					<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="sub_isoptional">
+    				<input type="hidden" name="sub_isoptional" value="N">
+    				<input type="checkbox" id="sub_isoptional" name="sub_isoptional" class="mdl-switch__input" value="Y" <%= @subject&.sub_isoptional == 'Y' ? 'checked' : '' %>>
+					</label>
+					</div>
+					<label class=" col-md-2">Active
+					</label>
+					<div class="col-md-4">
+					<label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="sub_activ">
+    				<input type="hidden" name="sub_activ" value="N">
+    				<input type="checkbox" id="sub_activ" name="sub_activ" class="mdl-switch__input" value="Y" <%= @subject&.sub_activ == 'Y' ? 'checked' : '' %>>
+					</label>
+					</div>
+					</div>
+
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+							<button type="submit"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>subject_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

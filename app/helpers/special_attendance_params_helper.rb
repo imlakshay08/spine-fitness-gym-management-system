@@ -1,0 +1,2 @@
+module SpecialAttendanceParamsHelper
+end

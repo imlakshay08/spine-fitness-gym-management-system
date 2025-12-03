@@ -1,0 +1,2 @@
+class MstTimeTable < ApplicationRecord
+end

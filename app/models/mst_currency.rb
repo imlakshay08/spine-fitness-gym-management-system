@@ -1,0 +1,2 @@
+class MstCurrency < ApplicationRecord
+end

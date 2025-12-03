@@ -1,0 +1,81 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Stock</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>category_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+			<input type="hidden" name="cur_cat_code" id="cur_cat_code" value="<% if @category %><%=@category.cat_code%><% end %>"/>
+            <input type="hidden" name="mid" id="mid" value="<% if @category %><%=@category.id%><% end %>"/>
+					<div class="form-body">
+						
+					<div class="form-group row">
+					<label class="col-md-3">Stock Code
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="cat_code" id="cat_code"  autofocus="true" type="text"  placeholder="Enter Stock Code"
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @category%><%=@category.cat_code%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['cat_code'] %><% end %>"/> 
+					</div>
+				
+					</div>
+					<div class="form-group row">
+					<label class="col-md-3">Stock Description
+					<span class="required"> * </span>
+				</label>
+					<div class="col-md-3">
+					<input name="cat_descp" id="cat_descp"  autofocus="true" type="text"  placeholder="Enter Stock Description"
+					autocomplete="off" maxlength="100" class="form-control" required value="<% if @category%><%=@category.cat_descp%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['cat_descp'] %><% end %>"/> 
+									</div>
+
+					</div>
+				
+
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+							<button type="submit"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>category_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

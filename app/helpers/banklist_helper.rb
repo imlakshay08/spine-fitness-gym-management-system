@@ -1,0 +1,2 @@
+module BanklistHelper
+end

@@ -1,0 +1,212 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content">
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">Fee Dashboard</div>
+
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+							                    												
+
+
+						</div>
+					</div>
+
+					<div class="row">
+					<div class="col-md-12">
+						
+							
+				<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+				  <input type="hidden" name="server_request" id="server_request" value="Y"/>
+				<%= form_tag({:action=>'index'} ,method: :get ,:multipart=>true,:id=>'myForms') do  %>
+
+
+					<div class="row">
+						<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="card card-box">
+								<div class="card-head">
+									<header>Fee Summary </header>
+									<div class="tools">
+									<a class="fa fa-repeat btn-color " href="<%=root_url%>fee_dashboard/fee_dashboard_refresh"></a>
+										<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+										
+									</div>
+								</div>
+								<div class="card-body ">
+								<div class="row">
+                                <div class="col-md-2">
+								<label class="text-center">Fiancial Year <span class="text-danger">*</span></label><br/>
+								<select class="form-select select-height" id="financial_years" name="financial_years" required>
+								<option value="">-Select -</option>
+								<%
+								start_year = @nbegindate.to_i
+								current_year = Date.today.month >= 4 ? Date.today.year : Date.today.year - 1
+								while start_year <= current_year do
+								  fy_label = "#{start_year}-#{start_year + 1}"
+							  %>
+								<option value="<%= fy_label %>" <% if @financial_years && @financial_years == fy_label %>selected<% end %>><%= fy_label %></option>
+							  <%
+								  start_year += 1
+								end
+							  %>
+								  </select>
+								</div>
+
+								<div class="col-md-3">
+									<label class="text-center">Course</label><br/>
+								<select class="form-select select-height" name="search_course" id="search_course" >
+									<option value="">Select...</option>
+									<%
+								if @CourseList && @CourseList.length>0
+									@CourseList.each do |course|
+							%>
+							<option value="<%=course.id%>" <%= 'selected' if @search_course.to_i == course.id.to_i %>><%=course.crse_descp%></option>
+							<%
+							end
+							end
+							%>
+								</select>
+							</div>
+
+								 <div class="col-sm-12 col-md-1 mt-2">  
+                    <button data-bs-toggle="button" onclick="filter_fee_summary();" class="btn btn-circle btn-default no_loader" ><i class="fa fa-search"></i>
+											</button>
+
+											<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active show_loader hidden" ></div>
+                    </div>
+								</div>
+									<div class="table-wrap">
+										<div class="table-responsive">
+											<table class="table display product-overview mb-30" id="support_table">
+												<thead>
+													<tr>
+														<th>S.No.</th>
+														<th>Course </th>
+														<th>Semester</th>
+														<th style="text-align: right;">No. of Students</th>
+														<th style="text-align: right;">Paid Students</th>
+														<th style="text-align: right;">Received</th>
+														<th style="text-align: right;">Defaulter</th>
+													</tr>
+												</thead>
+												<tbody>
+												<%
+                                                i = 1
+												if @courseSummary && @courseSummary.length>0 
+													@courseSummary.each do |cosmry|
+											        
+														coursename = ""
+														courseobj = get_course_detail(cosmry.feepr_course)
+														if courseobj  
+                                                           coursename = courseobj.crse_descp
+														end
+												%>
+													<tr>
+														<td><%=i%></td>
+														<td><%=coursename%></td>
+														<td><%=cosmry.feepr_sem%></td>
+														<td align="right"> 
+															<%=cosmry.total_students%>
+														</td>
+														<td align="right">
+														<%=cosmry.paid_students%> <% if cosmry.paid_students.to_i > 0 %><a href="javascript:void(0);" class=" text-success" onclick="get_defaulter_list('PS','<%=cosmry.feepr_course%>','<%=cosmry.feepr_sem%>');"><i class="fa fa-eye"></i></a> <% end %>
+														</td>
+													
+														<td align="right">
+														<%=currency_formatted(cosmry.receivedamount)%>
+														</td>
+														<td align="right" >
+														<%=cosmry.defaulters%> <% if cosmry.defaulters.to_i > 0 %><a href="javascript:void(0);" class=" text-success" onclick="get_defaulter_list('DF','<%=cosmry.feepr_course%>','<%=cosmry.feepr_sem%>');"><i class="fa fa-eye"></i></a> <% end %>
+														</td>
+													</tr>
+													<% 
+													i += 1
+												end 
+												%>
+												<% else %>
+							  <tr><td colspan="7" class="">No record found.</td></tr>
+
+												<%
+													end
+													%>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						</div>
+
+						<div  class="mt-3">
+						
+						<div class="row">
+						<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="card card-box">
+								<div class="card-head">
+									<header id="reqtype_label">List of Students</header>
+									<div class="tools">
+									    
+										<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+										
+									</div>
+								</div>
+								<div class="card-body ">
+								<div class="row" id="excel_button_row" style="display: none;">
+								<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="text-align: right;">
+								<button onclick="exportStyledExcel()" class="btn btn-info"><i class="fa fa-file-excel-o"></i> Download Excel</button>
+                                </div>
+								</div>
+									<div class="table-wrap">
+										<div class="table-responsive">
+											<table class="table display product-overview mb-30" id="student_table">
+												<thead>
+													<tr>
+														<th>S.No.</th>
+														<th>Registration No. </th>
+														<th>Name</th>
+														<th>Course</th>
+														<th>Semester</th>
+														<th style="text-align: right;">Fee Amount</th>
+														<th style="text-align: right;">Received Amount</th>
+													</tr>
+												</thead>
+												<tbody id="defaulters_list">
+												<tr>
+												<td colspan="8" class="text-center">
+												<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader_table" style="display:none;"></div>
+												</td>
+												</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						</div>
+
+						</div>
+
+
+
+					<% end %>
+
+					             
+					</div>
+					</div>
+
+      
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

@@ -1,0 +1,2 @@
+class TrnIssueReturnMaterial< ApplicationRecord
+end

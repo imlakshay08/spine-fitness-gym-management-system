@@ -1,0 +1,2 @@
+module InventoryOutletHelper
+end

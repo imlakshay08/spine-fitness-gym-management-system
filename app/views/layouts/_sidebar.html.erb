@@ -1,0 +1,396 @@
+<input type="hidden" id="globalrootaccess" value="<%=root_url%>">
+				<!-- Logo -->
+        <!-- start sidebar menu -->
+
+        <% 
+         commonflags                = ""
+         commonflagsstyl            = "none"
+
+    if controller.controller_name  =='student_list' || controller.controller_name  =='print_student_id_card' || controller.controller_name  =='student_transaction_list' || controller.controller_name  =='student_data_import'
+
+        masterpanel                 = "block"
+        masterclass                 = "subdrop" 			       
+        commonflags           	   	= "subdrop"
+        commonflagsstyl       		  = "block"
+        masteropen          	      = "open"
+    elsif controller.controller_name == 'component_list' || controller.controller_name  =='fee_list' || controller.controller_name  =='fee_import' || controller.controller_name  =='fee_dashboard'
+      feemasterpanel                 = "block"
+      feemasterclass                 = "subdrop" 			       
+      commonflags           	       = "subdrop"
+      commonflagsstyl       		     = "block"
+      feemasteropen          	       = "open"
+    elsif controller.controller_name  =='time_table' && controller.action_name == 'faculty_view'
+      facultypanel                   = "block"
+      facultyclass                   = "subdrop" 			       
+      commonflags           	       = "subdrop"
+      commonflagsstyl       		     = "block"
+      facultyopen          	         = "open"
+    elsif controller.controller_name == 'time_table' || controller.controller_name  =='time_table_date_parameter'
+      timetablepanel                   = "block"
+      timetableclass                   = "subdrop" 			       
+      commonflags           	       = "subdrop"
+      commonflagsstyl       		     = "block"
+      timetableopen          	         = "open"
+    elsif controller.controller_name == 'mark_attendance' || controller.controller_name  =='special_attendance' || controller.controller_name  =='faculty_list' || controller.controller_name  =='special_attendance_params' || controller.controller_name  =='faculty_id_card'
+
+      facultypanel                   = "block"
+      facultyclass                   = "subdrop" 			       
+      commonflags           	       = "subdrop"
+      commonflagsstyl       		     = "block"
+      facultyopen          	         = "open"
+
+    elsif controller.controller_name == 'create_user' || controller.controller_name  =='user_log' || controller.controller_name == 'course_list' || controller.controller_name  =='subject_list' || controller.controller_name  =='category_list' || controller.controller_name  =='house_list' || controller.controller_name  =='holiday' || controller.controller_name  =='year_end_process' 
+      userpanel                   = "block"
+      userclass                   = "subdrop" 			       
+      commonflags           	       = "subdrop"
+      commonflagsstyl       		     = "block"
+      useropen          	         = "open"
+      
+
+     elsif controller.controller_name == 'attendance_reports' 
+      reportpanel                  = "block"
+      reportclass                  = "subdrop" 			       
+      commonflags           	     = "subdrop"
+      commonflagsstyl       		   = "block"
+      reportopen          	         = "open"
+      end
+
+        %>
+        <div class="sidebar-container">
+          <div class="sidemenu-container navbar-collapse collapse fixed-menu">
+            <div id="remove-scroll" class="left-sidemenu">
+              <ul class="sidemenu  page-header-fixed slimscroll-style" data-keep-expanded="false"
+                data-auto-scroll="true" data-slide-speed="200" style="padding-top: 20px">
+                <li class="sidebar-toggler-wrapper hide">
+                  <div class="sidebar-toggler">
+                    <span></span>
+                  </div>
+                </li>
+            
+                <li class="nav-item active open">
+                <a href="<%=root_url%>dashboard" class="nav-link nav-toggle"> <i data-feather="airplay"></i>
+                  <span class="title">Dashboard</span>
+                </a>
+              </li>
+              <li class="nav-item <% if controller.controller_name == 'stock_list' %>menucolor<% end %>">
+              <a href="<%=root_url%>stock_list" class="nav-link "> <span class="title">Stock List</span>
+              </a>
+            </li>
+              <li class="nav-item <% if controller.controller_name == 'stock_inventory' %>menucolor<% end %>">
+              <a href="<%=root_url%>stock_inventory" class="nav-link "> <span class="title">Stock Inventory</span>
+              </a>
+            </li>
+              <li class="nav-item <% if controller.controller_name == 'membership_plan' %>menucolor<% end %>">
+              <a href="<%=root_url%>membership_plan" class="nav-link "> <span class="title">Membership Plans</span>
+              </a>
+            </li>
+              <li class="nav-item <% if controller.controller_name == 'member_list' %>menucolor<% end %>">
+              <a href="<%=root_url%>member_list" class="nav-link "> <span class="title">Members List</span>
+              </a>
+            </li>
+              <li class="nav-item <% if controller.controller_name == 'member_subscriptions' %>menucolor<% end %>">
+              <a href="<%=root_url%>member_subscriptions" class="nav-link "> <span class="title">Member Subscriptions</span>
+              </a>
+            </li>
+                 <%
+              if @student.to_i>0
+              %> 
+              <li class="nav-item">
+              <a href="#" class="nav-link nav-toggle <%= masterclass%>"> <i data-feather="briefcase"></i>
+                <span class="title">Student</span> 
+                <% if masterclass != nil && masterclass !='' %>
+                <i class="fa fa-check-circle float-none" style="font-size: 14px;color: burlywood;"></i>
+              <% end %>
+                <span class="arrow <%=masteropen%>"></span>
+             
+              </a>
+              <ul class="sub-menu" style="display:<%=masterpanel%>">
+               <%
+              if @std_list.to_i>0
+              %> 
+               <li class="nav-item <% if controller.controller_name == 'student_list' %>menucolor<% end %>">
+                <a href="<%=root_url%>student_list" class="nav-link "> <span class="title">Student List</span>
+                </a>
+              </li>
+              <% end %>
+               <%
+              if @std_i_card.to_i>0
+              %> 
+              <li class="nav-item <% if controller.controller_name == 'print_student_id_card' %>menucolor<% end %>">
+              <a href="<%=root_url%>print_student_id_card" class="nav-link "> <span class="title">I-Card</span>
+              </a>
+            </li>
+            <% end %>
+             <%
+              if @std_trans_list.to_i>0
+              %> 
+		          <li class="nav-item <% if controller.controller_name == 'student_transaction_list' %>menucolor<% end %>">
+                <a href="<%=root_url%>student_transaction_list" class="nav-link "> <span class="title">Student Status</span>
+                </a>
+              </li>
+            <% end %>
+		<%
+              if @std_import.to_i>0
+
+              %> 
+          <li class="nav-item <% if controller.controller_name == 'student_data_import' %>menucolor<% end %>">
+              <a href="<%=root_url%>student_data_import" class="nav-link "> <span class="title">Student Data Import</span>
+              </a>
+            </li>
+            <% end %>
+                </ul>
+                </li>
+           <% end %>
+            <%
+              if @fee.to_i>0
+              %> 
+                <li class="nav-item">
+                <a href="#" class="nav-link nav-toggle <%= feemasterclass%>"> <i data-feather="briefcase"></i>
+                  <span class="title">Fee</span> 
+                  <% if feemasterclass != nil && feemasterclass !='' %>
+                  <i class="fa fa-check-circle float-none" style="font-size: 14px;color: burlywood;"></i>
+                <% end %>
+                  <span class="arrow <%=feemasteropen%>"></span>
+               
+                </a>
+                <ul class="sub-menu" style="display:<%=feemasterpanel%>">
+                 <%
+              if @fee_comp_list.to_i>0
+              %> 
+                <li class="nav-item ">
+                <a href="<%=root_url%>component_list" class="nav-link <% if controller.controller_name == 'component_list' %>menucolor<% end %>"> <span class="title">Component List</span>
+                </a>
+              </li>
+              <% end %>
+               <%
+              if @fees_list.to_i>0
+              %> 
+                  <li class="nav-item ">
+                  <a href="<%=root_url%>fee_list" class="nav-link <% if controller.controller_name == 'fee_list' %>menucolor<% end %>"> <span class="title">Fee Structure</span>
+                  </a>
+                </li>
+               <% end %>
+ 		 <li class="nav-item ">
+                  <a href="<%=root_url%>fee_import" class="nav-link <% if controller.controller_name == 'fee_import' %>menucolor<% end %>"> <span class="title">Fee Import Process</span>
+                  </a>
+                </li>
+               <li class="nav-item ">
+                  <a href="<%=root_url%>fee_process" class="nav-link <% if controller.controller_name == 'fee_process' %>menucolor<% end %>"> <span class="title">Fee Process</span>
+                  </a>
+                </li>
+                <li class="nav-item ">
+                <a href="<%=root_url%>fee_dashboard" class="nav-link <% if controller.controller_name == 'fee_dashboard' %>menucolor<% end %>"> <span class="title">Fee Dashboard</span>
+                </a>
+              </li>
+                  </ul>
+                  </li>
+             <% end %>
+              <%
+              if @time.to_i>0
+              %> 
+            <li class="nav-item">
+                <a href="#" class="nav-link nav-toggle <%= timetableclass%>"> <i data-feather="briefcase"></i>
+                  <span class="title">Time Table</span> 
+                  <% if timetableclass != nil && timetableclass !='' %>
+                  <i class="fa fa-check-circle float-none" style="font-size: 14px;color: burlywood;"></i>
+                <% end %>
+                  <span class="arrow <%=timetableopen%>"></span>
+               
+                </a>
+                <ul class="sub-menu" style="display:<%=timetablepanel%>">
+                 <%
+              if @time_create.to_i>0
+              %> 
+                <li class="nav-item ">
+                <a href="<%=root_url%>time_table" class="nav-link <% if controller.controller_name == 'time_table' %>menucolor<% end %>"> <span class="title">Create Time Table</span>
+                </a>
+              </li>
+               <% end %>
+		<%
+              if @time_date.to_i>0
+              %>
+ 		<li class="nav-item ">
+                <a href="<%=root_url%>time_table_date_parameter" class="nav-link <% if controller.controller_name == 'time_table_date_parameter' %>menucolor<% end %>"> <span class="title">Date Parameter</span>
+                </a>
+              </li>
+               <% end %>
+
+                  </ul>
+                  </li>
+             <% end %>
+              <%
+              if @fac.to_i>0
+              %> 
+          <li class="nav-item">
+          <a href="#" class="nav-link nav-toggle <%= facultyclass%>"> <i data-feather="briefcase"></i>
+            <span class="title">Faculty</span> 
+            <% if facultyclass != nil && facultyclass !='' %>
+            <i class="fa fa-check-circle float-none" style="font-size: 14px;color: burlywood;"></i>
+          <% end %>
+            <span class="arrow <%=facultyopen%>"></span>
+         
+          </a>
+          <ul class="sub-menu" style="display:<%=facultypanel%>">
+             <%
+              if @fac_list.to_i>0
+              %> 
+          <li class="nav-item">
+              <a href="<%=root_url%>faculty_list" class="nav-link <% if controller.controller_name == 'faculty_list' %>menucolor<% end %>"><span class="title">Staff List</span>
+              </a>
+            </li>
+                 <li class="nav-item">
+              <a href="<%=root_url%>faculty_id_card" class="nav-link <% if controller.controller_name == 'faculty_id_card' %>menucolor<% end %>"><span class="title">Staff I-Card</span>
+              </a>
+            </li>
+           <% end %>
+             <%
+              if @fac_mark_atten.to_i>0
+              %> 
+          <li class="nav-item ">
+          <a href="<%=root_url%>mark_attendance" class="nav-link <% if controller.controller_name == 'mark_attendance' %>menucolor<% end %>"> <span class="title">Mark Attendance</span>
+          </a>
+        </li>
+        <% end %>
+         <%
+              if @fac_spl_atten.to_i>0
+              %> 
+            <li class="nav-item ">
+            <a href="<%=root_url%>special_attendance" class="nav-link <% if controller.controller_name == 'special_attendance' %>menucolor<% end %>"> <span class="title">Special Attendance</span>
+            </a>
+          </li>
+       <% end %>
+          <li class="nav-item ">
+            <a href="<%=root_url%>process_special_attendance" class="nav-link <% if controller.controller_name == 'process_special_attendance' %>menucolor<% end %>"> <span class="title">Process Special Attendance</span>
+            </a>
+          </li>
+		<%
+              if @fac_spl_atten_param.to_i>0
+              %> 
+ 	<li class="nav-item ">
+            <a href="<%=root_url%>special_attendance_params" class="nav-link <% if controller.controller_name == 'special_attendance_params' %>menucolor<% end %>"> <span class="title">Attendance Parameters</span>
+            </a>
+          </li>
+       <% end %>
+        <%
+              if @fac_time.to_i>0
+              %> 
+          <li class="nav-item ">
+            <a href="<%=root_url%>time_table/faculty_view" class="nav-link <% if controller.controller_name == 'time_table' && controller.action_name=='faculty_view'%>menucolor<% end %>"> <span class="title">Time Table</span>
+            </a>
+          </li>
+        <% end %>
+            </ul>
+            </li>
+           <% end %>
+            <%
+              if @admin.to_i>0
+              %> 
+            <li class="nav-item">
+          <a href="#" class="nav-link nav-toggle <%= userclass%>"> <i data-feather="briefcase"></i>
+            <span class="title">Administration</span> 
+            <% if userclass != nil && userclass !='' %>
+            <i class="fa fa-check-circle float-none" style="font-size: 14px;color: burlywood;"></i>
+          <% end %>
+            <span class="arrow <%=useropen%>"></span>
+         
+          </a>
+          <ul class="sub-menu" style="display:<%=userpanel%>">
+             <%
+              if @adm_user.to_i>0
+              %> 
+          <li class="nav-item">
+              <a href="<%=root_url%>create_user/user_list" class="nav-link <% if controller.controller_name == 'create_user' %>menucolor<% end %>"><span class="title">Create User</span>
+              </a>
+            </li>
+          <% end %>
+            <%
+              if @adm_log.to_i>0
+              %> 
+          <li class="nav-item ">
+          <a href="<%=root_url%>log_audit" class="nav-link <% if controller.controller_name == 'log_audit' %>menucolor<% end %>"> <span class="title">User Log</span>
+          </a>
+        </li>
+       <% end %>
+        <%
+              if @adm_cat.to_i>0
+              %> 
+          <li class="nav-item <% if controller.controller_name == 'category_list' %>menucolor<% end %>">
+              <a href="<%=root_url%>category_list" class="nav-link "> <span class="title">Category List</span>
+              </a>
+            </li>
+            <% end %>
+             <%
+              if @adm_course.to_i>0
+              %> 
+                <li class="nav-item <% if controller.controller_name == 'course_list' %>menucolor<% end %>">
+                  <a href="<%=root_url%>course_list" class="nav-link"> <span class="title">Course List</span>
+                  </a>
+                </li>
+                <% end %>
+                <%
+              if @adm_subject.to_i>0
+              %> 
+                <li class="nav-item <% if controller.controller_name == 'subject_list' %>menucolor<% end %>">
+                  <a href="<%=root_url%>subject_list" class="nav-link "> <span class="title">Subject List</span>
+                  </a>
+                </li>       
+                <% end %>  
+                <%
+              if @adm_club.to_i>0
+              %> 
+                <li class="nav-item <% if controller.controller_name == 'house_list' %>menucolor<% end %>">
+                <a href="<%=root_url%>house_list" class="nav-link "> <span class="title">Club List</span>
+                </a>
+              </li>
+             <% end %>
+		<%
+              if @adm_holiday.to_i>0
+              %> 
+	<li class="nav-item <% if controller.controller_name == 'holiday' %>menucolor<% end %>">
+                <a href="<%=root_url%>holiday" class="nav-link "> <span class="title">Holidays</span>
+                </a>
+              </li>
+             <% end %>
+             <%
+              if @adm_year_end.to_i>0
+              %> 
+                <li class="nav-item <% if controller.controller_name == 'year_end_process' %>menucolor<% end %>">
+                <a href="<%=root_url%>year_end_process" class="nav-link "> <span class="title">Year-end Process</span>
+                </a>
+              </li>
+             <% end %>
+            </ul>
+            </li>
+            <% end %>
+            <%
+              if @rep.to_i>0
+              %> 
+            <li class="nav-item">
+          <a href="#" class="nav-link nav-toggle <%= reportclass%>"> <i data-feather="briefcase"></i>
+            <span class="title">Reports</span> 
+            <% if reportclass != nil && reportclass !='' %>
+            <i class="fa fa-check-circle float-none" style="font-size: 14px;color: burlywood;"></i>
+          <% end %>
+            <span class="arrow <%=reportopen%>"></span>
+         
+          </a>
+          <ul class="sub-menu" style="display:<%=reportpanel%>">
+                          <%
+              if @rep_att.to_i>0
+              %> 
+          <li class="nav-item">
+              <a href="<%=root_url%>attendance_reports" class="nav-link <% if controller.controller_name == 'attendance_reports' %>menucolor<% end %>"><span class="title">Attendance Reports</span>
+              </a>
+            </li>
+          <li class="nav-item">
+              <a href="<%=root_url%>faculty_attendance_report" class="nav-link <% if controller.controller_name == 'faculty_attendance_report' %>menucolor<% end %>"><span class="title">Faculty Attendance Reports</span>
+              </a>
+            </li>
+             <% end %>
+              </ul>
+               <% end %>
+            </div>
+          </div>
+        </div>
+        <!-- end sidebar menu -->
+

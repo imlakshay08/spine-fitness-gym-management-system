@@ -1,0 +1,38 @@
+module ErpModule
+  module Common
+    def get_new_rows(objval,start)
+       st =  start.to_i+1
+      
+       vhtm = ''
+       vhtm += '<tr class="inv-push-item">';
+       vhtm += '<input type="hidden" id="raked_id" name="raked_id[]" value=""/>'
+			 vhtm += '<td id="header_table_sno" class="report inventory-td inv-serials" align="center">'
+       vhtm += '<i class="fa fa-times cursor hrms_flag" hidden="true" title="Clear Row" onclick="rake_clear_rows('+st.to_s+');"></i>&nbsp;'+st.to_s
+			 vhtm += '</td>';                                                               
+      
+       vhtm += '<td class="header_table_item_size report">'
+       vhtm += '<select onchange="get_rakenumber_list(this.value,'+st.to_s+');" class="form-control inventory-form-control  invt_restrict_field" name="prl_rakeno[]" id="prl_rakeno'+st.to_s+'">';
+       vhtm += '<option>-Select-</option>'
+      if objval.length >0
+        objval.each do |rkl|
+          vhtm += '<option value="'+rkl.rkl_number.to_s+'">'+rkl.rkl_number.to_s+'</option>'
+       end
+      end
+       vhtm += '</select>'
+			 vhtm += '</td>'
+       vhtm += '<td class="header_table_item_size report">'
+			 vhtm += '<input  type="text" readonly name="prl_position[]" id="prl_position'+st.to_s+'" class="width inventory-form-control invt_pull_right invt_restrict_field" autocomplete="off"/>'
+			 vhtm += '</td>'
+       vhtm += '<td class="header_table_item_size report">'
+			 vhtm += ' <input  type="text" onkeyup="rake_total_quantity();"  name="prl_qnty[]" id="prl_qnty'+st.to_s+'" class="width inventory-form-control invt_pull_right" autocomplete="off" />'
+			 vhtm += '</td>'
+       vhtm += '</tr>'
+       return vhtm
+    end
+    def get_name_of_product(compcodes,pdcode)
+       prodobj =  MstProduct.select('pd_productcode,pd_productname').where("pd_compcode = ? AND pd_productcode=?",compcodes,pdcode).first
+       return prodobj
+    end
+  end
+  
+end

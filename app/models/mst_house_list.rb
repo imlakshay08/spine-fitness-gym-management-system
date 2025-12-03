@@ -1,0 +1,2 @@
+class MstHouseList < ApplicationRecord
+end

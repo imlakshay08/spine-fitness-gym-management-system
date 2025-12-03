@@ -1,0 +1,22 @@
+<%
+  mcontroller = ''
+  mactions    = ''
+ if controller.controller_name!=nil
+  mcontroller = (controller.controller_name).gsub('_',' ')
+ end
+ if controller.action_name
+   mactions    = (controller.action_name).gsub('_',' ')
+ end
+%>
+<input type="hidden" id="selectedroot" value="<%=root_url%>">
+
+<ol class="breadcrumb page-breadcrumb pull-right">
+								<li><i class="fa fa-home"></i>&nbsp;<a class="parent-item"
+										href="javascript:;">Home</a>&nbsp;<i class="fa fa-angle-right"></i>
+								</li>
+								<li class="active"><%=mcontroller.capitalize%></li>
+								<%  if mactions != 'index'%>
+								<li class="active"><i class="fa fa-angle-right"></i><%=mactions.capitalize%></li>
+								<%end%>
+							</ol>
+                          

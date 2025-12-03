@@ -1,0 +1,2 @@
+class MstHoliday < ApplicationRecord
+end

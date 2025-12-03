@@ -1,0 +1,170 @@
+<form id="student_parent_detail" method="post">
+					<input type="hidden" id="myselected_classname" value="">
+
+					<input type="hidden" id="curadd1" value=""/>
+					<input type="hidden" id="curadd2" value=""/>
+					<input type="hidden" id="curcity" value=""/>
+
+					<input type="hidden" class="form-control-sm" name="qualiffooterid" id="qualiffooterid1" value="">
+					<div class="card-box">
+					<div class="card-body ">
+					<div class="form-group row">
+					<div class="col-md-2" >
+					Info. Type <span class="required"> * </span><br/>
+					<select class="form-select select-height"  name="stdnt_fam_type" id="stdnt_fam_type1" onchange="get_university_qualf_list();">
+							<option value="">Select...</option>
+							<option value="Father" >Father</option>
+							<option value="Mother" >Mother</option>
+							<option value="Guardian">Guardian</option>
+						
+						</select>
+				</div>
+					<div class="col-md-2" >
+					Name <span class="required"> * </span><br/>
+					<input name="stdnt_fam_father" id="stdnt_fam_father1"  type="text"  autocomplete="off" maxlength="50" class="form-control"  value=""/> 
+				</div>
+				<div class="col-md-2" >
+				Same as student <br/>
+				<label class="mdl-checkbox mdl-js-checkbox" for="stdnt_fam_check1">
+				<input type="checkbox" onclick="get_selected_address();" id="stdnt_fam_check1" name="stdnt_fam_check"  class="mdl-checkbox__input" value="Y"/>
+				
+			</label>
+			</div>
+
+				 <div class="col-md-2" >
+				Address 1 <span class="required"> * </span><br/>
+				<input name="stdnt_fam_add1" id="stdnt_fam_add11"  type="text"  autocomplete="off" maxlength="200" class="form-control"  value=""/> 
+				
+				</div>
+				<div class="col-md-2" >
+				Address 2<br/>
+				<input name="stdnt_fam_add2" id="stdnt_fam_add21"  type="text"  autocomplete="off" maxlength="200" class="form-control"  value=""/> 
+				
+			   </div>
+			   <div class="col-md-2" >
+			   City<br/>
+			   <input name="stdnt_fam_city" id="stdnt_fam_city1"  type="text"  autocomplete="off" maxlength="50" class="form-control"  value=""/> 
+			   
+			  </div>
+				<div class="col-md-2" >
+				Tel. no.(Resi.)<br/>
+				<div class="input-group">
+				<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
+				<input name="stdnt_fam_tel_res" onkeypress="return isNumberMyKeys(event);" id="stdnt_fam_tel_res1"  type="text"  autocomplete="off" maxlength="10" class="form-control"  value=""/> 
+				</div>
+				</div>
+				<div class="col-md-2" >
+				Tel. no.(Office)<br/>
+				<div class="input-group">
+				<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
+				<input name="stdnt_fam_tel_off" onkeypress="return isNumberMyKeys(event);" id="stdnt_fam_tel_off1"  type="text"  autocomplete="off" maxlength="10" class="form-control"  value=""/> 
+				</div>
+				
+				
+				</div>
+				<div class="col-md-2" >
+				Email Id<br/>
+				<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-envelope"></i></span>
+					<input name="stdnt_fam_email" id="stdnt_fam_email1"  type="text"  autocomplete="off" maxlength="50" class="form-control"  value=""/> 
+					</div>
+				
+				
+				</div>
+			<div class="col-md-2" >
+			Occupation <br/>
+			<select class="form-select select-height"   name="stdnt_fam_occu" id="stdnt_fam_occu1">
+							<option value="">Select...</option>
+							<option value="Private Job">Private Job</option>
+							<option value="Govt. Job">Govt. Job</option>
+							<option value="Business">Business</option>
+						
+						</select>
+			</div>
+			<div class="col-md-2" >
+			Income <br/>
+			<input name="stdnt_fam_income" onkeypress="return isNumberMyKeys(event);" id="stdnt_fam_income1"  type="text"  autocomplete="off" maxlength="50" class="form-control"  value=""/> 
+			
+			</div>
+			<div class="col-md-2" >
+			 <% if @myAddAld || @myEditAld %>
+			<button type="button" class="btn btn-circle btn-info mt-4 no_loader" onclick="process_student_family();">Save</button>
+			<% end %>
+			<div class="mt-4  mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader loader hidden"></div>
+			</div>
+			
+				</div>
+				</form>
+					<div class="table-scrollable">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>S.No</th>
+								<th>Info. Type</th>
+								<th>Name</th>
+								<th>Address</th>
+								<th>City</th>
+								<th>Contact No.</th>
+								<th>Occupation</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody id="process_canidate_quli">
+					<% i = 1
+
+					if @allstudentadmfam && @allstudentadmfam.length>0
+                             @allstudentadmfam.each do |student| %>  
+
+								<tr>
+								
+								<td><%= i %></td>
+								<td><%= student.stdnt_fam_type %></td>
+								<td><%= student.stdnt_fam_father %></td>
+								<td><%= student.stdnt_fam_add1 %></td>
+								<td><%= student.stdnt_fam_city %></td>
+								<td><%= student.stdnt_fam_tel_res %></td>
+								<td><%= student.stdnt_fam_occu %></td>
+								<td>
+								<% if @myEditAld %>
+								<a href="javascript:;"
+									class="tblEditBtn" onclick="process_qualif_edit('<%=student.id%>',
+									'<%=student.stdnt_fam_type%>',
+									'<%=student.stdnt_fam_father%>',
+									'<%=student.stdnt_fam_check%>',
+									'<%=student.stdnt_fam_add1%>',
+									'<%=student.stdnt_fam_add2%>',
+									'<%=student.stdnt_fam_city%>',
+									'<%=student.stdnt_fam_tel_res%>',
+									'<%=student.stdnt_fam_tel_off%>',
+									'<%=student.stdnt_fam_email%>',
+									'<%=student.stdnt_fam_occu%>',
+									'<%=student.stdnt_fam_income%>'
+									);
+																		
+									">
+									<i class="fa fa-pencil"></i>
+								</a>
+								<% end %>
+								<% if @myDeletAld %>
+								<a class="tblDelBtn" onclick="delete_parent_detail('<%= student.id %>');">
+									<i class="fa fa-trash-o"></i>
+								</a>
+								<% end %>
+								</td>
+															</tr>
+							<% i += 1 %>
+                            <% end %>
+                            <% end %>
+														</tbody>
+													</table>
+								
+												</div>
+					</div>
+					<div class="form-group form-button text-center  m-b-10" style="margin-top: 50px;">
+							<button type="button" onclick="general_next_process();"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">>></button>
+								
+							<a href="<%=root_url%>student_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+					

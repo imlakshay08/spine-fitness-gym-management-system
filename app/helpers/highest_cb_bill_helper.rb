@@ -1,0 +1,2 @@
+module HighestCbBillHelper
+end

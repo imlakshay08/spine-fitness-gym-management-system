@@ -1,0 +1,2 @@
+class MstVariant < ApplicationRecord
+end

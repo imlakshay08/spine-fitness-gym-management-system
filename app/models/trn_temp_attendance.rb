@@ -1,0 +1,2 @@
+class TrnTempAttendance < ApplicationRecord
+end
