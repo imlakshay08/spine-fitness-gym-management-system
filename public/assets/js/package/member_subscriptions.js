@@ -1,0 +1,190 @@
+
+
+$(document).ready(function(){
+    flatpickr("#ms_start_date", {
+      dateFormat: "d-M-Y",
+      allowInput: true,
+      onOpen: function (selectedDates, dateStr, instance) {
+        instance.setDate(instance.input.value, false);
+      },
+    });
+  });
+
+  $(document).ready(function(){
+    flatpickr("#ms_end_date", {
+      dateFormat: "d-M-Y",
+      allowInput: true,
+      onOpen: function (selectedDates, dateStr, instance) {
+        instance.setDate(instance.input.value, false);
+      },
+    });
+  });
+
+function alertChecked(url){
+
+    if( confirm("Are you sure want to delete ?")){
+
+        window.location = url
+
+    }
+
+  }
+
+function check_email_validation(email, id) {
+
+  if (!ValidateEmail(email)) {
+
+    showToast("info", "Invalid Email Address! Please type a valid email address.");
+
+    $("#" + id).focus(); 
+
+    return false; 
+
+  }
+
+  return true; 
+
+}
+
+function ValidateEmail(mail) {
+
+  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return emailRegex.test(mail);
+
+}
+
+  function isNumberMyKeys(evt) {
+
+    evt = (evt) ? evt : window.event;
+
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+
+        return false;
+
+    }
+
+    return true;
+
+  }
+
+  $(document).on("keypress","#member_list",function(e){
+
+    var keycode = (e.keyCode ? e.keyCode : e.which );
+
+      if( keycode == '13' ){
+
+        filter_member_list();
+
+      }
+
+  
+
+  });
+
+  function filter_member_list(){
+
+      var useroot = $("#rootXPath").val();
+
+     
+
+      $(".show_loader").removeClass("hidden");
+
+      $(".no_loader").removeClass("hidden").addClass("hidden")
+
+      $("form#myForms").submit(); 
+
+  
+
+  }
+
+
+function set_global_focus(id){
+  $("#"+id).focus();
+}
+
+function save_member_subscription(){
+  var usePath           = $.trim( $("#rootXPath").val() );
+  var formData          = new FormData();
+  var other_data        = $('form#myforms').serializeArray();
+  var mid               = $.trim( $("#mid").val() ); 
+  var ms_sbscrptn_no      = $.trim( $("#ms_sbscrptn_no").val() );
+  var ms_member_id    = $.trim( $("#ms_member_id").val() );
+  var ms_plan_id       = $.trim( $("#ms_plan_id").val() ); 
+  var ms_start_date         = $.trim( $("#ms_start_date").val() );
+  var ms_amount_paid      = $.trim( $("#ms_amount_paid").val() );	
+  var ms_payment_mode      = $.trim( $("#ms_payment_mode").val() );	
+
+  if( ms_sbscrptn_no == ''){
+    showToast("info","Subscription No. is required.");
+    setTimeout(function(){ set_global_focus('ms_sbscrptn_no');},500);
+    return false;
+  }else if( ms_member_id == ''){
+    showToast("info","Member is required.");
+    setTimeout(function(){ set_global_focus('ms_member_id');},500);
+    return false;
+  }else if( ms_plan_id == ''){
+    showToast("info","Plan is required.");
+    setTimeout(function(){ set_global_focus('ms_plan_id');},500);
+    return false;
+  }else if( ms_start_date == ''){
+    showToast("info","Start Date is required.");
+    setTimeout(function(){ set_global_focus('ms_start_date');},500);
+    return false;
+  }else if( ms_amount_paid == ''){
+    showToast("info","Amount is required.");
+    setTimeout(function(){ set_global_focus('ms_amount_paid');},500);
+    return false;
+  }else if( ms_payment_mode == ''){
+    showToast("info","Payment Mode is required.");
+    setTimeout(function(){ set_global_focus('ms_payment_mode');},500);
+    return false;
+  }
+
+  formData.append("identity", "SAVESUBSCR");
+  formData.append("mid", mid);  
+ 
+  $.each(other_data,function(key,input){
+      formData.append(input.name,input.value);
+  });
+  
+   $(".no_loader").removeClass("hidden").addClass("hidden");
+   $(".loader").removeClass("hidden");
+    setTimeout(function(){
+  $.ajax({
+          url: usePath+"member_subscriptions/ajax_process",
+          type: 'POST',
+          data: formData,
+          async: false,
+          contentType: false,
+          processData: false,
+          success: function (resp) {
+            
+            if( resp.status ){
+              $("#mid").val(resp.profileid);
+              $(".no_loader").removeClass("hidden");
+               $(".loader").removeClass("hidden").addClass("hidden");                          
+              showToast("success",resp.message);                  
+               window.location.href = usePath + "member_subscriptions";
+      
+            }else{  
+              $(".no_loader").removeClass("hidden");
+               $(".loader").removeClass("hidden").addClass("hidden");                         
+              showToast("error",resp.message); 
+            }
+
+          },
+          error: function () {
+            $(".no_loader").removeClass("hidden");
+            $(".loader").removeClass("hidden").addClass("hidden");
+              $(".process_save").show();
+          },
+          cache: false
+           });
+
+    },500);
+}
+
+
