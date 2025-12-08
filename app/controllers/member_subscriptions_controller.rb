@@ -254,7 +254,7 @@ class MemberSubscriptionsController < ApplicationController
     end
 
     private
-    def members_params
+    def member_subscription_params
         params[:ms_compcode]     = session[:loggedUserCompCode] 
         params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_plan_id,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks)
 
