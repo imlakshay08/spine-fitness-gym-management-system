@@ -109,10 +109,10 @@ Rails.application.routes.draw do
   post  'staff_list/index'=>'staff_list#index'
   post  'staff_list/search' =>'staff_list#index'
   get   'staff_list/search' =>'staff_list#index'
-  get   'staff_list/add_member'=>'staff_list#add_member'
-  post  'staff_list/add_member'=>'staff_list#add_member'
+  get   'staff_list/add_staff'=>'staff_list#add_staff'
+  post  'staff_list/add_staff'=>'staff_list#add_staff'
   get   "staff_list/:id"=>'staff_list#index'
-  get   "staff_list/add_member/:id"=>'staff_list#add_member'
+  get   "staff_list/add_staff/:id"=>'staff_list#add_staff'
   get   "staff_list/:id/deletes"=>'staff_list#destroy'
   post  "staff_list/faculty_ajax_img"=>"staff_list#save_faculty_img"
   post  "staff_list/ajax_process"=>"staff_list#ajax_process" 
