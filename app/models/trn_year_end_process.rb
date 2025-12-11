@@ -1,2 +1,0 @@
-class TrnYearEndProcess < ApplicationRecord
-end

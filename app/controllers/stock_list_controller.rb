@@ -192,7 +192,7 @@ class StockListController < ApplicationController
     private
     def check_existing_uses(catcode)
         @compcodes = session[:loggedUserCompCode]
-        sewobj = MstStudentDtl.where("stdnt_dtl_compcode = ? AND stdnt_dtl_cat = ?", @compcodes, catcode)
+        sewobj = TrnStockInventory.where("si_compcode = ? AND si_stock_id = ?", @compcodes, catcode)
         sewobj.exists?
       end
 end

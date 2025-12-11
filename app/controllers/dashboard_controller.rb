@@ -7,6 +7,35 @@ class DashboardController < ApplicationController
     def index
         @stock_list = MstStockList.where(["sl_compcode=?",session[:loggedUserCompCode]])
 
+  @active_subs     = active_subscriptions
+  @expiring_subs   = expiring_soon(7)
+  @expired_subs    = expired_subscriptions
     end
+
+    def active_subscriptions
+  TrnMemberSubscription.where(
+    "ms_compcode=? AND ms_end_date >= ?",
+    session[:loggedUserCompCode],
+    Date.today
+  )
+end
+
+def expiring_soon(days = 7)
+  TrnMemberSubscription.where(
+    "ms_compcode=? AND ms_end_date BETWEEN ? AND ?",
+    session[:loggedUserCompCode],
+    Date.today,
+    Date.today + days
+  )
+end
+
+def expired_subscriptions
+  TrnMemberSubscription.where(
+    "ms_compcode=? AND ms_end_date < ?",
+    session[:loggedUserCompCode],
+    Date.today
+  )
+end
+
       
 end

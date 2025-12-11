@@ -1,2 +1,0 @@
-class MstSubjectList < ApplicationRecord
-end

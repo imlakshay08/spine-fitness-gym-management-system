@@ -100,8 +100,29 @@ class MemberSubscriptionsController < ApplicationController
               isFlags = false
           end
 
+            member_id = params[:ms_member_id].to_i
+
             currentgrp =  params[:cur_ms_sbscrptn_no].to_s.strip
             newgroup   =  params[:ms_sbscrptn_no].to_s.strip
+
+            latest = get_latest_subscription(member_id)
+
+            if mid.to_i == 0  
+              if latest.present?
+                if latest.ms_end_date >= Date.parse(params[:ms_start_date])
+                  message = "Member already has an ACTIVE subscription until #{latest.ms_end_date}. Please choose a start date after expiry."
+                  isFlags = false
+                end
+              end
+            end
+
+            start_date = Date.parse(params[:ms_start_date])
+            end_date   = calculate_end_date(start_date, params[:ms_plan_id])
+
+            params[:ms_end_date] = end_date
+
+            params[:ms_status] = subscription_status(end_date)
+
 
               if params[:mid].to_i>0
                  if currentgrp.to_s.downcase != newgroup.to_s.downcase
@@ -256,7 +277,7 @@ class MemberSubscriptionsController < ApplicationController
     private
     def member_subscription_params
         params[:ms_compcode]     = session[:loggedUserCompCode] 
-        params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_plan_id,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks)
+        params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_member_id,:ms_plan_id,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks)
 
     end
 

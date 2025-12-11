@@ -1,2 +1,0 @@
-class TrnSpecialAttendance < ApplicationRecord
-end

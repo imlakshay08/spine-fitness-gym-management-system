@@ -1,0 +1,2 @@
+class MstStaffList < ApplicationRecord
+end

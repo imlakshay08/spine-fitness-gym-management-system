@@ -3,94 +3,130 @@ begin
 %>
 <div class="page-wrapper">
 <%= render "layouts/header" %>
-<!-- start page container -->
-		<div class="page-container">
-		<%= render "layouts/sidebar" %>
- <div class="page-content-wrapper">
+
+<div class="page-container">
+  <%= render "layouts/sidebar" %>
+
+  <div class="page-content-wrapper">
     <div class="page-content">
-           
-    <div class="page-bar">
-						<div class="page-title-breadcrumb">
-							<div class=" pull-left">
-								<div class="page-title">Dashboard</div>
-							</div>
-							<%= render "layouts/breadcrumbs" %>
-						</div>
-					</div>
-							<%= form_tag({:action=>'index'} ,:multipart=>true,:id=>'myForms' ) do  %>
-       						<input type="hidden" id="rootXPath" value="<%=root_url%>">
-  						    <input type="hidden" id="server_request" name="server_request" value="Y" />					
-							<input type="hidden" name="" id="" value="" title=""/>
 
-					<div class="row">
-					<div class="col-md-3 col-sm-12">
-					<div class="card card-box">
-						<div class="card-head">
-						<header>Stock Summary</header>
-						</div>
+      <div class="page-bar">
+        <div class="page-title-breadcrumb">
+          <div class="pull-left">
+            <div class="page-title">Dashboard</div>
+          </div>
+          <%= render "layouts/breadcrumbs" %>
+        </div>
+      </div>
 
-						<div class="card-body" style="max-height: 400px; overflow-y: auto;">
-						<ul class="list-group">
+      <%= form_tag({ action: 'index' }, multipart: true, id: 'myForms') do %>
+      <input type="hidden" id="rootXPath" value="<%= root_url %>">
+      <input type="hidden" id="server_request" name="server_request" value="Y">
 
-							<% @stock_list.each do |stk| %>
-							<li class="list-group-item d-flex justify-content-between align-items-center">
-								<span><strong><%= stk.sl_name %></strong></span>
-								<span class="badge badge-info badge-pill">
-								<%= get_current_stock(stk.id) %>
-								</span>
-							</li>
-							<% end %>
+      <!-- ROW 1 : SUMMARY BOXES -->
+      <div class="row">
 
-						</ul>
-						</div>
-					</div>
-					</div>
+        <!-- STOCK SUMMARY -->
+        <div class="col-md-3 col-sm-12">
+          <div class="card card-box">
+            <div class="card-head">
+              <header>Stock Summary</header>
+            </div>
 
-						<div class="col-md-9 col-sm-12">
-							<div class="card">
-								<div class="card-head d-flex justify-content-between align-items-center">
-									
-									</div>				
-					
-								<div class="card-body">
-									<div class="panel-body">
-										<div id="calendar" class="has-toolbar"> </div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-        
-			</div>
-	 	</div>	 
-    </div>
-	<!-- End page container --><% end %>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+              <ul class="list-group">
+                <% @stock_list.each do |stk| %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><strong><%= stk.sl_name %></strong></span>
+                    <span class="badge badge-info badge-pill"><%= get_current_stock(stk.id) %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
 
-</div>
-<script>
+        <!-- EXPIRED SUBSCRIPTIONS -->
+        <div class="col-md-3 col-sm-12">
+          <div class="card card-box">
+            <div class="card-head"><header>Expired</header></div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+              <ul class="list-group">
+                <% @expired_subs.each do |sub| %>
+                  <% mem = get_member_detail(sub.ms_member_id) %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><%= mem.mmbr_name %></span>
+                    <span class="badge badge-danger badge-pill"><%= sub.ms_end_date.strftime("%d-%b") %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
 
-</script>
+        <!-- EXPIRING SOON -->
+        <div class="col-md-3 col-sm-12">
+          <div class="card card-box">
+            <div class="card-head"><header>Expiring Soon</header></div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+              <ul class="list-group">
+                <% @expiring_subs.each do |sub| %>
+                  <% mem = get_member_detail(sub.ms_member_id) %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><%= mem.mmbr_name %></span>
+                    <span class="badge badge-warning badge-pill"><%= sub.ms_end_date.strftime("%d-%b") %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTIVE -->
+        <div class="col-md-3 col-sm-12">
+          <div class="card card-box">
+            <div class="card-head"><header>Active Members</header></div>
+            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+              <ul class="list-group">
+                <% @active_subs.each do |sub| %>
+                  <% mem = get_member_detail(sub.ms_member_id) %>
+                  <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span><%= mem.mmbr_name %></span>
+                    <span class="badge badge-success badge-pill"><%= sub.ms_end_date.strftime("%d-%b") %></span>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- END ROW 1 -->
 
 
+      <!-- ROW 2 : CALENDAR FULL-WIDTH -->
+      <div class="row mt-4">
+        <div class="col-md-12 col-sm-12">
+          <div class="card">
+            <div class="card-head"><header>Calendar</header></div>
+            <div class="card-body">
+              <div class="panel-body">
+                <div id="calendar" class="has-toolbar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <% end %> <!-- form -->
 
-
+    </div> <!-- page-content -->
+  </div> <!-- wrapper -->
+</div> <!-- container -->
 
 <%
-message = ""
- rescue ActiveRecord::RecordNotFound => e
-# Handle the specific exception when the record is not found
-message = "Record not found "##{e.message}
-isFlags  = false 
-
-rescue ActiveRecord::StatementInvalid => e
-	# Handle SQL syntax errors or invalid queries
-	message =  "Unknown error " ##{e.message}
-	isFlags  = false 
-rescue StandardError => e
-	# Handle any other errors
-	message =  "An error occurred " ##{e.message}
-	isFlags  = false 
+rescue => e
+  message = "Error: #{e.message}"
 end
 %>
-<%=message%>
+
+<%= message %>

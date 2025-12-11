@@ -1,2 +1,0 @@
-class MstSpecialAttendanceParam < ApplicationRecord
-end

@@ -169,7 +169,7 @@ class ApplicationController < ActionController::Base
      private
      def get_plan_detail(planid)
           compcode =  session[:loggedUserCompCode]
-          planobj =  MstMembersList.where("plan_compcode= ? AND id = ?",compcode,planid).first
+          planobj =  MstMembershipPlan.where("plan_compcode= ? AND id = ?",compcode,planid).first
           return planobj
      end
 

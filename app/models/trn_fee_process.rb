@@ -1,3 +1,0 @@
-class TrnFeeProcess < ApplicationRecord
-    
-end

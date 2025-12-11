@@ -1,2 +1,0 @@
-class MstSegment < ApplicationRecord
-end

@@ -1,2 +1,0 @@
-class MstPackSize < ApplicationRecord
-end

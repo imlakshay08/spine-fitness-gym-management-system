@@ -78,6 +78,7 @@
 														<tr>
 															<th>S.No</th>
                               <th>Subscription No.</th>
+                              <th>Member Name</th>
                               <th>Plan</th>
                             	<th>Start Date</th>
                               <th>End Date</th>
@@ -110,8 +111,15 @@
                             	<td><%=planname%></td>
                               <td><%= subscription.ms_start_date %></td>
                             	<td><%= subscription.ms_end_date %></td>
-                              <td> </td>
-														</tr>
+                          <td>
+                            <% status = subscription_status(subscription.ms_end_date) %>
+                            <% if status == "ACTIVE" %>
+                              <span class="badge badge-success">ACTIVE</span>
+                            <% else %>
+                              <span class="badge badge-danger">EXPIRED</span>
+                            <% end %>
+                          </td>														
+                          </tr>
                           <% i += 1 %>
                             <% end %>
                             <% end %>

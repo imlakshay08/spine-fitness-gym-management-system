@@ -1,2 +1,0 @@
-class TrnStudentList < ApplicationRecord
-end

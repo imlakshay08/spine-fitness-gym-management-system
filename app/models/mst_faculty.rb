@@ -1,2 +1,0 @@
-class MstFaculty < ApplicationRecord
-end

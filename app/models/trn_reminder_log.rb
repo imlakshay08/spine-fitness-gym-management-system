@@ -1,0 +1,2 @@
+class TrnReminderLog < ApplicationRecord
+end
