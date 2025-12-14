@@ -9,7 +9,7 @@
     <div class="page-bar">
 						<div class="page-title-breadcrumb">
 							<div class=" pull-left">
-								<div class="page-title">Staff List</div>
+								<div class="page-title">Trainer List</div>
 							</div>
 							<%= render "layouts/breadcrumbs" %>
 						</div>
@@ -45,11 +45,11 @@
                     
                     <div class="row m-b-10">
                    <label class="col-sm-12 col-md-2">Name</label>
-                    <div class="col-sm-12 col-md-3">  <input type="text" class="form-control" name="member_list" id="member_list"  autocomplete="off" placeholder="Enter Member Name"  value="<% if @staff_list_search %><%=@staff_list_search%><% end %>"/></div>
+                    <div class="col-sm-12 col-md-3">  <input type="text" class="form-control" name="trainer_list" id="trainer_list"  autocomplete="off" placeholder="Enter trainer Name"  value="<% if @trainer_list_search %><%=@trainer_list_search%><% end %>"/></div>
                     
                   
                     <div class="col-sm-12 col-md-1 no_loader">  
-                    <button data-bs-toggle="button" onclick="filter_staff_list();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
+                    <button data-bs-toggle="button" onclick="filter_trainer_list();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
 											</button>
                     </div>
                     <div class="col-sm-12 col-md-1 show_loader hidden">
@@ -58,7 +58,7 @@
                     </div>
                   </div>
                     <div class="col-sm-12 col-md-6 ">  
-                    <a href="<%=root_url%>staff_list/referesh_staff_list" class="float-right">
+                    <a href="<%=root_url%>trainer_list/referesh_trainer_list" class="float-right">
                     <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
                     </div>
                     </div>  
@@ -66,8 +66,8 @@
                       <%end%>
                       <div class="row">
                       <div class="col-sm-12 col-md-3">  
-                      <a href="<%=root_url%>staff_list/add_staff"  class="">
-                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add Staff</button> </a>
+                      <a href="<%=root_url%>trainer_list/add_trainer"  class="">
+                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add Trainer</button> </a>
                       </div>
                       <div class="col-sm-12 col-md-9 hidden">  
                       <a href="javascript:;" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
@@ -75,7 +75,7 @@
                       </div>
  
                       <div class="col-sm-12 col-md-9 ">  
-                      <a href="<%=root_url%>staff_list/1_prt_staff_list.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
+                      <a href="<%=root_url%>trainer_list/1_prt_trainer_list.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
                       <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">PDF</button> </a>
                       </div>
  
@@ -87,7 +87,7 @@
                       <thead>
                         <tr>
                           <th>S.No</th>
-                          <th>Staff Name </th>
+                          <th>Trainer Name </th>
                           <th>Gender</th>
                           <th>Date of Birth</th>
                           <th>Date of Joining</th>
@@ -102,24 +102,24 @@
                              @staff_list.each do |staff| %> 
                         <tr class="odd gradeX">
                         <td class="left"><%= i %></td>
-                          <td class="left"><%= staff.stf_name %></td>
-                          <%if staff.stf_gender == ''%>
+                          <td class="left"><%= staff.trn_name %></td>
+                          <%if staff.trn_gender == ''%>
                           <td class="left"></td>
-                          <%elsif staff.stf_gender == 'M'%>
+                          <%elsif staff.trn_gender == 'M'%>
                           <td class="left">Male</td>
-                          <%elsif staff.stf_gender == 'F'%>
+                          <%elsif staff.trn_gender == 'F'%>
                           <td class="left">Female</td>
-                          <%elsif staff.stf_gender == 'Oth'%>
+                          <%elsif staff.trn_gender == 'Oth'%>
                           <td class="left">Other</td>
                           <%end%>
-                          <td class="left"><%= formatted_date(staff.stf_dob) %></td>
-                          <td class="left"><%= formatted_date(staff.stf_join_date) %></td>
+                          <td class="left"><%= formatted_date(staff.trn_dob) %></td>
+                          <td class="left"><%= formatted_date(staff.trn_join_date) %></td>
                           <td> 
-                            <a href="<%= root_url %>staff_list/add_staff/<%= staff.id %>" class="tblEditBtn">
+                            <a href="<%= root_url %>trainer_list/add_trainer/<%= staff.id %>" class="tblEditBtn">
                               <i class="fa fa-pencil"></i>
                             </a> 
                              
-                            <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>staff_list/<%= staff.id %>/deletes')">
+                            <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>trainer_list/<%= staff.id %>/deletes')">
                               <i class="fa fa-trash-o"></i>
                             </a> 
                           </td>

@@ -9,7 +9,7 @@
 	<div class="page-bar">
 	<div class="page-title-breadcrumb">
 		<div class=" pull-left">
-			<div class="page-title">Add Staff</div>
+			<div class="page-title">Add Trainer</div>
 		</div>
 		<%= render "layouts/breadcrumbs" %>
 	</div>
@@ -21,7 +21,7 @@
 			<div class="card-body">
 			<div class="row">
 	       <div class="col-md-12 col-sm-12">
-		<a href="<%=root_url%>staff_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		<a href="<%=root_url%>trainer_list" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
 		</div>
 		</div>
 		<% if flash[:error] %>
@@ -32,8 +32,8 @@
         <% end %>
 			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
 						<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
-            <input type="hidden" name="mid" id="mid" value="<% if @staff %><%=@staff.id%><% end %>"/>
-			<input type="hidden" name="cur_stf_code" id="cur_stf_code" value="<% if @staff %><%=@staff.stf_code%><% end %>"/>
+            <input type="hidden" name="mid" id="mid" value="<% if @trainer %><%=@trainer.id%><% end %>"/>
+			<input type="hidden" name="cur_trn_code" id="cur_trn_code" value="<% if @trainer %><%=@trainer.trn_code%><% end %>"/>
 
 					<div class="form-body">
 						
@@ -57,8 +57,8 @@
 						<span class="required"> * </span>
 					</label>
 					<div class="col-md-3">
-										<input name="stf_code" id="stf_code"  type="text"  placeholder="Enter Code"
-										autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @staff%><%=@staff.stf_code%><% else %><%=@Lastcode%><% end %>"/> 
+										<input name="trn_code" id="trn_code"  type="text"  placeholder="Enter Code"
+										autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @trainer%><%=@trainer.trn_code%><% else %><%=@Lastcode%><% end %>"/> 
 										
 					
 					</div>
@@ -68,7 +68,7 @@
 					<div class="col-md-3">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-					<input name="stf_dob" id="stf_dob" type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @staff%><%=formatted_date(@staff.stf_dob)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_dob'] %><% end %>"/>
+					<input name="trn_dob" id="trn_dob" type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @trainer%><%=formatted_date(@trainer.trn_dob)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_dob'] %><% end %>"/>
 					</div>
 						
 					</div>
@@ -80,18 +80,18 @@
 					<span class="required"> * </span>
 					</label>
 					<div class="col-md-3">
-					<input name="stf_name" id="stf_name"  type="text"  placeholder="Enter Name"
-					autocomplete="off" maxlength="50" class="form-control" required value="<% if @staff%><%=@staff.stf_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_name'] %><% end %>"/> 
+					<input name="trn_name" id="trn_name"  type="text"  placeholder="Enter Name"
+					autocomplete="off" maxlength="50" class="form-control" required value="<% if @trainer%><%=@trainer.trn_name%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_name'] %><% end %>"/> 
 					</div>
 					<label class="col-md-3">Gender
 					<span class="required"> * </span>
 					</label>
 					<div class="col-md-3">
-						<select class="form-select select-height" required name="stf_gender" id="stf_gender">
+						<select class="form-select select-height" required name="trn_gender" id="trn_gender">
 							<option value="">Select...</option>
-							<option value="M" <% if @staff && @staff.stf_gender.to_s == 'M'%>selected<% end %>>Male</option>
-							<option value="F"  <% if @staff && @staff.stf_gender.to_s == 'F'%>selected<% end %>>Female</option>
-							<option value="Oth"  <% if @staff && @staff.stf_gender.to_s == 'Oth'%>selected<% end %>>Other</option>
+							<option value="M" <% if @trainer && @trainer.trn_gender.to_s == 'M'%>selected<% end %>>Male</option>
+							<option value="F"  <% if @trainer && @trainer.trn_gender.to_s == 'F'%>selected<% end %>>Female</option>
+							<option value="Oth"  <% if @trainer && @trainer.trn_gender.to_s == 'Oth'%>selected<% end %>>Other</option>
 						
 						</select>
 					</div>
@@ -104,14 +104,14 @@
 					<div class="col-md-3">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-					<input name="stf_join_date" id="stf_join_date" type="text" placeholder="Select Join Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @staff%><%=formatted_date(@staff.stf_join_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_join_date'] %><% end %>"/>
+					<input name="trn_join_date" id="trn_join_date" type="text" placeholder="Select Join Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @trainer%><%=formatted_date(@trainer.trn_join_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_join_date'] %><% end %>"/>
 					</div></div>
 					<label class="col-md-3">Leaving Date
 					</label>
 					<div class="col-md-3">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-					<input name="stf_leave_date" id="stf_leave_date" type="text" placeholder="Select Leave Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @staff%><%=formatted_date(@staff.stf_leave_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_leave_date'] %><% end %>"/>
+					<input name="trn_leave_date" id="trn_leave_date" type="text" placeholder="Select Leave Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @trainer%><%=formatted_date(@trainer.trn_leave_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_leave_date'] %><% end %>"/>
 					</div>
 					</div>
 					
@@ -146,16 +146,16 @@
 					<label class="col-md-3">Aadhaar No.
 					</label>
 					<div class="col-md-3">
-					<input name="stf_aadhaar" id="stf_aadhaar" onkeypress="return isNumberMyKeys(event);" type="text"  placeholder="Enter Aadhaar No"
-					autocomplete="off" maxlength="12" class="form-control"  value="<% if @staff%><%=@staff.stf_aadhaar%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_aadhaar'] %><% end %>"/> 
+					<input name="trn_aadhaar" id="trn_aadhaar" onkeypress="return isNumberMyKeys(event);" type="text"  placeholder="Enter Aadhaar No"
+					autocomplete="off" maxlength="12" class="form-control"  value="<% if @trainer%><%=@trainer.trn_aadhaar%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_aadhaar'] %><% end %>"/> 
 					</div>
 						<label class="col-md-3">Email Id
 					</label>
 					<div class="col-md-3">
 					<div class="input-group">
 						<span class="input-group-addon iconinput-pd"><i class="fa fa-envelope"></i></span>
-						<input name="stf_email" id="stf_email"  type="email"  placeholder="Enter Email Id"
-					autocomplete="off" maxlength="50" class="form-control" onchange="check_email_validation(this.value,'stf_email');" value="<% if @staff%><%=@staff.stf_email%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_email'] %><% end %>"/>
+						<input name="trn_email" id="trn_email"  type="email"  placeholder="Enter Email Id"
+					autocomplete="off" maxlength="50" class="form-control" onchange="check_email_validation(this.value,'trn_email');" value="<% if @trainer%><%=@trainer.trn_email%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_email'] %><% end %>"/>
 					</div>
 					</div>
 					</div>
@@ -168,8 +168,8 @@
 					<div class="col-md-3">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-phone"></i></span>
-					<input name="stf_contact" id="stf_contact" onkeypress="return isNumberMyKeys(event);"  type="text"  placeholder="Enter Contact No."
-					autocomplete="off" maxlength="10" class="form-control" required value="<% if @staff%><%=@staff.stf_contact%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_contact'] %><% end %>"/> 
+					<input name="trn_contact" id="trn_contact" onkeypress="return isNumberMyKeys(event);"  type="text"  placeholder="Enter Contact No."
+					autocomplete="off" maxlength="10" class="form-control" required value="<% if @trainer%><%=@trainer.trn_contact%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_contact'] %><% end %>"/> 
 					</div>
 					
 					</div>
@@ -180,8 +180,8 @@
 					<label class="col-md-3">Address 1
 					</label>
 					<div class="col-md-3">
-					<input name="stf_addr1" id="stf_addr1"  type="text"  placeholder="Enter Address 1"
-					autocomplete="off" maxlength="150" class="form-control"  value="<% if @staff%><%=@staff.stf_addr1%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_addr1'] %><% end %>"/> 
+					<input name="trn_addr1" id="trn_addr1"  type="text"  placeholder="Enter Address 1"
+					autocomplete="off" maxlength="150" class="form-control"  value="<% if @trainer%><%=@trainer.trn_addr1%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_addr1'] %><% end %>"/> 
 					</div>
 					</div>
 
@@ -191,14 +191,14 @@
 					
 					</label>
 					<div class="col-md-3">
-					<input name="stf_addr2" id="stf_addr2"  type="text"  placeholder="Enter Address 2"
-					autocomplete="off" maxlength="150" class="form-control" value="<% if @staff%><%=@staff.stf_addr2%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_addr2'] %><% end %>"/> 
+					<input name="trn_addr2" id="trn_addr2"  type="text"  placeholder="Enter Address 2"
+					autocomplete="off" maxlength="150" class="form-control" value="<% if @trainer%><%=@trainer.trn_addr2%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_addr2'] %><% end %>"/> 
 					</div>
 					<label class="col-md-3">Designation
 					</label>
 					<div class="col-md-3">
-					<input name="stf_designation" id="stf_designation"  type="text"  placeholder="Enter Designation"
-					autocomplete="off" maxlength="50" class="form-control"  value="<% if @staff%><%=@staff.stf_designation%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['stf_designation'] %><% end %>"/> 
+					<input name="trn_designation" id="trn_designation"  type="text"  placeholder="Enter Designation"
+					autocomplete="off" maxlength="50" class="form-control"  value="<% if @trainer%><%=@trainer.trn_designation%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_designation'] %><% end %>"/> 
 				</label>
 					</div>	
 					</div>
@@ -208,7 +208,7 @@
 							<button type="button" onclick="process_save_student_details();"
 							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
 								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
-							<a href="<%=root_url%>staff_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							<a href="<%=root_url%>trainer_list">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
 							</div>
 					</div>
 
