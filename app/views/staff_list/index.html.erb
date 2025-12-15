@@ -45,7 +45,7 @@
                     
                     <div class="row m-b-10">
                    <label class="col-sm-12 col-md-2">Name</label>
-                    <div class="col-sm-12 col-md-3">  <input type="text" class="form-control" name="member_list" id="member_list"  autocomplete="off" placeholder="Enter Member Name"  value="<% if @staff_list_search %><%=@staff_list_search%><% end %>"/></div>
+                    <div class="col-sm-12 col-md-3">  <input type="text" class="form-control" name="staff_list" id="staff_list"  autocomplete="off" placeholder="Enter Staff Name"  value="<% if @staff_list_search %><%=@staff_list_search%><% end %>"/></div>
                     
                   
                     <div class="col-sm-12 col-md-1 no_loader">  
@@ -91,6 +91,7 @@
                           <th>Gender</th>
                           <th>Date of Birth</th>
                           <th>Date of Joining</th>
+                          <th>Designation</th>
                           <th> Action </th>
                         </tr>
                       </thead>
@@ -114,6 +115,7 @@
                           <%end%>
                           <td class="left"><%= formatted_date(staff.stf_dob) %></td>
                           <td class="left"><%= formatted_date(staff.stf_join_date) %></td>
+                          <td class="left"><%= staff.stf_designation %></td>
                           <td> 
                             <a href="<%= root_url %>staff_list/add_staff/<%= staff.id %>" class="tblEditBtn">
                               <i class="fa fa-pencil"></i>

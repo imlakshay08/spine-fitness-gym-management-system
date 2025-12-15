@@ -1,0 +1,2 @@
+module StaffListHelper
+end

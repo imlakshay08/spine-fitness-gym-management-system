@@ -40,7 +40,7 @@ class MemberListController < ApplicationController
 
     def add_member
         @compcodes      = session[:loggedUserCompCode] 
-        @Lastcode=generate_regularization_series
+        @Lastcode=generate_code(table: MstMembersList, column: "mmbr_code", prefix: "M", compcode: session[:loggedUserCompCode])
         @member     = nil
         if params[:id].to_i>0
             @member = MstMembersList.where("mmbr_compcode=? AND id=?",@compcodes,params[:id]).first
@@ -81,10 +81,10 @@ class MemberListController < ApplicationController
             params[:mmbr_gender].to_s.blank?
             message =  "Gender is Required"
             isFlags = false
-          elsif
-             params[:mmbr_dob].to_s.blank?
-             message =  "Date of Birth is Required"
-             isFlags = false
+          # elsif
+          #    params[:mmbr_dob].to_s.blank?
+          #    message =  "Date of Birth is Required"
+          #    isFlags = false
             elsif
               params[:mmbr_contact].to_s.blank?
               message =  "Contact No. is Required"

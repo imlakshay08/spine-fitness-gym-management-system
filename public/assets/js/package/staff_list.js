@@ -112,13 +112,13 @@ function ValidateEmail(mail) {
 
   }
 
-  $(document).on("keypress","#staff_list",function(e){
+  $(document).on("keypress","#member_list",function(e){
 
     var keycode = (e.keyCode ? e.keyCode : e.which );
 
       if( keycode == '13' ){
 
-        filter_staff_list();
+        filter_member_list();
 
       }
 
@@ -126,7 +126,7 @@ function ValidateEmail(mail) {
 
   });
 
-  function filter_staff_list(){
+  function filter_member_list(){
 
       var useroot = $("#rootXPath").val();
 
@@ -170,10 +170,6 @@ function process_save_student_details(){
   }else if( stf_gender == ''){
     showToast("info","Gender is required.");
     setTimeout(function(){ set_global_focus('stf_gender');},500);
-    return false;
-  }else if( stf_dob == ''){
-    showToast("info","Date of Birth is required.");
-    setTimeout(function(){ set_global_focus('stf_dob');},500);
     return false;
   }else if( stf_contact == ''){
     showToast("info","Contact No. is required.");

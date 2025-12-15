@@ -1,0 +1,2 @@
+class MstTrainerList < ApplicationRecord
+end

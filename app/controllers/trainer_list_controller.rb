@@ -112,7 +112,7 @@ class TrainerListController < ApplicationController
                      chkgrpobj   = MstMembersList.where("trn_compcode=? AND id=?",@compcodes,mid).first
                      if chkgrpobj
                       profileid    = chkgrpobj.id
-                         chkgrpobj.update(members_params)
+                         chkgrpobj.update()
                         message = "Data updated successfully"
                          isFlags       = true
                          modulename = "Member List"
@@ -127,7 +127,7 @@ class TrainerListController < ApplicationController
                   isFlags        = false
                  end
                    if isFlags
-                       savegrp = MstMembersList.new(_params)
+                       savegrp = MstMembersList.new()
                        if savegrp.save
                            profileid    = savegrp.id.to_i
                           chkgrpobjx   = MstMembersList.where("trn_compcode=? AND id=?",@compcodes,profileid).first

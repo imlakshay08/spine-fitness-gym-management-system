@@ -36,7 +36,7 @@ class StockInventoryController < ApplicationController
 
     def add_stock_inventory
         @compcodes      = session[:loggedUserCompCode]
-        @Lastcode=generate_regularization_series
+        @Lastcode=generate_code(table: TrnStockInventory,column: "si_entry_no",prefix: "STK",compcode: session[:loggedUserCompCode])
         @StockList = MstStockList.where(["sl_compcode =?",@compcodes])         
         @stockin = nil
         if params[:id].to_i>0

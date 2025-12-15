@@ -36,7 +36,7 @@ class MemberSubscriptionsController < ApplicationController
 
     def add_member_subscriptions
         @compcodes      = session[:loggedUserCompCode]
-        @Lastcode=generate_regularization_series
+        @Lastcode=generate_code(table: TrnMemberSubscription,column: "ms_sbscrptn_no",prefix: "SUB",compcode: session[:loggedUserCompCode])
         @MemberList = MstMembersList.where(["mmbr_compcode =?",@compcodes])         
         @MemberPlanList = MstMembershipPlan.where(["plan_compcode =?",@compcodes])         
         @subscription = nil

@@ -1,3 +1,5 @@
+include GlobalCodeGenerator
+
 class StaffListController < ApplicationController
     before_action :require_login
     before_action :get_user_access_permissions
@@ -40,7 +42,7 @@ class StaffListController < ApplicationController
 
     def add_staff
         @compcodes      = session[:loggedUserCompCode] 
-        @Lastcode=generate_regularization_series
+        @Lastcode=generate_code(table: MstStaffList,column: "stf_code",prefix: "STF",compcode: session[:loggedUserCompCode])
         @staff     = nil
         if params[:id].to_i>0
             @staff = MstStaffList.where("stf_compcode=? AND id=?",@compcodes,params[:id]).first
@@ -82,10 +84,6 @@ class StaffListController < ApplicationController
             message =  "Gender is Required"
             isFlags = false
           elsif
-             params[:stf_dob].to_s.blank?
-             message =  "Date of Birth is Required"
-             isFlags = false
-            elsif
               params[:stf_contact].to_s.blank?
               message =  "Contact No. is Required"
               isFlags = false
@@ -240,6 +238,7 @@ class StaffListController < ApplicationController
     def staff_params
         params[:stf_compcode]     = session[:loggedUserCompCode] 
        stf_leave_date          = params[:stf_leave_date] !=nil && params[:stf_leave_date]!='' ? params[:stf_leave_date] : 0
+              stf_join_date          = params[:stf_join_date] !=nil && params[:stf_join_date]!='' ? params[:stf_join_date] : 0
         params.permit(:stf_compcode,:stf_code,:stf_name,:stf_gender,:stf_dob,:stf_designation,:stf_join_date,:stf_leave_date,:stf_contact,:stf_email,:stf_address1,:stf_address2,:stf_aadhaar,:stf_status)
                     # chkgrpobj   = MstFaculty.where("fclty_compcode=? ",@compcodes)
 

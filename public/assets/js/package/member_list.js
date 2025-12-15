@@ -171,10 +171,6 @@ function process_save_student_details(){
     showToast("info","Gender is required.");
     setTimeout(function(){ set_global_focus('mmbr_gender');},500);
     return false;
-  }else if( mmbr_dob == ''){
-    showToast("info","Date of Birth is required.");
-    setTimeout(function(){ set_global_focus('mmbr_dob');},500);
-    return false;
   }else if( mmbr_contact == ''){
     showToast("info","Contact No. is required.");
     setTimeout(function(){ set_global_focus('mmbr_contact');},500);

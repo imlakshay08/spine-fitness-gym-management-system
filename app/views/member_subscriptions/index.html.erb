@@ -109,8 +109,8 @@
                             	<td><%= subscription.ms_sbscrptn_no %></td>
                                <td> <%=membername%></td>
                             	<td><%=planname%></td>
-                              <td><%= subscription.ms_start_date %></td>
-                            	<td><%= subscription.ms_end_date %></td>
+                              <td><%= formatted_date(subscription.ms_start_date) %></td>
+                            	<td><%= formatted_date(subscription.ms_end_date) %></td>
                           <td>
                             <% status = subscription_status(subscription.ms_end_date) %>
                             <% if status == "ACTIVE" %>
