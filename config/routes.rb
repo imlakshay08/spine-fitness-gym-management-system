@@ -120,6 +120,22 @@ Rails.application.routes.draw do
 end
 
 Rails.application.routes.draw do
+  get   'trainer_list/referesh_trainer_list'
+  get   'trainer_list/index'=>'trainer_list#index'
+  post  'trainer_list/index'=>'trainer_list#index'
+  post  'trainer_list/search' =>'trainer_list#index'
+  get   'trainer_list/search' =>'trainer_list#index'
+  get   'trainer_list/add_trainer'=>'trainer_list#add_trainer'
+  post  'trainer_list/add_trainer'=>'trainer_list#add_trainer'
+  get   "trainer_list/:id"=>'trainer_list#index'
+  get   "trainer_list/add_trainer/:id"=>'trainer_list#add_trainer'
+  get   "trainer_list/:id/deletes"=>'trainer_list#destroy'
+  post  "trainer_list/faculty_ajax_img"=>"trainer_list#save_faculty_img"
+  post  "trainer_list/ajax_process"=>"trainer_list#ajax_process" 
+  resources :trainer_list
+end
+
+Rails.application.routes.draw do
   get   'member_subscriptions/referesh_member_subscriptions'
   get   'member_subscriptions/index'=>'member_subscriptions#index'
   post  'member_subscriptions/index'=>'member_subscriptions#index'
