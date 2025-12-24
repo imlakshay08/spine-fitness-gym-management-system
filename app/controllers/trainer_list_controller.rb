@@ -1,3 +1,5 @@
+include GlobalCodeGenerator
+
 class TrainerListController < ApplicationController
     before_action :require_login
     before_action :get_user_access_permissions
@@ -40,7 +42,7 @@ class TrainerListController < ApplicationController
 
     def add_trainer
         @compcodes      = session[:loggedUserCompCode] 
-        @Lastcode=generate_code(table: MstTrainerList, column: "trn_code", prefix: "M", compcode: session[:loggedUserCompCode])
+        @Lastcode=generate_code(table: MstTrainerList, column: "trn_code", prefix: "T", compcode: session[:loggedUserCompCode])
         @trainer     = nil
         if params[:id].to_i>0
             @trainer = MstTrainerList.where("trn_compcode=? AND id=?",@compcodes,params[:id]).first
@@ -71,7 +73,7 @@ class TrainerListController < ApplicationController
         mdfiles      = ""
       # begin
           if params[:trn_code].to_s.blank?
-             message =  "Member Code is Required"
+             message =  "Trainer Code is Required"
              isFlags = false
           elsif
              params[:trn_name].to_s.blank?
@@ -101,40 +103,40 @@ class TrainerListController < ApplicationController
 
               if params[:mid].to_i>0
                  if currentgrp.to_s.downcase != newgroup.to_s.downcase
-                     chkgrpobj   = MstMembersList.where("trn_compcode=? AND LOWER(trn_code)=? ",@compcodes,newgroup.to_s.downcase)
+                     chkgrpobj   = MstTrainerList.where("trn_compcode=? AND LOWER(trn_code)=? ",@compcodes,newgroup.to_s.downcase)
                      if chkgrpobj.length>0
-                         message = "Member Code already exist!"
+                         message = "Trainer Code already exist!"
                          isFlags        = false
                      end
                  end
          
                if isFlags
-                     chkgrpobj   = MstMembersList.where("trn_compcode=? AND id=?",@compcodes,mid).first
+                     chkgrpobj   = MstTrainerList.where("trn_compcode=? AND id=?",@compcodes,mid).first
                      if chkgrpobj
                       profileid    = chkgrpobj.id
                          chkgrpobj.update()
                         message = "Data updated successfully"
                          isFlags       = true
-                         modulename = "Member List"
-                         description = "Member List Update: #{params[:trn_code]}"
+                         modulename = "Trainer List"
+                         description = "Trainer List Update: #{params[:trn_code]}"
                          process_request_log_data("UPDATE", modulename, description)
                      end
                end
              else
-                 chkgrpobj   = MstMembersList.where("trn_compcode=? AND LOWER(trn_code)=?",@compcodes,newgroup.to_s.downcase)
+                 chkgrpobj   = MstTrainerList.where("trn_compcode=? AND LOWER(trn_code)=?",@compcodes,newgroup.to_s.downcase)
                  if chkgrpobj.length>0
-                  message = "Member Code already exist!"
+                  message = "Trainer Code already exist!"
                   isFlags        = false
                  end
                    if isFlags
-                       savegrp = MstMembersList.new()
+                       savegrp = MstTrainerList.new()
                        if savegrp.save
                            profileid    = savegrp.id.to_i
-                          chkgrpobjx   = MstMembersList.where("trn_compcode=? AND id=?",@compcodes,profileid).first
+                          chkgrpobjx   = MstTrainerList.where("trn_compcode=? AND id=?",@compcodes,profileid).first
                            message = "Data saved successfully"
                            isFlags       = true
-                           modulename = "Member List"
-                           description = "Member List Save: #{params[:trn_code]}"
+                           modulename = "Trainer List"
+                           description = "Trainer List Save: #{params[:trn_code]}"
                            process_request_log_data("SAVE", modulename, description)
                       
                        end
@@ -204,7 +206,7 @@ class TrainerListController < ApplicationController
     def destroy
         @compcodes      = session[:loggedUserCompCode] 
         if params[:id].to_i >0
-            @ListSate =  MstMembersList.where("trn_compcode=? AND id=?", @compcodes,params[:id].to_i).first
+            @ListSate =  MstTrainerList.where("trn_compcode=? AND id=?", @compcodes,params[:id].to_i).first
                if @ListSate
                      @ListSate.destroy
                          flash[:error] =  "Data deleted successfully."
@@ -213,11 +215,11 @@ class TrainerListController < ApplicationController
                  
                end
        end
-       redirect_to "#{root_url}member_list"
+       redirect_to "#{root_url}trainer_list"
     end
 
     private
-    def get_member_list
+    def get_trainer_list
         @compcodes      = session[:loggedUserCompCode] 
         
         if params[:page].to_i >0
@@ -230,15 +232,15 @@ class TrainerListController < ApplicationController
            
             #  session[:req_faculty_list] = nil
           # end
-          filter_search = params[:member_list] !=nil && params[:member_list] != '' ? params[:member_list].to_s.strip : session[:req_member_list].to_s.strip       
+          filter_search = params[:trainer_list] !=nil && params[:trainer_list] != '' ? params[:trainer_list].to_s.strip : session[:req_trainer_list].to_s.strip       
           iswhere       = "trn_compcode ='#{@compcodes}'"
           if filter_search !=nil && filter_search !=''
             iswhere +=" AND ( trn_code LIKE '%#{filter_search}%' OR trn_name LIKE '%#{filter_search}%')"
             @member_list_search       = filter_search
-            session[:req_member_list] = filter_search
+            session[:req_trainer_list] = filter_search
           end    
           
-        stdob =  MstMembersList.where(iswhere).order("trn_code ASC")
+        stdob =  MstTrainerList.where(iswhere).order("trn_code ASC")
         return stdob
     end
 

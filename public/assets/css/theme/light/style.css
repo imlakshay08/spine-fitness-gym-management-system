@@ -1222,3 +1222,11 @@ tr.group:hover {
     z-index: 1010;
     width: 94%;
 }
+.dashboard-scroll {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.dashboard-scroll ul {
+  margin-bottom: 0;
+}

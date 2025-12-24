@@ -59,7 +59,6 @@
 					<div class="col-md-3">
 										<input name="trn_code" id="trn_code"  type="text"  placeholder="Enter Code"
 										autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @trainer%><%=@trainer.trn_code%><% else %><%=@Lastcode%><% end %>"/> 
-										
 					
 					</div>
 					<label class="col-md-3 age_calcualted">Date of Birth
@@ -173,6 +172,15 @@
 					</div>
 					
 					</div>
+
+					<label class="col-md-3">Speciality
+					<span class="required"> * </span>
+					</label>
+					<div class="col-md-3">
+					<input name="trn_speciality" id="trn_speciality"  type="text"  placeholder="Eg: Strength, Yoga, Weight Loss"
+					autocomplete="off" maxlength="200" class="form-control" required
+					value="<% if @trainer%><%=@trainer.trn_speciality%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_speciality'] %><% end %>"/> 
+					</div>
 					</div>
 
 						<div class="form-group row">
@@ -182,6 +190,15 @@
 					<div class="col-md-3">
 					<input name="trn_addr1" id="trn_addr1"  type="text"  placeholder="Enter Address 1"
 					autocomplete="off" maxlength="150" class="form-control"  value="<% if @trainer%><%=@trainer.trn_addr1%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_addr1'] %><% end %>"/> 
+					</div>
+
+					<label class="col-md-3">Experience (Years)
+					</label>
+					<div class="col-md-3">
+					<input name="trn_experience_years" id="trn_experience_years" onkeypress="return isNumberMyKeys(event);" type="text"
+					placeholder="Enter Years"
+					autocomplete="off" maxlength="3" class="form-control"
+					value="<% if @trainer%><%=@trainer.trn_experience_years%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_experience_years'] %><% end %>"/> 
 					</div>
 					</div>
 
@@ -194,14 +211,59 @@
 					<input name="trn_addr2" id="trn_addr2"  type="text"  placeholder="Enter Address 2"
 					autocomplete="off" maxlength="150" class="form-control" value="<% if @trainer%><%=@trainer.trn_addr2%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_addr2'] %><% end %>"/> 
 					</div>
-					<label class="col-md-3">Designation
+
+					<label class="col-md-3">Certification
 					</label>
 					<div class="col-md-3">
-					<input name="trn_designation" id="trn_designation"  type="text"  placeholder="Enter Designation"
-					autocomplete="off" maxlength="50" class="form-control"  value="<% if @trainer%><%=@trainer.trn_designation%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_designation'] %><% end %>"/> 
-				</label>
-					</div>	
+					<input name="trn_certification" id="trn_certification" type="text"
+					placeholder="Eg: ACE, K11, ISSA"
+					autocomplete="off" maxlength="200" class="form-control"
+					value="<% if @trainer%><%=@trainer.trn_certification%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_certification'] %><% end %>"/> 
 					</div>
+	
+					</div>
+
+				<div class="form-group row">
+
+				<label class="col-md-3">Salary Type
+				<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+				<select class="form-select select-height" required name="trn_salary_type" id="trn_salary_type">
+				<option value="">Select...</option>
+				<option value="MONTHLY" <% if @trainer && @trainer.trn_salary_type.to_s == 'MONTHLY'%>selected<% end %>>Monthly</option>
+				<option value="PER_SESSION" <% if @trainer && @trainer.trn_salary_type.to_s == 'PER_SESSION'%>selected<% end %>>Per Session</option>
+				<option value="COMMISSION" <% if @trainer && @trainer.trn_salary_type.to_s == 'COMMISSION'%>selected<% end %>>Commission</option>
+				</select>
+				</div>
+
+				<label class="col-md-3">Salary Amount
+				<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+				<input name="trn_salary_amount" id="trn_salary_amount" onkeypress="return isNumberMyKeys(event);" type="text"
+				placeholder="Enter Amount"
+				autocomplete="off" maxlength="8" class="form-control" required
+				value="<% if @trainer%><%=@trainer.trn_salary_amount%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['trn_salary_amount'] %><% end %>"/> 
+				</div>
+
+				</div>
+
+				<div class="form-group row">
+
+				<label class="col-md-3">Status
+				<span class="required"> * </span>
+				</label>
+				<div class="col-md-3">
+				<select class="form-select select-height" required name="trn_status" id="trn_status">
+				<option value="">Select...</option>
+				<option value="ACTIVE" <% if @trainer && @trainer.trn_status.to_s == 'ACTIVE'%>selected<% end %>>Active</option>
+				<option value="INACTIVE" <% if @trainer && @trainer.trn_status.to_s == 'INACTIVE'%>selected<% end %>>Inactive</option>
+				</select>
+				</div>
+
+				</div>
+
 					
 					</div>
 				<div class="form-group form-button text-center  m-b-10" style="margin-top: 50px;">

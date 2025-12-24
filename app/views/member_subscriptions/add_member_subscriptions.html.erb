@@ -33,9 +33,12 @@
 
 			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
              			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
-			  <input type="hidden" name="mid" id="mid" value="<% if @subscription %><%=@subscription.id%><% end %>"/>         
-			<input type="hidden" name="cur_ms_sbscrptn_no" id="cur_ms_sbscrptn_no" value="<% if @subscription %><%=@subscription.ms_sbscrptn_no%><% end %>"/>
+						<input type="hidden" name="mid" id="mid" value="<% if @subscription && params[:renew].to_s != '1' %><%=@subscription.id%><% end %>"/>
 
+						<input type="hidden" name="cur_ms_sbscrptn_no" value="<% if @subscription && params[:renew].to_s != '1' %><%=@subscription.ms_sbscrptn_no%><% end %>"/>
+				<% if params[:renew].to_s == '1' %>
+						<input type="hidden" name="ms_member_id" value="<%= session[:sess_ms_member_id] %>">
+				<% end %>
 					<div class="form-body">
 						
 					<div class="form-group row">
@@ -50,13 +53,13 @@
 					<span class="required"> * </span>
 				</label>
 				<div class="col-md-4">
-						<select class="form-select select-height " required name="ms_member_id" id="ms_member_id">
+						<select class="form-select select-height " required name="ms_member_id" id="ms_member_id"  <% if params[:renew].to_s == '1' %>disabled<% end %>>
                     <option value="">Select...</option>
                     <%
                         if @MemberList && @MemberList.length>0
                             @MemberList.each do |member|
                     %>
-                    <option value="<%=member.id%>" <% if @subscription && @subscription.ms_member_id.to_i == member.id.to_i %>selected<% elsif session[:sess_ms_member_id].to_s==member.id.to_i%>selected<% end %>><%=member.mmbr_name%></option>
+                    <option value="<%=member.id%>" <% if @subscription && @subscription.ms_member_id.to_i == member.id.to_i %>selected<% elsif session[:sess_ms_member_id].to_i==member.id.to_i%>selected<% end %>><%=member.mmbr_name%></option>
                     <%
                     end
                     end
@@ -97,7 +100,7 @@
 					<div class="col-md-4">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-					<input name="ms_start_date" id="ms_start_date" type="text" placeholder="Select Start Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @subscription%><%=formatted_date(@subscription.ms_start_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_start_date'] %><% end %>"/>
+					<input name="ms_start_date" id="ms_start_date" type="text" class="form-control" value="<% if @subscription %><%= formatted_date(@subscription.ms_start_date) %><% elsif session[:sess_ms_start_date].present? %><%= session[:sess_ms_start_date] %><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_start_date'] %><% end %>"<% if params[:renew].to_s == '1' %>readonly<% end %>/>
 					</div></div>
 						<label class=" col-md-2">End Date
 					<span class="required"> * </span>

@@ -33,7 +33,7 @@ begin
               <header>Stock Summary</header>
             </div>
 
-            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+            <div class="card-body dashboard-scroll">
               <ul class="list-group">
                 <% @stock_list.each do |stk| %>
                   <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -50,7 +50,7 @@ begin
         <div class="col-md-3 col-sm-12">
           <div class="card card-box">
             <div class="card-head"><header>Expired</header></div>
-            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+            <div class="card-body dashboard-scroll">
               <ul class="list-group">
                 <% @expired_subs.each do |sub| %>
                   <% mem = get_member_detail(sub.ms_member_id) %>
@@ -68,7 +68,7 @@ begin
         <div class="col-md-3 col-sm-12">
           <div class="card card-box">
             <div class="card-head"><header>Expiring Soon</header></div>
-            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+            <div class="card-body dashboard-scroll">
               <ul class="list-group">
                 <% @expiring_subs.each do |sub| %>
                   <% mem = get_member_detail(sub.ms_member_id) %>
@@ -86,7 +86,7 @@ begin
         <div class="col-md-3 col-sm-12">
           <div class="card card-box">
             <div class="card-head"><header>Active Members</header></div>
-            <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+            <div class="card-body dashboard-scroll">
               <ul class="list-group">
                 <% @active_subs.each do |sub| %>
                   <% mem = get_member_detail(sub.ms_member_id) %>

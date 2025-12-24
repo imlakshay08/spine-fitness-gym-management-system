@@ -40,6 +40,19 @@ class MemberSubscriptionsController < ApplicationController
         @MemberList = MstMembersList.where(["mmbr_compcode =?",@compcodes])         
         @MemberPlanList = MstMembershipPlan.where(["plan_compcode =?",@compcodes])         
         @subscription = nil
+        if params[:renew].to_s == '1'
+            params[:id] = nil
+            @subscription = nil
+          member_id = params[:member_id].to_i
+          @latest = get_latest_subscription(member_id)
+
+          if @latest
+            session[:sess_ms_member_id] = member_id
+            session[:sess_ms_plan_id]   = @latest.ms_plan_id
+            session[:sess_ms_start_date] = (@latest.ms_end_date + 1.day).strftime("%d-%m-%Y")
+          end
+        end
+
         if params[:id].to_i>0
             @subscription = TrnMemberSubscription.where("ms_compcode=? AND id=?",@compcodes,params[:id]).first
          end

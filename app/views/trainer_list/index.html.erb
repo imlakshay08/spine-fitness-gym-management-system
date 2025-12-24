@@ -98,28 +98,28 @@
                       <% 
                        pagestart = params[:page].present? ? params[:page].to_i : 1
                          i = pagestart <= 1 ? 1 : ((pagestart - 1) * 10) + 1
-                      if @staff_list && @staff_list.length>0 
-                             @staff_list.each do |staff| %> 
+                      if @trainer_list && @trainer_list.length>0 
+                             @trainer_list.each do |trainer| %> 
                         <tr class="odd gradeX">
                         <td class="left"><%= i %></td>
-                          <td class="left"><%= staff.trn_name %></td>
-                          <%if staff.trn_gender == ''%>
+                          <td class="left"><%= trainer.trn_name %></td>
+                          <%if trainer.trn_gender == ''%>
                           <td class="left"></td>
-                          <%elsif staff.trn_gender == 'M'%>
+                          <%elsif trainer.trn_gender == 'M'%>
                           <td class="left">Male</td>
-                          <%elsif staff.trn_gender == 'F'%>
+                          <%elsif trainer.trn_gender == 'F'%>
                           <td class="left">Female</td>
-                          <%elsif staff.trn_gender == 'Oth'%>
+                          <%elsif trainer.trn_gender == 'Oth'%>
                           <td class="left">Other</td>
                           <%end%>
-                          <td class="left"><%= formatted_date(staff.trn_dob) %></td>
-                          <td class="left"><%= formatted_date(staff.trn_join_date) %></td>
+                          <td class="left"><%= formatted_date(trainer.trn_dob) %></td>
+                          <td class="left"><%= formatted_date(trainer.trn_join_date) %></td>
                           <td> 
-                            <a href="<%= root_url %>trainer_list/add_trainer/<%= staff.id %>" class="tblEditBtn">
+                            <a href="<%= root_url %>trainer_list/add_trainer/<%= trainer.id %>" class="tblEditBtn">
                               <i class="fa fa-pencil"></i>
                             </a> 
                              
-                            <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>trainer_list/<%= staff.id %>/deletes')">
+                            <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>trainer_list/<%= trainer.id %>/deletes')">
                               <i class="fa fa-trash-o"></i>
                             </a> 
                           </td>

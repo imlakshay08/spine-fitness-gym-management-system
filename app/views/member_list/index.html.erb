@@ -122,6 +122,14 @@
                             <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>member_list/<%= member.id %>/deletes')">
                               <i class="fa fa-trash-o"></i>
                             </a> 
+                        <% latest = get_latest_subscription(member.id) %>
+
+                        <% if latest.nil? || latest.ms_end_date < Date.today %>
+                          <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%=member.id%>"
+                            class="btn btn-warning btn-xs">
+                            Renew
+                          </a>
+                        <% end %>
                           </td>
                         </tr>
                         <% i += 1 %>
