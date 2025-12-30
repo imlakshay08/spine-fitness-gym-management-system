@@ -1,0 +1,138 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper" >
+    <div class="page-content" >
+           
+	<div class="page-bar">
+	<div class="page-title-breadcrumb">
+		<div class=" pull-left">
+			<div class="page-title">Add Issue Amount</div>
+		</div>
+		<%= render "layouts/breadcrumbs" %>
+	</div>
+</div>		
+	<div class="row">
+	<div class="col-md-12 col-sm-12">
+		<div class="card card-box" >
+			
+			<div class="card-body">
+			<div class="row">
+	       <div class="col-md-12 col-sm-12">
+		<a href="<%=root_url%>issue_amount" class="float-right">	<button type="button" class="btn btn-circle btn-info "><i class="fa fa-arrow-left"></i> Back to list</button> </a>
+		</div>
+		</div>
+		<% if flash[:error] %>
+             <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+             <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+            <%= flash[:error] %>
+            </div>
+        <% end %>
+
+			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
+             			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+						<input type="hidden" name="mid" id="mid" value="<% if @issueamount %><%=@issueamount.id%><% end %>"/>
+
+						<input type="hidden" name="cur_ia_code" value="<% if @issueamount %><%=@issueamount.ia_code%><% end %>"/>
+
+					<div class="form-body">
+						
+					<div class="form-group row">
+					<label class="col-md-2">Issue No.
+						<span class="required"> * </span>
+					</label>
+					<div class="col-md-4">
+										<input name="ia_code" id="ia_code"  type="text"  placeholder="Enter Code"
+										autocomplete="off" maxlength="10" class="form-control" readonly required value="<% if @issueamount%><%=@issueamount.ia_code%><% else %><%=@Lastcode%><% end %>"/> 
+					</div>
+					<label class="col-md-2">Staff Name
+					<span class="required"> * </span>
+				</label>
+				<div class="col-md-4">
+						<select class="form-select select-height " required name="ia_staff_id" id="ia_staff_id">
+                    <option value="">Select...</option>
+                    <%
+                        if @StaffList && @StaffList.length>0
+                            @StaffList.each do |staff|
+                    %>
+                    <option value="<%=staff.id%>" <% if @issueamount && @issueamount.ia_staff_id.to_i == staff.id.to_i %>selected<% elsif session[:sess_ia_staff_id].to_i==staff.id.to_i%>selected<% end %>><%=staff.stf_name%></option>
+                    <%
+                    end
+                    end
+                    %>
+                </select>								
+				</div>
+					</div>
+				
+
+				
+
+						<div class="form-group row">
+				
+						<label class=" col-md-2"> Type
+					<span class="required"> * </span>
+						</label>
+						<div class="col-md-4">
+						<select class="form-select select-height " required name="ia_type" id="ia_type">
+                    <option value="">Select...</option>
+                   <option value="I" <% if @issueamount && @issueamount.ia_type.to_s == 'I'%>selected="selected"<% end %>>Issue</option>
+                   <option value="R" <% if @issueamount && @issueamount.ia_type.to_s == 'R'%>selected="selected"<% end %>>Return</option>
+
+                </select>	
+						</div>
+					</div>
+
+		               <div class="form-group row">
+				
+						<label class=" col-md-2"> Date
+					<span class="required"> * </span>
+						</label>
+					<div class="col-md-4">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
+					<input name="ia_date" id="ia_date" type="text" class="form-control" value="<% if @issueamount %><%= formatted_date(@issueamount.ia_date) %><% elsif session[:sess_ia_date].present? %><%= session[:sess_ia_date] %><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ia_date'] %><% end %>"/>
+					</div></div>
+					</div>
+
+					
+		               <div class="form-group row">
+				
+						<label class=" col-md-2">Amount 
+						</label>
+						<div class="col-md-4">
+				        <input name="ia_amount" id="ia_amount" type="text" maxlength="6"  placeholder="Enter Amount Paid" class="form-control" value="<% if @issueamount%><%=@issueamount.ia_amount%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ia_amount'] %><% end %>" />
+						</div>
+					</div>
+
+		               <div class="form-group row">
+				
+						<label class=" col-md-2">Remarks				
+						</label>
+						<div class="col-md-4">
+				        <input name="ia_remarks" id="ia_remarks" type="text" maxlength="25"  placeholder="Enter Remarks" class="form-control" value="<% if @issueamount%><%=@issueamount.ia_remarks%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ia_remarks'] %><% end %>" />
+						</div>
+					</div>
+
+							<div class="form-group form-button text-center  m-b-20" style="margin-top: 50px;">
+							<button type="submit"
+							class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 m-r-20 btn-circle btn-primary">SUBMIT</button>
+								<div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active process_loader" style="display:none;"></div>
+							<a href="<%=root_url%>member_subscriptions">	<button type="button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect m-b-10 btn-circle btn-danger">Quit</button> </a>
+							</div>
+					</div>
+				</form>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+					
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>

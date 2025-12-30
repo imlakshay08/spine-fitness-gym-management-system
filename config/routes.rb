@@ -150,6 +150,23 @@ Rails.application.routes.draw do
   resources :member_subscriptions
 end
 
+Rails.application.routes.draw do
+  get   'issue_amount/referesh_issue_amount'
+  get   'issue_amount/index'=>'issue_amount#index'
+  post  'issue_amount/index'=>'issue_amount#index'
+  post  'issue_amount/search' =>'issue_amount#index'
+  get   'issue_amount/search' =>'issue_amount#index'
+  get   'issue_amount/add_issue_amount'=>'issue_amount#add_issue_amount'
+  post  'issue_amount/add_issue_amount'=>'issue_amount#add_issue_amount'
+  get   "issue_amount/staff_balance"=>'issue_amount#staff_balance'
+  post  "issue_amount/staff_balance"=>'issue_amount#staff_balance'
+  get   "issue_amount/:id"=>'issue_amount#index'
+  get   "issue_amount/add_issue_amount/:id"=>'issue_amount#add_issue_amount'
+  get   "issue_amount/:id/deletes"=>'issue_amount#destroy'
+  post  "issue_amount/faculty_ajax_img"=>"issue_amount#save_faculty_img"
+  post  "issue_amount/ajax_process"=>"issue_amount#ajax_process" 
+  resources :issue_amount
+end
 
 Rails.application.routes.draw do
   get   "change_password/change_password_refresh" 

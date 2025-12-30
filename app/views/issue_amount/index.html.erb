@@ -9,7 +9,7 @@
     <div class="page-bar">
 						<div class="page-title-breadcrumb">
 							<div class=" pull-left">
-								<div class="page-title">Membership Plans</div>
+								<div class="page-title">Issue Amount</div>
 							</div>
 							<%= render "layouts/breadcrumbs" %>
 						</div>
@@ -36,10 +36,10 @@
                       <input type="hidden" name="server_request" id="server_request" value="Y"/>
                     <div class="row m-b-10">
                    <label class="col-sm-12 col-md-1">Search</label>
-                    <div class="col-sm-12 col-md-4">  <input type="text" class="form-control" name="membership_plan" id="membership_plan"  autocomplete="off" placeholder=""  value="<% if @membership_plan_search %><%=@membership_plan_search%><% end %>"/></div>
+                    <div class="col-sm-12 col-md-4">  <input type="text" class="form-control" name="issue_amount" id="issue_amount"  autocomplete="off" placeholder="Enter "  value="<% if @issue_amount_search %><%=@issue_amount_search%><% end %>"/></div>
                     
                     <div class="col-sm-12 col-md-1 no_loader">  
-                    <button data-bs-toggle="button" onclick="filter_membership_plan();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
+                    <button data-bs-toggle="button" onclick="filter_issue_amount();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
 											</button>
                     </div>
                     <div class="col-sm-12 col-md-1 show_loader hidden">
@@ -48,7 +48,7 @@
                     </div>
                   </div>
                     <div class="col-sm-12 col-md-2">  
-                    <a href="<%=root_url%>membership_plan/referesh_membership_plan" class="float-right">
+                    <a href="<%=root_url%>issue_amount/referesh_issue_amount" class="float-right">
                     <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
                     </div>
                     </div>  
@@ -56,16 +56,17 @@
                       <%end%>
                       <div class="row">
                       <div class="col-sm-12 col-md-3">  
-                      <a href="<%=root_url%>membership_plan/add_membership_plan"  class="">
-                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add Membership Plan</button> </a>
+                      <a href="<%=root_url%>issue_amount/add_issue_amount"  class="">
+                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add Issue Amount</button> </a>
                       </div> 
                       <div class="col-sm-12 col-md-9 hidden">  
                       <a href="javascript:;" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
                       <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
 
                       </div>
-                      <div class="col-sm-12 col-md-9 hidden">  
-                      <a href="<%=root_url%>membership_plan/1_prt_subject_list.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
+
+                      <div class="col-sm-12 col-md-9 ">  
+                      <a href="<%=root_url%>issue_amount/1_prt_issue_amount.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
                       <button type="button" class="btn dark btn-outline m-b-10 " style="float:right;">PDF</button> </a>
                       </div>
                       </div>
@@ -75,35 +76,37 @@
                         id="example4">
 													<thead>
 														<tr>
-															<th>S.No</th>
-                              <th>Plan Name</th>
-                              <th>Plan Duration(No. of Months)</th>
-                            	<th>Plan Amount</th>
-                              <th>Action</th>
+                            <th>S.No</th>
+                            <th>Issue No</th>
+                            <th>Date</th>
+                            <th>Staff</th>
+                            <th>Type</th>
+                            <th>Amount</th>
 														</tr>
 													</thead>
 													<tbody>
                                          <% pagestart = params[:page].present? ? params[:page].to_i : 1 %>
                           <% i = pagestart <= 1 ? 1 : ((pagestart - 1) * 10) + 1 %>
 
-                          <% if @membership_plan && @membership_plan.length>0 %>
-                            <% @membership_plan.each do |plan| %>    
+                          <% if @issue_amount && @issue_amount.length>0 %>
+                            <% @issue_amount.each do |issue| %>    
+  
+                          <%
+                          	staffobj = get_staff_detail(issue.ia_staff_id)
+                            if staffobj
+                               staffname = staffobj.stf_name
+                            end
+                          %>
 
 														<tr  class="odd gradeX">
 															<td><%= i %></td>
-                            	<td><%= plan.plan_name %></td>
-                            	<td><%= plan.plan_duration_months %> Months</td>
-                               <td> Rs. <%= plan.plan_amount %> </td>
-                              <td>
-                              <a href="<%= root_url %>membership_plan/add_membership_plan/<%= plan.id %>"
-                                class="tblEditBtn">
-                                <i class="fa fa-pencil"></i>
-                              </a>
-                              <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>membership_plan/<%= plan.id %>/deletes')">
-                                <i class="fa fa-trash-o"></i>
-                              </a>
-                            </td>
-														</tr>
+                              <td><%=issue.ia_code%></td>
+                              <td><%=formatted_date(issue.ia_date)%></td>
+                              <td><%=staffname%></td>
+                              <td><% if issue.ia_type == 'I'%>Issue<%elsif issue.ia_type == 'R'%>Return<%end%></td>
+                              <td><%=issue.ia_amount%></td>
+
+                          </tr>
                           <% i += 1 %>
                             <% end %>
                             <% end %>

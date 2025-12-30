@@ -1,3 +1,5 @@
+include GlobalCodeGenerator
+
 class MemberSubscriptionsController < ApplicationController
     before_action      :require_login
     before_action :get_user_access_permissions
@@ -37,7 +39,13 @@ class MemberSubscriptionsController < ApplicationController
     def add_member_subscriptions
         @compcodes      = session[:loggedUserCompCode]
         @Lastcode=generate_code(table: TrnMemberSubscription,column: "ms_sbscrptn_no",prefix: "SUB",compcode: session[:loggedUserCompCode])
-        @MemberList = MstMembersList.where(["mmbr_compcode =?",@compcodes])         
+        active_member_ids = TrnMemberSubscription
+                              .where(ms_compcode: @compcodes, ms_status: 'ACTIVE')
+                              .pluck(:ms_member_id)
+
+        @MemberList = MstMembersList
+                        .where(mmbr_compcode: @compcodes)
+                        .where.not(id: active_member_ids)
         @MemberPlanList = MstMembershipPlan.where(["plan_compcode =?",@compcodes])         
         @subscription = nil
         if params[:renew].to_s == '1'
@@ -60,9 +68,12 @@ class MemberSubscriptionsController < ApplicationController
 
     def ajax_process
       @compCodes       = session[:loggedUserCompCode]
-        if  params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'SAVESUBSCR'
+      if params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'SAVESUBSCR'
         create();
         return 
+      elsif params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'FILLENDDATE' 
+        fill_end_date();
+        return
       end
     end
 
@@ -107,10 +118,10 @@ class MemberSubscriptionsController < ApplicationController
               params[:ms_amount_paid].to_s.blank?
               message =  "Amount Paid is Required"
               isFlags = false
-            elsif
-              params[:ms_payment_mode].to_s.blank?
-              message =  "Payment Mode is Required"
-              isFlags = false
+            # elsif
+            #   params[:ms_payment_mode].to_s.blank?
+            #   message =  "Payment Mode is Required"
+            #   isFlags = false
           end
 
             member_id = params[:ms_member_id].to_i
@@ -167,8 +178,18 @@ class MemberSubscriptionsController < ApplicationController
                    if isFlags
                        savegrp = TrnMemberSubscription.new(member_subscription_params)
                        if savegrp.save
+                       TrnPayment.create(
+                          pay_compcode: @compcodes,
+                          pay_no: generate_code(table: TrnPayment,column: "pay_no",prefix: "PAY",compcode: session[:loggedUserCompCode]),
+                          pay_ref_type: 'MEMBER_SUBSCRIPTION',
+                          pay_ref_id: savegrp.id,
+                          pay_date: params[:ms_start_date],
+                          pay_amount: params[:ms_amount_paid],
+                          pay_mode: params[:ms_payment_mode],
+                          pay_remarks: 'Subscription payment'
+                        )
                            profileid    = savegrp.id.to_i
-                          chkgrpobjx   = TrnMemberSubscription.where("ms_compcode=? AND id=?",@compcodes,profileid).first
+                           chkgrpobjx   = TrnMemberSubscription.where("ms_compcode=? AND id=?",@compcodes,profileid).first
                            message = "Data saved successfully"
                            isFlags       = true
                            modulename = "Member Subscription"
@@ -252,10 +273,18 @@ class MemberSubscriptionsController < ApplicationController
     end
 
     def calculate_end_date(start_date, plan_id)
-        plan = MstMembershipPlan.where("plan_compcode=? AND id=?", session[:loggedUserCompCode], plan_id).first
-        return start_date if plan.nil?
-        return start_date + plan.plan_duration_days.to_i.days
+      plan = MstMembershipPlan.find_by(
+        plan_compcode: session[:loggedUserCompCode],
+        id: plan_id
+      )
+      return start_date if plan.nil?
+
+      months = plan.plan_duration_months.to_i
+
+      # Business rule: end date is last day of subscription
+      start_date.advance(months: months) - 1.day
     end
+
 
     def subscription_status(end_date)
         end_date < Date.today ? "EXPIRED" : "ACTIVE"
@@ -292,6 +321,24 @@ class MemberSubscriptionsController < ApplicationController
         params[:ms_compcode]     = session[:loggedUserCompCode] 
         params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_member_id,:ms_plan_id,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks)
 
+    end
+
+    def fill_end_date
+      plan = MstMembershipPlan.find_by(id: params[:ms_plan_id])
+
+      if plan.present? && params[:ms_start_date].present?
+        start_date = Date.strptime(params[:ms_start_date], "%d-%b-%Y")
+        months     = plan.plan_duration_months.to_i
+
+        end_date = start_date.advance(months: months) - 1.day
+
+        render json: {
+          status: true,
+          end_date: end_date.strftime("%d-%b-%Y")
+        }
+      else
+        render json: { status: false }
+      end
     end
 
     private

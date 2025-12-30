@@ -59,8 +59,8 @@ class MembershipPlanController < ApplicationController
            flash[:error] =  "Plan Name is Required"
            isFlags = false
         end
-        if params[:plan_duration_days].to_s.blank?
-          flash[:error] =  "Duration Days is Required"
+        if params[:plan_duration_months].to_s.blank?
+          flash[:error] =  "Duration Months is Required"
           isFlags = false
         end
         if params[:plan_amount].to_s.blank?
@@ -187,7 +187,7 @@ class MembershipPlanController < ApplicationController
     def membership_plan_params
         @compcodes      = session[:loggedUserCompCode] 
         params[:plan_compcode]	    = @compcodes
-        params.permit(:plan_compcode,:plan_name,:plan_amount,:plan_description,:plan_duration_days)
+        params.permit(:plan_compcode,:plan_name,:plan_amount,:plan_description,:plan_duration_months)
 
     end
 end

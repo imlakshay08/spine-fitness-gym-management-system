@@ -1,0 +1,128 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+		<div class="page-container">
+		<%= render "layouts/sidebar" %>
+ <div class="page-content-wrapper">
+    <div class="page-content" >
+           
+    <div class="page-bar">
+						<div class="page-title-breadcrumb">
+							<div class=" pull-left">
+								<div class="page-title">Staff Balance</div>
+							</div>
+							<%= render "layouts/breadcrumbs" %>
+						</div>
+            
+					</div>
+       
+					<div class="row">
+						<div class="col-md-12">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="card">
+								
+										<div class="card-body ">
+                    <% if flash[:error] %>
+                    <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-success<% end %>" style="width:900px;" id="successXMessage">
+                      <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+                      <%= flash[:error] %>
+                    </div>
+                   <% end %>
+                    <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                    <%= form_tag({:action=>'index'} ,method: :get ,:multipart=>true,:id=>'myForms') do  %>
+                                        <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
+                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
+                    <div class="row m-b-10">
+                   <label class="col-sm-12 col-md-1">Search</label>
+                    <div class="col-sm-12 col-md-4 hidden">  <input type="text" class="form-control" name="issue_amount" id="issue_amount"  autocomplete="off" placeholder="Enter "  value=""/></div>
+                    
+                    <div class="col-sm-12 col-md-1 no_loader hidden">  
+                    <button data-bs-toggle="button" onclick="filter_issue_amount();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
+											</button>
+                    </div>
+                    <div class="col-sm-12 col-md-1 show_loader hidden">
+                    <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner  " >
+                      <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
+                    </div>
+                  </div>
+                    <div class="col-sm-12 col-md-2 hidden">  
+                    <a href="<%=root_url%>member_subscriptions/referesh_member_subscriptions" class="float-right">
+                    <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
+                    </div>
+                    </div>  
+
+                      <%end%>
+                      <div class="row">
+                      <div class="col-sm-12 col-md-3">  
+                      <a href="<%=root_url%>issue_amount/add_issue_amount"  class="">
+                      <button type="button" class="btn btn-circle btn-success hidden"><i class="fa fa-plus"></i> Add Issue Amount</button> </a>
+                      </div> 
+                      <div class="col-sm-12 col-md-9 hidden">  
+                      <a href="javascript:;" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
+                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
+
+                      </div>
+
+                      <div class="col-sm-12 col-md-9 ">  
+                      <a href="<%=root_url%>member_subscriptions/1_prt_member_subscriptions.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
+                      <button type="button" class="btn dark btn-outline m-b-10 hidden" style="float:right;">PDF</button> </a>
+                      </div>
+                      </div>
+											
+												<table class="table table-striped table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                            <th>S.No</th>
+                                                            <th>Staff Name</th>
+                                                            <th>Total Issued</th>
+                                                            <th>Total Returned</th>
+                                                            <th>Balance</th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            <% i = 1 %>
+                                                            <% @staff_balances.each do |row| %>
+                                                            <% staff = MstStaffList.find(row.ia_staff_id) rescue nil %>
+                                                            <% issued   = row.total_issued.to_i %>
+                                                            <% returned = row.total_returned.to_i %>
+                                                            <% balance  = issued - returned %>
+
+                                                            <tr>
+                                                                <td><%= i %></td>
+                                                                <td><%= staff&.stf_name %></td>
+                                                                <td><%= issued %></td>
+                                                                <td><%= returned %></td>
+                                                                <td>
+                                                                <strong>
+                                                                    <%= balance %>
+                                                                </strong>
+                                                                </td>
+                                                            </tr>
+
+                                                            <% i += 1 %>
+                                                            <% end %>
+                                                        </tbody>
+                                                        </table>
+
+											
+                     
+                    <div class="col-md-12 text-center"></div>
+                    
+										</div>
+									</div>
+								</div>
+
+                </div>
+                </div>
+                </div>
+        
+			</div>
+	 	</div>	 
+
+    </div>
+	<!-- End page container -->
+</div>
+

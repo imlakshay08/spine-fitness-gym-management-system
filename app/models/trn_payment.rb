@@ -1,0 +1,2 @@
+class TrnPayment < ApplicationRecord
+end

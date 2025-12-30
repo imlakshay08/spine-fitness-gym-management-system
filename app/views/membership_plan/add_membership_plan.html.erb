@@ -46,12 +46,12 @@
 					<input name="plan_name" id="plan_name"  type="text"  placeholder="Enter Plan Name"
 					autocomplete="off" maxlength="20" class="form-control" required value="<% if @memberplan%><%=@memberplan.plan_name%><% end %>"/> 
 					</div>
-					<label class="col-md-2">Plan Duration(In No. of Days)
+					<label class="col-md-2">Plan Duration(In No. of Months)
 					<span class="required"> * </span>
 				</label>
 				<div class="col-md-4">
-					<input name="plan_duration_days" id="plan_duration_days"  type="text"  placeholder="Enter Plan Duration(In No. of Days)"
-					autocomplete="off" maxlength="5" class="form-control" onkeypress="return isNumberMyKeys(event);" required value="<% if @memberplan%><%=@memberplan.plan_duration_days%><% end %>"/> 
+					<input name="plan_duration_months" id="plan_duration_months"  type="text"  placeholder="Enter Plan Duration(In No. of Months)"
+					autocomplete="off" maxlength="12" class="form-control" onkeypress="return isNumberMyKeys(event);" required value="<% if @memberplan%><%=@memberplan.plan_duration_months%><% end %>"/> 
 									
 				</div>
 					</div>

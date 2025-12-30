@@ -1,3 +1,5 @@
+include GlobalCodeGenerator
+
 class StockInventoryController < ApplicationController
     before_action      :require_login
     before_action :get_user_access_permissions

@@ -87,10 +87,10 @@
                       <thead>
                         <tr>
                           <th>S.No</th>
+                          <th>Member Code</th>
                           <th>Member Name </th>
                           <th>Gender</th>
-                          <th>Date of Birth</th>
-                          <th>Date of Joining</th>
+                          <th>Contact No.</th>
                           <th> Action </th>
                         </tr>
                       </thead>
@@ -102,6 +102,7 @@
                              @member_list.each do |member| %> 
                         <tr class="odd gradeX">
                         <td class="left"><%= i %></td>
+                        <td class="left"><%= member.mmbr_code%></td>
                           <td class="left"><%= member.mmbr_name %></td>
                           <%if member.mmbr_gender == ''%>
                           <td class="left"></td>
@@ -112,8 +113,7 @@
                           <%elsif member.mmbr_gender == 'Oth'%>
                           <td class="left">Other</td>
                           <%end%>
-                          <td class="left"><%= formatted_date(member.mmbr_dob) %></td>
-                          <td class="left"><%= formatted_date(member.mmbr_join_date) %></td>
+                          <td class="left"><%= member.mmbr_contact %></td>
                           <td> 
                             <a href="<%= root_url %>member_list/add_member/<%= member.id %>" class="tblEditBtn">
                               <i class="fa fa-pencil"></i>

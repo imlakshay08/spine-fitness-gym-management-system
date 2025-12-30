@@ -137,10 +137,6 @@ function save_member_subscription(){
     showToast("info","Amount is required.");
     setTimeout(function(){ set_global_focus('ms_amount_paid');},500);
     return false;
-  }else if( ms_payment_mode == ''){
-    showToast("info","Payment Mode is required.");
-    setTimeout(function(){ set_global_focus('ms_payment_mode');},500);
-    return false;
   }
 
   formData.append("identity", "SAVESUBSCR");
@@ -187,4 +183,47 @@ function save_member_subscription(){
     },500);
 }
 
+function fill_end_date() {
+    var usePath   = $.trim($("#rootXPath").val());
+    var plan_id   = $("#ms_plan_id").val();
+    var startDate = $("#ms_start_date").val();
 
+    if (plan_id == "" || startDate == "") {
+        $("#ms_end_date").val("");
+        return;
+    }
+
+    $.ajax({
+        url: usePath + "member_subscriptions/ajax_process",
+        type: "POST",
+        dataType: "json",
+        data: {
+            identity: "FILLENDDATE",
+            ms_plan_id: plan_id,
+            ms_start_date: startDate
+        },
+        success: function (resp) {
+            if (resp.status === true) {
+                $("#ms_end_date").val(resp.end_date);
+            } else {
+                $("#ms_end_date").val("");
+            }
+        },
+        error: function () {
+            alert("Something went wrong while calculating end date.");
+        }
+    });
+}
+
+$(document).ready(function() {
+  $('#ms_member_id').select2({
+    placeholder: "-Select-",
+    allowClear: true,
+    width: 'resolve'  // auto width
+  });
+  
+   $('#ms_member_id').on('select2:open', function () {
+    $('.select2-search__field').focus();
+  });
+  
+});

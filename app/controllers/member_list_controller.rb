@@ -1,3 +1,5 @@
+include GlobalCodeGenerator
+
 class MemberListController < ApplicationController
     before_action :require_login
     before_action :get_user_access_permissions
@@ -233,7 +235,7 @@ class MemberListController < ApplicationController
           filter_search = params[:member_list] !=nil && params[:member_list] != '' ? params[:member_list].to_s.strip : session[:req_member_list].to_s.strip       
           iswhere       = "mmbr_compcode ='#{@compcodes}'"
           if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( mmbr_code LIKE '%#{filter_search}%' OR mmbr_name LIKE '%#{filter_search}%')"
+            iswhere +=" AND ( mmbr_code LIKE '%#{filter_search}%' OR mmbr_name LIKE '%#{filter_search}%' OR mmbr_contact LIKE '%#{filter_search}%')"
             @member_list_search       = filter_search
             session[:req_member_list] = filter_search
           end    

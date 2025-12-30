@@ -1,0 +1,2 @@
+class TrnIssueAmount < ApplicationRecord
+end

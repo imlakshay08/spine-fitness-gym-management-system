@@ -46,6 +46,15 @@
               <a href="<%=root_url%>trainer_list" class="nav-link "> <span class="title">Trainers List</span>
               </a>
             </li>
+            </li>
+              <li class="nav-item <% if controller.controller_name == 'issue_amount' %>menucolor<% end %>">
+              <a href="<%=root_url%>issue_amount" class="nav-link "> <span class="title">Issue Amount</span>
+              </a>
+            </li>
+              <li class="nav-item">
+              <a href="<%=root_url%>issue_amount/staff_balance" class="nav-link "> <span class="title">Staff Balance</span>
+              </a>
+            </li>
               </ul>
             </div>
           </div>
