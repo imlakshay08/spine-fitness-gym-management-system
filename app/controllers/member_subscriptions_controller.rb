@@ -45,7 +45,7 @@ class MemberSubscriptionsController < ApplicationController
 
         @MemberList = MstMembersList
                         .where(mmbr_compcode: @compcodes)
-                        .where.not(id: active_member_ids)
+                        
         @MemberPlanList = MstMembershipPlan.where(["plan_compcode =?",@compcodes])         
         @subscription = nil
         if params[:renew].to_s == '1'
@@ -123,6 +123,21 @@ class MemberSubscriptionsController < ApplicationController
             #   message =  "Payment Mode is Required"
             #   isFlags = false
           end
+
+          plan = MstMembershipPlan.find_by(
+            plan_compcode: @compcodes,
+            id: params[:ms_plan_id]
+          )
+
+          if plan.nil?
+            message = "Invalid membership plan"
+            isFlags = false
+          end
+
+          # LOCK PRICING SNAPSHOT
+          params[:ms_plan_amount]    = plan.plan_mrp_amount
+          params[:ms_final_amount]   = plan.plan_final_amount
+          params[:ms_discount_amount] = plan.plan_mrp_amount.to_f - plan.plan_final_amount.to_f
 
             member_id = params[:ms_member_id].to_i
 
@@ -319,7 +334,7 @@ class MemberSubscriptionsController < ApplicationController
     private
     def member_subscription_params
         params[:ms_compcode]     = session[:loggedUserCompCode] 
-        params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_member_id,:ms_plan_id,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks)
+        params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_member_id,:ms_plan_id,:ms_plan_amount,:ms_final_amount,:ms_discount_amount,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks)
 
     end
 

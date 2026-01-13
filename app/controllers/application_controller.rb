@@ -2,7 +2,7 @@ class ApplicationController < ActionController::Base
    protect_from_forgery with: :exception
    rescue_from ActiveRecord::RecordNotFound, :with => :render_404
    include ErpModule::Common
-   helper_method :get_dob_calculate,:page_linked,:set_ent,:set_dct,:formatted_date,:get_student_personal_information,:get_latest_subscription,:get_all_family_information,:get_faculty_detail,:get_club_detail,:get_timetable_information,:get_course_detail,:get_current_stock,:get_plan_detail,:get_stock_detail,:get_member_detail,:get_staff_detail,:get_attendance_info,:generate_common_numbers
+   helper_method :get_dob_calculate,:page_linked,:set_ent,:set_dct,:formatted_date,:get_student_personal_information,:get_latest_subscription,:get_all_family_information,:get_faculty_detail,:get_club_detail,:get_timetable_information,:get_course_detail,:get_current_stock,:get_plan_detail,:get_stock_detail,:get_member_detail,:get_all_member_detail,:get_staff_detail,:get_attendance_info,:generate_common_numbers
   
    def serial_global_number(lgth)
      chracters = ""
@@ -177,6 +177,13 @@ class ApplicationController < ActionController::Base
      def get_member_detail(memberid)
           compcode =  session[:loggedUserCompCode]
           memberobj =  MstMembersList.where("mmbr_compcode= ? AND id = ?",compcode,memberid).first
+          return memberobj
+     end
+
+     private
+     def get_all_member_detail(memberid)
+          compcode =  session[:loggedUserCompCode]
+          memberobj =  MstMembersList.where("mmbr_compcode= ? AND id = ?",compcode,memberid)
           return memberobj
      end
 
