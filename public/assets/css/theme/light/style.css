@@ -1223,8 +1223,8 @@ tr.group:hover {
     width: 94%;
 }
 .dashboard-scroll {
-  max-height: 280px;
-  overflow-y: auto;
+  max-height: 280px !important;
+  overflow-y: auto !important;
 }
 
 .dashboard-scroll ul {
