@@ -33,7 +33,7 @@ begin
               <header>Stock Summary</header>
             </div>
 
-            <div class="card-body dashboard-scroll">
+    <div class="card-body p-0" style="height:280px; overflow-y:auto;">
               <ul class="list-group">
                 <% @stock_list.each do |stk| %>
                   <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -88,14 +88,17 @@ begin
 
         <!-- EXPIRED SUBSCRIPTIONS -->
 <div class="col-md-4">
-  <div class="card">
-    <div class="card-head"><header>Expired Subscriptions</header></div>
-    <div class="card-body dashboard-scroll">
-      <ul class="list-group">
+  <div class="card h-100">
+    <div class="card-head">
+      <header>Expired Subscriptions</header>
+    </div>
+
+    <div class="card-body p-0" style="height:280px; overflow-y:auto;">
+      <ul class="list-group list-group-flush">
         <% @expired_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
           <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member"%></span>
+            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
             <span class="text-danger">
               <%= sub.ms_end_date.strftime("%d-%b") %>
             </span>
@@ -106,17 +109,18 @@ begin
   </div>
 </div>
 
-
-        <!-- EXPIRING SOON -->
 <div class="col-md-4">
-  <div class="card">
-    <div class="card-head"><header>Expiring Soon Subscriptions</header></div>
-    <div class="card-body dashboard-scroll">
-      <ul class="list-group">
+  <div class="card h-100">
+    <div class="card-head">
+      <header>Expiring Soon Subscriptions</header>
+    </div>
+
+    <div class="card-body p-0" style="height:280px; overflow-y:auto;">
+      <ul class="list-group list-group-flush">
         <% @expiring_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
           <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member"%></span>
+            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
             <span class="text-warning">
               <%= sub.ms_end_date.strftime("%d-%b") %>
             </span>
@@ -127,17 +131,18 @@ begin
   </div>
 </div>
 
-
-        <!-- ACTIVE -->
 <div class="col-md-4">
-  <div class="card">
-    <div class="card-head"><header>Active Subscriptions</header></div>
-    <div class="card-body dashboard-scroll">
-      <ul class="list-group">
+  <div class="card h-100">
+    <div class="card-head">
+      <header>Active Subscriptions</header>
+    </div>
+
+    <div class="card-body p-0" style="height:280px; overflow-y:auto;">
+      <ul class="list-group list-group-flush">
         <% @active_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
           <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member"%></span>
+            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
             <span>
               <%= payment_status(sub) %> |
               <%= sub.ms_end_date.strftime("%d-%b") %>
@@ -157,7 +162,7 @@ begin
         <table class="table table-bordered">
           <thead>
             <tr>
-              <th>Member</th>
+              <th>Member(Contact)</th>
               <th>Plan</th>
               <th>Final Amount</th>
               <th>Paid</th>
@@ -174,7 +179,7 @@ begin
                             end
               %>
               <tr>
-                <td><%= mem&.mmbr_name || "Unknown Member" %></td>
+                <td><%= mem&.mmbr_name || "Unknown Member" %>(<%=mem&.mmbr_contact%>)</td>
                 <td><%= planname %></td>
                 <td>₹ <%= sub.ms_final_amount %></td>
                 <td>₹ <%= total_paid(sub) %></td>
