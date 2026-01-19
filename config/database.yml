@@ -27,10 +27,11 @@ production:
   adapter: mysql2
   encoding: utf8mb4
   pool: 1
-  host: <%= ENV['MYSQL_HOST'] %>
-  port: <%= ENV['MYSQL_PORT'] %>
-  username: <%= ENV['MYSQL_USER'] %>
-  password: <%= ENV['MYSQL_PASSWORD'] %>
-  database: <%= ENV['MYSQL_DB'] %>
+  host: <%= ENV['MYSQL_ADDON_HOST'] %>
+  port: <%= ENV['MYSQL_ADDON_PORT'] %>
+  username: <%= ENV['MYSQL_ADDON_USER'] %>
+  password: <%= ENV['MYSQL_ADDON_PASSWORD'] %>
+  database: <%= ENV['MYSQL_ADDON_DB'] %>
+
 
 
