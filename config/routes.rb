@@ -1,3 +1,11 @@
+### FOR REST API ######
+Rails.application.routes.draw do
+  namespace 'api' do
+    namespace 'v1' do
+    post "/api/biometric_attendances", to: "api/biometric_attendances#create"
+    end
+  end
+end
 
 Rails.application.routes.draw do  
   get   '/index.html.var'=>'login#index'
