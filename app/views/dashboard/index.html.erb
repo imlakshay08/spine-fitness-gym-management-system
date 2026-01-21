@@ -98,7 +98,7 @@ begin
         <% @expired_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
           <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
+            <span><%= mem&.mmbr_name || "Unknown Member" %>(<%= mem&.mmbr_contact%>)</span>
             <span class="text-danger">
               <%= sub.ms_end_date.strftime("%d-%b") %>
             </span>
@@ -120,7 +120,7 @@ begin
         <% @expiring_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
           <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
+            <span><%= mem&.mmbr_name || "Unknown Member" %>(<%= mem&.mmbr_contact%>)</span>
             <span class="text-warning">
               <%= sub.ms_end_date.strftime("%d-%b") %>
             </span>
@@ -142,7 +142,7 @@ begin
         <% @active_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
           <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
+            <span><%= mem&.mmbr_name || "Unknown Member" %>(<%= mem&.mmbr_contact%>)</span>
             <span>
               <%= payment_status(sub) %> |
               <%= sub.ms_end_date.strftime("%d-%b") %>
