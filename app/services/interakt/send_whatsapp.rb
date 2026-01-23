@@ -5,14 +5,14 @@ module Interakt
   class SendWhatsapp
     INTERAKT_URL = "https://api.interakt.ai/v1/public/message/"
 
-    def self.send_membership_expiry(phone:, name:, expiry_date)
-      return if phone.to_s.length != 10   # hard safety
+    def self.send_membership_expiry(phone:, name:, expiry_date:)
+      return if phone.to_s.length != 10
 
       uri = URI(INTERAKT_URL)
 
       payload = {
         countryCode: "+91",
-        phoneNumber: phone,                # 10-digit only
+        phoneNumber: phone,
         type: "Template",
         template: {
           name: "membership_expiry_reminder",
