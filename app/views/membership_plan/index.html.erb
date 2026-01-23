@@ -78,7 +78,8 @@
 															<th>S.No</th>
                               <th>Plan Name</th>
                               <th>Plan Duration(No. of Months)</th>
-                            	<th>Plan Amount</th>
+                              <th>MRP Amount</th>
+                            	<th>Final Plan Amount</th>
                               <th>Action</th>
 														</tr>
 													</thead>
@@ -93,7 +94,8 @@
 															<td><%= i %></td>
                             	<td><%= plan.plan_name %></td>
                             	<td><%= plan.plan_duration_months %> Months</td>
-                               <td> Rs. <%= plan.plan_amount %> </td>
+                              <td> Rs. <%= plan.plan_mrp_amount%> </td>
+                               <td> Rs. <%= plan.plan_final_amount %> </td>
                               <td>
                               <a href="<%= root_url %>membership_plan/add_membership_plan/<%= plan.id %>"
                                 class="tblEditBtn">

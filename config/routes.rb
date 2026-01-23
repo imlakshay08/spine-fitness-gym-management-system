@@ -1,9 +1,7 @@
 ### FOR REST API ######
 Rails.application.routes.draw do
-  namespace 'api' do
-    namespace 'v1' do
-    post "/api/biometric_attendances", to: "api/biometric_attendances#create"
-    end
+  namespace :api do
+    resources :biometric_attendances, only: [:create]
   end
 end
 
@@ -156,6 +154,11 @@ Rails.application.routes.draw do
   get   "member_subscriptions/:id/deletes"=>'member_subscriptions#destroy'
   post  "member_subscriptions/ajax_process"=>"member_subscriptions#ajax_process" 
   resources :member_subscriptions
+end
+
+Rails.application.routes.draw do
+  get   'cron/send_expiry_whatsapp'=>'cron#send_expiry_whatsapp'
+  resources :cron
 end
 
 Rails.application.routes.draw do

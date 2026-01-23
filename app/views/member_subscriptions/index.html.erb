@@ -79,6 +79,7 @@
 															<th>S.No</th>
                               <th>Subscription No.</th>
                               <th>Member Name</th>
+                              <th>Contact No.</th>
                               <th>Plan</th>
                             	<th>Start Date</th>
                               <th>End Date</th>
@@ -96,6 +97,7 @@
 														memberobj = get_member_detail(subscription.ms_member_id)
                             if memberobj
                                membername = memberobj.mmbr_name
+                               memberphone = memberobj.mmbr_contact
                             end
 
 														planobj = get_plan_detail(subscription.ms_plan_id)
@@ -108,6 +110,7 @@
 															<td><%= i %></td>
                             	<td><%= subscription.ms_sbscrptn_no %></td>
                                <td> <%=membername%></td>
+                               <td><%=memberphone%></td>
                             	<td><%=planname%></td>
                               <td><%= formatted_date(subscription.ms_start_date) %></td>
                             	<td><%= formatted_date(subscription.ms_end_date) %></td>

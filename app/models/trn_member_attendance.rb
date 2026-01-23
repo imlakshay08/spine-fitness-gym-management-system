@@ -1,0 +1,2 @@
+class TrnMemberAttendance < ApplicationRecord
+end

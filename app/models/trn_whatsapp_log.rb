@@ -1,0 +1,2 @@
+class TrnWhatsappLog < ApplicationRecord
+end

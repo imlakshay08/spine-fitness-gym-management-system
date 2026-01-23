@@ -1,0 +1,2 @@
+class TrnMemberBiometricMapping < ApplicationRecord
+end
