@@ -147,7 +147,7 @@ class StaffListController < ApplicationController
                  session[:sess_stf_name] = params[:stf_name]
                  session[:sess_stf_gender] = params[:stf_gender]
                  session[:sess_stf_dob] = params[:stf_dob]
-                 session[:sess_stf_designation] = params[:mmbr_stf_designation]
+                 session[:sess_stf_designation] = params[:stf_designation]
                  session[:sess_stf_join_date] = params[:stf_join_date]
                  session[:sess_stf_leave_date] = params[:stf_leave_date]
                  session[:sess_stf_contact] = params[:stf_contact]

@@ -1,12 +1,9 @@
-require 'net/http'
-require 'json'
-
 module Interakt
   class SendWhatsapp
     INTERAKT_URL = "https://api.interakt.ai/v1/public/message/"
 
-    def self.send_membership_expiry(phone:, name:, expiry_date:)
-      return if phone.to_s.length != 10
+    def self.send_template(phone:, template:, body_values:)
+      return { http_code: 0, body: {}, raw: "Invalid phone" } if phone.to_s.length != 10
 
       uri = URI(INTERAKT_URL)
 
@@ -15,12 +12,9 @@ module Interakt
         phoneNumber: phone,
         type: "Template",
         template: {
-          name: "membership_expiry_reminder",
+          name: template,
           languageCode: "en",
-          bodyValues: [
-            name,
-            expiry_date.strftime("%d %b %Y")
-          ]
+          bodyValues: body_values
         }
       }
 
@@ -34,8 +28,11 @@ module Interakt
 
       response = http.request(request)
 
-      Rails.logger.info("[INTERAKT] #{phone} → #{response.code}")
-      response
+      {
+        http_code: response.code.to_i,
+        body: JSON.parse(response.body) rescue {},
+        raw: response.body
+      }
     end
   end
 end

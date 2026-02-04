@@ -1,48 +1,62 @@
 class MembershipExpiryWhatsappJob < ApplicationJob
   queue_as :default
 
-  TEMPLATE_NAME = "membership_expiry_reminder"
-
-  def perform
+  def perform(type = :expiring)
     compcode = "SF"
-    target_date = Date.today + 3.days
+    today = Date.today
 
-    subscriptions = TrnMemberSubscription
-      .joins("INNER JOIN mst_members_lists ON mst_members_lists.id = trn_member_subscriptions.ms_member_id")
-      .where(
-        ms_compcode: compcode,
-        ms_end_date: target_date,
-        ms_status: "ACTIVE"
-      )
+    subscriptions =
+      case type
+      when :expiring
+        TrnMemberSubscription.where(
+          ms_compcode: compcode,
+          ms_end_date: today + 3.days,
+          ms_status: "ACTIVE"
+        )
+      when :expired
+        TrnMemberSubscription.where(
+              ms_compcode: compcode,
+              ms_status: "ACTIVE",
+              ms_end_date: 7.days.ago.to_date..(today - 1)
+            )
 
-    subscriptions.each do |sub|
-      member = MstMembersList.find(sub.ms_member_id)
-      next if member.mmbr_contact.blank?
+      end
 
-      already_sent = TrnWhatsappLog.exists?(
-        wl_compcode: compcode,
-        wl_member_id: member.id,
+      subscriptions.find_each do |sub|
+      member = MstMembersList.find_by(id: sub.ms_member_id)
+      next if member.nil? || member.mmbr_contact.blank?
+
+      template = "membership_expiry_reminder"
+
+      already_sent = TrnWhatsappLog.where(
         wl_subscription_id: sub.id,
-        wl_template_name: TEMPLATE_NAME
-      )
+        wl_template_name: template,
+        wl_status: %w[DELIVERED READ]
+      ).exists?
 
       next if already_sent
 
-      response = Interakt::SendWhatsapp.send_membership_expiry(
+      response = Interakt::SendWhatsapp.send_template(
         phone: member.mmbr_contact,
-        name: member.mmbr_name,
-        expiry_date: sub.ms_end_date
+        template: template,
+        body_values: [
+          member.mmbr_name,
+          sub.ms_end_date.strftime("%d %b %Y")
+        ]
       )
 
       TrnWhatsappLog.create!(
         wl_compcode: compcode,
         wl_member_id: member.id,
         wl_subscription_id: sub.id,
-        wl_template_name: TEMPLATE_NAME,
+        wl_template_name: template,
         wl_sent_at: Time.current,
-        wl_status: response&.code.to_i == 200 ? "SENT" : "FAILED",
-        wl_api_response: response&.body.to_s
+        wl_status: response[:http_code] == 200 ? "QUEUED" : "FAILED",
+        wl_interakt_msg_id: response.dig(:body, "id"),
+        wl_api_response: response[:raw],
+        wl_failed_reason: response[:raw]
       )
+
     end
   end
 end
