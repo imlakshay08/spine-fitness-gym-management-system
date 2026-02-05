@@ -3,7 +3,9 @@ module Interakt
     INTERAKT_URL = "https://api.interakt.ai/v1/public/message/"
 
     def self.send_template(phone:, template:, body_values:)
-      return { http_code: 0, body: {}, raw: "Invalid phone" } if phone.to_s.length != 10
+      # sanitize phone
+      phone = phone.to_s.gsub(/\D/, "").last(10)
+      return { http_code: 0, body: {}, raw: "Invalid phone" } unless phone.length == 10
 
       uri = URI(INTERAKT_URL)
 
@@ -28,9 +30,16 @@ module Interakt
 
       response = http.request(request)
 
+      parsed_body =
+        begin
+          JSON.parse(response.body)
+        rescue
+          {}
+        end
+
       {
         http_code: response.code.to_i,
-        body: JSON.parse(response.body) rescue {},
+        body: parsed_body,
         raw: response.body
       }
     end
