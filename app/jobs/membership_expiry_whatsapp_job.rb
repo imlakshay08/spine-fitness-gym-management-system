@@ -45,13 +45,17 @@ class MembershipExpiryWhatsappJob < ApplicationJob
         ]
       )
 
+      success =
+        response[:http_code].between?(200,299) &&
+        response.dig(:body, "result") == true
+
       TrnWhatsappLog.create!(
         wl_compcode: compcode,
         wl_member_id: member.id,
         wl_subscription_id: sub.id,
         wl_template_name: template,
         wl_sent_at: Time.current,
-        wl_status: response[:http_code] == 200 ? "QUEUED" : "FAILED",
+        wl_status: success ? "QUEUED" : "FAILED",
         wl_interakt_msg_id: response.dig(:body, "id"),
         wl_api_response: response[:raw],
         wl_failed_reason: response[:raw]
