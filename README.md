@@ -1,114 +1,148 @@
 # Spine Fitness – Gym Management System
 
-Spine Fitness is a gym management platform built to digitize and automate the daily operations of a real gym located in Dwarka, New Delhi.
+Spine Fitness is a **gym management platform** built to digitize and automate the daily operations of a real gym located in **Dwarka, New Delhi**.
 
-The system replaces manual record-keeping (previously done using notebooks) with a centralized digital platform for managing members, subscriptions, payments, attendance, and inventory.
+The system replaces manual record-keeping (previously done using notebooks) with a centralized digital platform for managing **members, subscriptions, payments, attendance, and inventory**.
 
-The software is currently deployed and actively used by **Spine Fitness Gym**, which has **200+ registered members and 100+ active members**.
+The software is currently **deployed in production and actively used** by Spine Fitness Gym, which has:
+
+* **200+ registered members**
+* **100+ active members**
+* **Biometric attendance tracking**
 
 ---
 
-## Live Application
+# Live Application
 
-[https://spine-fitness.com](https://spine-fitness.com)
+https://spine-fitness.com
 
 ---
 
 # Problem
 
-The gym previously managed all operations manually:
+The gym previously managed operations manually using notebooks and physical registers.
 
-• Member registrations were written in notebooks
-• Membership renewals were tracked manually
-• Attendance was not automated
-• Payment history was difficult to track
-• Stock inventory was not organized
-• Member communication (renewals, offers) required manual effort
+This created several issues:
 
-This resulted in:
+* Member registrations recorded manually
+* Membership renewals difficult to track
+* Attendance monitoring inconsistent
+* Payment history not centralized
+* Inventory tracking unreliable
+* Member communication required manual effort
 
-• Human errors
-• Missed renewals
-• Poor visibility of gym operations
+This led to:
 
-The goal was to build a system that **automates and centralizes gym operations**.
+* Human errors
+* Missed membership renewals
+* Lack of operational visibility
+* Time-consuming administrative work
 
 ---
 
 # Solution
 
-Spine Fitness provides a web-based management system that allows gym administrators to:
+Spine Fitness provides a **web-based management platform** that allows gym administrators to manage all operations digitally.
 
-• Manage members and memberships
-• Track payments and subscription renewals
-• Monitor attendance through biometric devices
-• Maintain gym inventory
-• Send automated WhatsApp notifications to members
+The system centralizes data and automates several workflows such as attendance tracking and member notifications.
 
-The system improves operational efficiency and provides real-time visibility into gym activities.
+Gym administrators can now:
+
+* Manage member records
+* Track membership plans and renewals
+* Record and track payments
+* Monitor attendance through biometric devices
+* Manage inventory and staff
+* Send automated WhatsApp notifications
 
 ---
 
 # Key Features
 
-### Member Management
+## Member Management
 
-• Add and manage gym members
-• Maintain member profiles
-• Track active and expired memberships
+* Add and manage gym members
+* Maintain detailed member profiles
+* Track active and expired memberships
 
-### Membership Plans
+## Membership Plans
 
-• Create different subscription plans
-• Assign plans to members
-• Track subscription periods and renewals
+* Create and manage membership plans
+* Assign plans to members
+* Track subscription periods and renewal status
 
-### Payment Tracking
+## Payment Tracking
 
-• Record membership payments
-• Maintain payment history for each member
+* Record membership payments
+* Maintain payment history for each member
 
-### Biometric Attendance Integration
+## Biometric Attendance Integration
 
-• Integrated with a fingerprint biometric device
-• Automatically records member attendance
-• Maps biometric IDs with member profiles
+* Integrated with fingerprint biometric device
+* Automatic attendance recording
+* Biometric ID mapped to gym members
 
-### WhatsApp Automation
+## WhatsApp Automation
 
-• Automated WhatsApp messages sent to members for:
+Automated WhatsApp messaging system used for:
 
-* Membership reminders
-* Notifications
-* Offers and updates
+* Membership expiry reminders
+* Important notifications
+* Promotional offers
+* General communication with members
 
-### Inventory Management
+## Inventory Management
 
-• Track gym stock items
-• Manage stock usage and issue records
+* Track gym equipment and stock
+* Manage stock issuance and usage
 
-### Staff & Trainer Management
+## Staff & Trainer Management
 
-• Maintain list of trainers and staff members
+* Maintain records of trainers and staff members
 
-### Admin Dashboard
+## Admin Dashboard
 
-• Centralized dashboard to monitor gym operations
+Centralized dashboard for monitoring gym operations.
 
 ---
 
 # Real-World Usage
 
-The system is actively used by **Spine Fitness Gym (Dwarka, New Delhi)**.
+The system is actively used by a real business:
 
-Current usage statistics:
+**Spine Fitness Gym**
+Dwarka Sector 22 Market
+New Delhi, India
 
-• 200+ registered members
-• 100+ active members
-• Biometric attendance tracking enabled
-• Automated WhatsApp communication with members
+Current system usage includes:
 
-This project demonstrates building **production software used by a real business**.
+* 200+ registered members
+* 100+ active members
+* Biometric attendance tracking
+* Automated WhatsApp notifications
+
+This project demonstrates the development and deployment of **production software used by a real business environment**.
+
+---
+
+# Architecture Overview
+
+```
+Gym Admin
+   │
+   ▼
+Web Application (Ruby on Rails)
+   │
+   ├── MySQL Database (CleverCloud)
+   │
+   ├── WhatsApp Messaging (Interakt API)
+   │
+   ├── Biometric Attendance Device API
+   │
+   └── Scheduled Jobs (cron-job.com)
+```
+
+The Rails application acts as the central system that integrates all services and manages gym operations.
 
 ---
 
@@ -130,42 +164,33 @@ Messaging Integration
 Interakt WhatsApp API
 
 Scheduling
-cron-job.com (daily automation tasks)
+cron-job.com (for automated daily tasks)
 
 Hardware Integration
 Biometric fingerprint attendance device
 
 ---
 
-# System Architecture
-
-The system follows a standard Ruby on Rails MVC architecture.
-
-Components include:
-
-• Web application for gym administrators
-• MySQL database for persistent data storage
-• API integration for biometric attendance devices
-• WhatsApp API integration for automated messaging
-• Scheduled cron jobs for automated reminders
-
----
-
 # Database Design
 
-The system uses structured master and transaction tables.
+The database is organized into **Master tables** and **Transaction tables**.
 
-### Master Tables
+## Master Tables
 
+```
 mst_members_lists
 mst_membership_plans
 mst_staff_lists
 mst_trainer_lists
 mst_stock_lists
 mst_category_lists
+```
 
-### Transaction Tables
+These tables store static business data.
 
+## Transaction Tables
+
+```
 trn_member_subscriptions
 trn_member_attendances
 trn_payments
@@ -173,40 +198,104 @@ trn_stock_inventories
 trn_issue_amounts
 trn_reminder_logs
 trn_whatsapp_logs
+```
 
-### System Tables
+These tables store dynamic operational data.
 
+## System Tables
+
+```
 users
 sessions
 trn_user_accesses
 trn_user_rights
 trn_audit_trials
+```
+
+These tables manage authentication, authorization, and audit logging.
+
+---
+
+# Local Development Setup
+
+Clone the repository
+
+```
+git clone https://github.com/your-username/spinefitness.git
+cd spinefitness
+```
+
+Install dependencies
+
+```
+bundle install
+```
+
+Create database
+
+```
+rails db:create
+```
+
+Run migrations
+
+```
+rails db:migrate
+```
+
+Start the server
+
+```
+rails server
+```
+
+Application will run at:
+
+```
+http://localhost:3000
+```
 
 ---
 
 # Technical Challenges
 
-### Biometric Device Integration
+## Biometric Device Integration
 
-Integrating the fingerprint biometric device required mapping biometric IDs to member profiles and synchronizing attendance data through an API.
+Integrating the biometric fingerprint device required mapping biometric IDs with gym members and synchronizing attendance records through an API.
 
-### WhatsApp Automation
+## WhatsApp API Integration
 
-Integrating Interakt API for automated messaging required building workflows for sending reminders and notifications.
+Integrating the Interakt WhatsApp API required designing automated workflows for sending notifications and reminders.
 
-### Real-World Business Requirements
+## Real Business Workflow Modeling
 
-The system was designed around real operational workflows of a physical gym, requiring flexible membership management and payment tracking.
+The system needed to replicate real gym operations including membership management, attendance tracking, and payment recording.
+
+---
+
+# Key Learnings
+
+Building Spine Fitness provided experience with:
+
+* Designing software for a real-world business workflow
+* API integration with third-party services
+* Hardware integration with biometric attendance devices
+* Database design for subscription-based systems
+* Deploying and maintaining production Rails applications
+* Handling real user data and operational processes
 
 ---
 
 # Future Improvements
 
-• Online payment gateway integration
-• Member self-service portal
-• Mobile application for gym members
-• Advanced analytics dashboard
-• Automated subscription renewal system
+Planned improvements include:
+
+* Online payment gateway integration
+* Member self-service portal
+* Mobile application for members
+* Advanced analytics dashboard
+* Automated membership renewal system
+* Enhanced reporting tools
 
 ---
 
@@ -217,3 +306,8 @@ Ruby on Rails Developer
 
 This project was developed independently as a real-world software solution for a local gym business.
 
+---
+
+# License
+
+MIT License
