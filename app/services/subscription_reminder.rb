@@ -26,10 +26,10 @@ class SubscriptionReminder
   end
 
   def self.log_sent(member_id, subscription_id)
-    ReminderLog.create(member_id: member_id, subscription_id: subscription_id)
+    TrnReminderLog.create(member_id: member_id, subscription_id: subscription_id)
   end
 
   def self.already_sent?(member_id, subscription_id)
-    ReminderLog.where(member_id: member_id, subscription_id: subscription_id).exists?
+    TrnReminderLog.where(member_id: member_id, subscription_id: subscription_id).exists?
   end
 end

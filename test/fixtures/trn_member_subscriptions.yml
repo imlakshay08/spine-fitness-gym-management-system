@@ -1,11 +1,32 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-# This model initially had no columns defined. If you add columns to the
-# model remove the "{}" from the fixture names and add the columns immediately
-# below each fixture, per the syntax in the comments below
-#
-one: {}
-# column: value
-#
-two: {}
-# column: value
+one:
+  ms_compcode: "SF"
+  ms_sbscrptn_no: "SUB0001"
+  ms_member_id: 1
+  ms_plan_id: 1
+  ms_plan_amount: "2000.0"
+  ms_final_amount: "1800.0"
+  ms_discount_amount: "200.0"
+  ms_start_date: "2025-01-01"
+  ms_end_date: "2025-03-31"
+  ms_amount_paid: "1800.0"
+  ms_payment_mode: "cash"
+  ms_status: "ACTIVE"
+  ms_remarks: ""
+
+two:
+  ms_compcode: "SF"
+  ms_sbscrptn_no: "SUB0002"
+  ms_member_id: 2
+  ms_plan_id: 1
+  ms_plan_amount: "2000.0"
+  ms_final_amount: "1800.0"
+  ms_discount_amount: "200.0"
+  ms_start_date: "2024-10-01"
+  ms_end_date: "2024-12-31"
+  ms_amount_paid: "1800.0"
+  ms_payment_mode: "upi"
+  ms_status: "EXPIRED"
+  ms_remarks: ""
+

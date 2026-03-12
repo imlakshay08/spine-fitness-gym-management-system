@@ -1,11 +1,22 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-# This model initially had no columns defined. If you add columns to the
-# model remove the "{}" from the fixture names and add the columns immediately
-# below each fixture, per the syntax in the comments below
-#
-one: {}
-# column: value
-#
-two: {}
-# column: value
+one:
+  plan_compcode: "SF"
+  plan_name: "3 Months"
+  plan_duration_days: "90"
+  plan_duration_months: 3
+  plan_amount: "2000"
+  plan_mrp_amount: "2000.0"
+  plan_final_amount: "1800.0"
+  plan_description: "3 Month Membership"
+
+two:
+  plan_compcode: "SF"
+  plan_name: "6 Months"
+  plan_duration_days: "180"
+  plan_duration_months: 6
+  plan_amount: "3500"
+  plan_mrp_amount: "3500.0"
+  plan_final_amount: "3000.0"
+  plan_description: "6 Month Membership"
+
