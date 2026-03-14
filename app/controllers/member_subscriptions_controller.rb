@@ -305,30 +305,39 @@ class MemberSubscriptionsController < ApplicationController
         end_date < Date.today ? "EXPIRED" : "ACTIVE"
     end
 
-    private
     def get_member_subscriptions
-        @compcodes      = session[:loggedUserCompCode] 
-        
-        if params[:page].to_i >0
-            pages = params[:page]
-            else
-            pages = 1
-            end
-            
-          # if params[:server_request]!=nil && params[:server_request]!= ''
-           
-            #  session[:req_faculty_list] = nil
-          # end
-          filter_search = params[:member_subscriptions] !=nil && params[:member_subscriptions] != '' ? params[:member_subscriptions].to_s.strip : session[:req_member_subscriptions].to_s.strip       
-          iswhere       = "ms_compcode ='#{@compcodes}'"
-          if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( ms_sbscrptn_no LIKE '%#{filter_search}%' )"
-            @member_list_search       = filter_search
-            session[:req_member_subscriptions] = filter_search
-          end    
-          
-        stdob =  TrnMemberSubscription.where(iswhere).order("ms_sbscrptn_no ASC")
-        return stdob
+      @compcodes = session[:loggedUserCompCode]
+
+      pages = params[:page].to_i > 0 ? params[:page] : 1
+
+      filter_search = params[:member_subscriptions].present? ?
+                      params[:member_subscriptions].to_s.strip :
+                      session[:req_member_subscriptions].to_s.strip
+
+      iswhere = "ms_compcode ='#{@compcodes}'"
+
+      if filter_search.present?
+        iswhere += " AND (ms_sbscrptn_no LIKE '%#{filter_search}%')"
+        @member_subscriptions_search = filter_search
+        session[:req_member_subscriptions] = filter_search
+      end
+
+      stdob = TrnMemberSubscription.where(iswhere).order("ms_sbscrptn_no ASC")
+
+      # -------- PERFORMANCE FIX --------
+
+      member_ids = stdob.map(&:ms_member_id).uniq
+      plan_ids   = stdob.map(&:ms_plan_id).uniq
+
+      @members_hash = MstMembersList
+                        .where("mmbr_compcode=? AND id IN (?)", @compcodes, member_ids)
+                        .index_by(&:id)
+
+      @plans_hash = MstMembershipPlan
+                      .where("plan_compcode=? AND id IN (?)", @compcodes, plan_ids)
+                      .index_by(&:id)
+
+      return stdob
     end
 
     private

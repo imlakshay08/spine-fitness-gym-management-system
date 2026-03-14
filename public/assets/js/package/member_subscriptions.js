@@ -70,34 +70,19 @@ function ValidateEmail(mail) {
 
   }
 
-  $(document).on("keypress","#member_list",function(e){
-
+  $(document).on("keypress","#member_subscriptions",function(e){
     var keycode = (e.keyCode ? e.keyCode : e.which );
-
       if( keycode == '13' ){
-
-        filter_member_list();
-
+        filter_member_subscriptions();
       }
-
-  
-
   });
 
-  function filter_member_list(){
-
+  function filter_member_subscriptions(){
       var useroot = $("#rootXPath").val();
-
-     
-
       $(".show_loader").removeClass("hidden");
-
-      $(".no_loader").removeClass("hidden").addClass("hidden")
-
+      $(".no_loader").removeClass("hidden").addClass("hidden");
+      $("form#myForms").attr("action",useroot+"member_subscriptions/search");
       $("form#myForms").submit(); 
-
-  
-
   }
 
 

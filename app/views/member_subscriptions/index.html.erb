@@ -92,20 +92,14 @@
 
                           <% if @member_subscriptions && @member_subscriptions.length>0 %>
                             <% @member_subscriptions.each do |subscription| %>    
-                              <%       
+                          <%
+                          memberobj = @members_hash[subscription.ms_member_id.to_i]
+                          planobj   = @plans_hash[subscription.ms_plan_id.to_i]
 
-														memberobj = get_member_detail(subscription.ms_member_id)
-                            if memberobj
-                               membername = memberobj.mmbr_name
-                               memberphone = memberobj.mmbr_contact
-                            end
-
-														planobj = get_plan_detail(subscription.ms_plan_id)
-                            if planobj
-                               planname = planobj.plan_name
-                            end
-
-                            %>
+                          membername  = memberobj&.mmbr_name
+                          memberphone = memberobj&.mmbr_contact
+                          planname    = planobj&.plan_name
+                          %>
 														<tr  class="odd gradeX">
 															<td><%= i %></td>
                             	<td><%= subscription.ms_sbscrptn_no %></td>
