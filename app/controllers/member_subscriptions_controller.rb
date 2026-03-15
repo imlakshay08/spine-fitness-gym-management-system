@@ -322,7 +322,7 @@ class MemberSubscriptionsController < ApplicationController
         session[:req_member_subscriptions] = filter_search
       end
 
-      stdob = TrnMemberSubscription.where(iswhere).paginate(:page =>pages,:per_page => 10).order("ms_sbscrptn_no ASC")
+      stdob = TrnMemberSubscription.where(iswhere).order("ms_sbscrptn_no ASC")
 
       # -------- PERFORMANCE FIX --------
 

@@ -235,7 +235,7 @@ class MemberListController < ApplicationController
             session[:req_member_list] = filter_search
           end    
           
-        stdob =  MstMembersList.where(iswhere).paginate(:page =>pages,:per_page => 10).order("mmbr_code ASC")
+        stdob =  MstMembersList.where(iswhere).order("mmbr_code ASC")
 
         member_ids = stdob.map(&:id)
 
