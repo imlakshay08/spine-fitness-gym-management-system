@@ -241,6 +241,13 @@ class MemberListController < ApplicationController
           end    
           
         stdob =  MstMembersList.where(iswhere).order("mmbr_code ASC")
+
+        member_ids = stdob.map(&:id)
+
+        subscriptions = TrnMemberSubscription.where("ms_compcode=? AND ms_member_id IN (?)", @compcodes, member_ids).order("ms_end_date DESC")
+
+        @latest_subscription_hash = subscriptions.group_by(&:ms_member_id).transform_values(&:first)
+
         return stdob
     end
 
