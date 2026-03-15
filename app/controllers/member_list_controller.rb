@@ -221,12 +221,7 @@ class MemberListController < ApplicationController
     private
     def get_member_list
         @compcodes      = session[:loggedUserCompCode] 
-        
-        if params[:page].to_i >0
-            pages = params[:page]
-            else
-            pages = 1
-            end
+        pages = params[:page].to_i > 0 ? params[:page] : 1
             
           # if params[:server_request]!=nil && params[:server_request]!= ''
            
@@ -240,7 +235,7 @@ class MemberListController < ApplicationController
             session[:req_member_list] = filter_search
           end    
           
-        stdob =  MstMembersList.where(iswhere).order("mmbr_code ASC")
+        stdob =  MstMembersList.where(iswhere).paginate(:page =>pages,:per_page => 10).order("mmbr_code ASC")
 
         member_ids = stdob.map(&:id)
 
