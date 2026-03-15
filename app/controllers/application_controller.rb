@@ -137,20 +137,6 @@ class ApplicationController < ActionController::Base
     userobj = User.where("id=?",regid).first
      return userobj
   end
-  
-  private
-  def get_faculty_detail(facultyid)
-       compcode =  session[:loggedUserCompCode]
-       courseobj =  MstFaculty.where("fclty_compcode= ? AND id = ?",compcode,facultyid).first
-       return courseobj
-  end
-     
-  private
-  def get_club_detail(clubid)
-       compcode =  session[:loggedUserCompCode]
-       courseobj =  MstHouseList.where("hs_compcode= ? AND id = ?",compcode,clubid).first
-       return courseobj
-  end
      
      private
      def get_course_detail(coursid)
