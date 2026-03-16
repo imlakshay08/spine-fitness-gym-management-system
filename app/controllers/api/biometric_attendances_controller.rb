@@ -9,11 +9,11 @@ class Api::BiometricAttendancesController < ApplicationController
     punch_time = Time.zone.parse(params[:timestamp]) rescue Time.current
 
     # 1️⃣ Find biometric mapping
-    mapping = TrnMemberBiometricMapping.active.find_by(
-      mbm_compcode: compcode,
-      mbm_device_user_id: device_user_id,
-      mbm_device_sn: device_sn
-    )
+      mapping = TrnMemberBiometricMapping.find_by(
+        mbm_compcode: compcode,
+        mbm_device_user_id: device_user_id,
+        mbm_device_sn: device_sn
+      )
 
     unless mapping
       render json: {
