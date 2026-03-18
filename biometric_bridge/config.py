@@ -1,10 +1,10 @@
 # config.py
 
-DEVICE_IP = "192.168.1.201"
+DEVICE_IP = ""
 DEVICE_PORT = 4370
 DEVICE_TIMEOUT = 5
 
-RAILS_API_URL = "https://spine-fitness.com/api/biometric_attendances"
-COMP_CODE = "SF"
+RAILS_API_URL = ""
+COMP_CODE = ""
 
 POLL_INTERVAL_SECONDS = 20
