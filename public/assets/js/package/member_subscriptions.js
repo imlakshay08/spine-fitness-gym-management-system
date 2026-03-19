@@ -20,6 +20,16 @@ $(document).ready(function(){
     });
   });
 
+    $(document).ready(function(){
+    flatpickr("#ms_open_end_date", {
+      dateFormat: "d-M-Y",
+      allowInput: true,
+      onOpen: function (selectedDates, dateStr, instance) {
+        instance.setDate(instance.input.value, false);
+      },
+    });
+  });
+
 function alertChecked(url){
 
     if( confirm("Are you sure want to delete ?")){
@@ -123,7 +133,23 @@ function save_member_subscription(){
     setTimeout(function(){ set_global_focus('ms_amount_paid');},500);
     return false;
   }
+var isOpen = $("#open_plan_row").is(":visible");
 
+if(isOpen){
+
+  var open_amount = $("#ms_open_amount").val();
+  var open_end = $("#ms_open_end_date").val();
+
+  if(open_amount == ""){
+    showToast("info","Custom amount required");
+    return false;
+  }
+
+  if(open_end == ""){
+    showToast("info","Custom end date required");
+    return false;
+  }
+}
   formData.append("identity", "SAVESUBSCR");
   formData.append("mid", mid);  
  
@@ -167,13 +193,13 @@ function save_member_subscription(){
 
     },500);
 }
-
 function fill_end_date() {
+
     var usePath   = $.trim($("#rootXPath").val());
     var plan_id   = $("#ms_plan_id").val();
     var startDate = $("#ms_start_date").val();
 
-    if (plan_id == "" || startDate == "") {
+    if (plan_id == "") {
         $("#ms_end_date").val("");
         return;
     }
@@ -188,18 +214,38 @@ function fill_end_date() {
             ms_start_date: startDate
         },
         success: function (resp) {
+
             if (resp.status === true) {
-                $("#ms_end_date").val(resp.end_date);
+
+                if (resp.is_open === true) {
+
+                    // OPEN PLAN
+                    $("#open_plan_row").show();
+
+                    $("#ms_end_date").prop("readonly", false);
+                    $("#ms_end_date").val("");
+
+                } else {
+
+                    // NORMAL PLAN
+                    $("#open_plan_row").hide();
+
+                    $("#ms_open_amount").val("");
+                    $("#ms_open_end_date").val("");
+
+                    $("#ms_end_date").prop("readonly", true);
+                    $("#ms_end_date").val(resp.end_date);
+
+                }
+
             } else {
                 $("#ms_end_date").val("");
             }
-        },
-        error: function () {
-            alert("Something went wrong while calculating end date.");
+
         }
     });
 }
-
+  
 $(document).ready(function() {
   $('#ms_member_id').select2({
     placeholder: "-Select-",

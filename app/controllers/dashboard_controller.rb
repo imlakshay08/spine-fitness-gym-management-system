@@ -85,6 +85,12 @@ class DashboardController < ApplicationController
   end
 
   def due_amount(subscription)
+
+    plan = @plans_map[subscription.ms_plan_id.to_s]
+
+    return 0 if plan.present? && plan.plan_is_open.to_i == 1
+    return 0 if subscription.ms_skip_due_check.to_i == 1
+
     subscription.ms_final_amount.to_f - total_paid(subscription)
   end
 

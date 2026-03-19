@@ -92,6 +92,32 @@
 						</div>
 					</div>
 
+				<div class="form-group row" id="open_plan_row" style="display:none;">
+
+				<label class="col-md-2">Custom Amount</label>
+				<div class="col-md-4">
+					<input name="ms_open_amount" id="ms_open_amount"
+					type="text" class="form-control"
+					placeholder="Enter custom amount"
+					onkeypress="return isNumberMyKeys(event);" value="<% if @subscription %><%=@subscription.ms_open_amount%><% end %>"/>
+				</div>
+
+				<label class="col-md-2">Custom End Date</label>
+				<div class="col-md-4">
+					<div class="input-group">
+					<span class="input-group-addon iconinput-pd">
+						<i class="fa fa-calendar"></i>
+					</span>
+					<input name="ms_open_end_date" id="ms_open_end_date"
+						type="text" class="form-control"
+						placeholder="Select custom end date" value="<% if @subscription && @subscription.ms_open_end_date.present? %>
+         <%=formatted_date(@subscription.ms_open_end_date)%>
+       <% end %>"/>
+					</div>
+				</div>
+
+				</div>
+
 		               <div class="form-group row">
 				
 						<label class=" col-md-2">Start Date

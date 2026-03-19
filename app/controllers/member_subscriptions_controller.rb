@@ -58,6 +58,14 @@ class MemberSubscriptionsController < ApplicationController
             session[:sess_ms_member_id] = member_id
             session[:sess_ms_plan_id]   = @latest.ms_plan_id
             session[:sess_ms_start_date] = (@latest.ms_end_date + 1.day).strftime("%d-%m-%Y")
+
+            # If previous plan was open plan, clear custom values
+            plan = MstMembershipPlan.find_by(id: @latest.ms_plan_id)
+
+            if plan&.plan_is_open.to_i == 1
+              session[:sess_ms_open_amount] = nil
+              session[:sess_ms_open_end_date] = nil
+            end
           end
         end
 
@@ -134,10 +142,31 @@ class MemberSubscriptionsController < ApplicationController
             isFlags = false
           end
 
-          # LOCK PRICING SNAPSHOT
-          params[:ms_plan_amount]    = plan.plan_mrp_amount
-          params[:ms_final_amount]   = plan.plan_final_amount
-          params[:ms_discount_amount] = plan.plan_mrp_amount.to_f - plan.plan_final_amount.to_f
+     if isFlags
+
+        is_open_plan = plan.plan_is_open.to_i == 1
+        params[:ms_skip_due_check] = is_open_plan ? 1 : 0
+
+        if is_open_plan
+          open_amount = params[:ms_open_amount].to_f
+
+          params[:ms_plan_amount]     = open_amount
+          params[:ms_final_amount]    = open_amount
+          params[:ms_discount_amount] = 0
+
+          open_end = Date.parse(params[:ms_open_end_date])
+
+          params[:ms_open_duration_days] =
+            (open_end - Date.parse(params[:ms_start_date])).to_i
+
+          params[:ms_end_date] = open_end
+
+        else
+          params[:ms_plan_amount]     = plan.plan_mrp_amount
+          params[:ms_final_amount]    = plan.plan_final_amount
+          params[:ms_discount_amount] =
+            plan.plan_mrp_amount.to_f - plan.plan_final_amount.to_f
+        end
 
             member_id = params[:ms_member_id].to_i
 
@@ -155,13 +184,16 @@ class MemberSubscriptionsController < ApplicationController
               end
             end
 
-            start_date = Date.parse(params[:ms_start_date])
-            end_date   = calculate_end_date(start_date, params[:ms_plan_id])
+              start_date = Date.parse(params[:ms_start_date])
 
-            params[:ms_end_date] = end_date
+              if is_open_plan
+                end_date = open_end   # already parsed
+              else
+                end_date = calculate_end_date(start_date, params[:ms_plan_id])
+              end
 
-            params[:ms_status] = subscription_status(end_date)
-
+              params[:ms_end_date] = end_date
+              params[:ms_status]   = subscription_status(end_date)
 
               if params[:mid].to_i>0
                  if currentgrp.to_s.downcase != newgroup.to_s.downcase
@@ -171,8 +203,8 @@ class MemberSubscriptionsController < ApplicationController
                          isFlags        = false
                      end
                  end
-         
-               if isFlags
+
+                if isFlags
                      chkgrpobj   = TrnMemberSubscription.where("ms_compcode=? AND id=?",@compcodes,mid).first
                      if chkgrpobj
                       profileid    = chkgrpobj.id
@@ -255,7 +287,7 @@ class MemberSubscriptionsController < ApplicationController
             # respond_to do |format|
             #   format.json { render :json => { 'data'=>chkgrpobj,:status=>isFlags,:message=>message} }
             # end
-
+            end
           respond_to do |format|
             format.json { render :json => {  "message"=>message,:profileid=>profileid,:status=>isFlags} }
           end
@@ -292,11 +324,15 @@ class MemberSubscriptionsController < ApplicationController
         plan_compcode: session[:loggedUserCompCode],
         id: plan_id
       )
+
       return start_date if plan.nil?
 
-      months = plan.plan_duration_months.to_i
+      # OPEN PLAN
+      if plan.plan_is_open.to_i == 1
+        return Date.parse(params[:ms_open_end_date])
+      end
 
-      # Business rule: end date is last day of subscription
+      months = plan.plan_duration_months.to_i
       start_date.advance(months: months) - 1.day
     end
 
@@ -343,29 +379,43 @@ class MemberSubscriptionsController < ApplicationController
     private
     def member_subscription_params
         params[:ms_compcode]     = session[:loggedUserCompCode] 
-        params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_member_id,:ms_plan_id,:ms_plan_amount,:ms_final_amount,:ms_discount_amount,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks)
-
+        params.permit(:ms_compcode,:ms_sbscrptn_no,:ms_member_id,:ms_plan_id,:ms_plan_amount,:ms_final_amount,:ms_discount_amount,:ms_start_date,:ms_end_date,:ms_amount_paid,:ms_payment_mode,:ms_status,:ms_remarks,:ms_open_amount,:ms_open_end_date,:ms_open_duration_days,:ms_skip_due_check)
     end
 
     def fill_end_date
       plan = MstMembershipPlan.find_by(id: params[:ms_plan_id])
 
-      if plan.present? && params[:ms_start_date].present?
-        start_date = Date.strptime(params[:ms_start_date], "%d-%b-%Y")
-        months     = plan.plan_duration_months.to_i
+      if plan.present?
 
-        end_date = start_date.advance(months: months) - 1.day
+        # OPEN PLAN
+        if plan.plan_is_open.to_i == 1
+          render json: {
+            status: true,
+            is_open: true
+          }
+          return
+        end
 
-        render json: {
-          status: true,
-          end_date: end_date.strftime("%d-%b-%Y")
-        }
+        if params[:ms_start_date].present?
+          start_date = Date.strptime(params[:ms_start_date], "%d-%b-%Y")
+          months     = plan.plan_duration_months.to_i
+
+          end_date = start_date.advance(months: months) - 1.day
+
+          render json: {
+            status: true,
+            is_open: false,
+            end_date: end_date.strftime("%d-%b-%Y")
+          }
+        else
+          render json: { status: false }
+        end
+
       else
         render json: { status: false }
       end
     end
 
-    private
     def generate_regularization_series
         @compcodes      = session[:loggedUserCompCode]
          @isCode     = 0
