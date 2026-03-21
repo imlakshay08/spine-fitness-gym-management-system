@@ -48,7 +48,7 @@ def create
 
   if subscription && subscription.ms_end_date >= Date.today
     att_status = "ALLOWED"
-    reason     = nil
+    reason     = "Y"
   else
     att_status = "DENIED"
     reason     = "Subscription expired"
