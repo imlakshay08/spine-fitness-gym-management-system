@@ -35,13 +35,15 @@ function fetchLiveAttendance() {
     processData: false,
     success: function(resp) {
       if (resp.status && resp.data.length > 0) {
-        lastChecked = resp.last_checked;
         var tbody = $("#live-attendance-body");
 
         if (tbody.find("td[colspan]").length > 0) {
           tbody.empty();
         }
 
+        // Clear and re-render all rows instead of prepending
+        tbody.empty();
+        
         resp.data.forEach(function(row) {
           var accessClass = row.att_status === "ALLOWED" ? "text-success" : "text-danger";
           var accessIcon  = row.att_status === "ALLOWED" ? "✓" : "✗";
@@ -55,10 +57,11 @@ function fetchLiveAttendance() {
             '<td class="' + accessClass + '"><strong>' + accessIcon + ' ' + row.att_status + '</strong></td>' +
             '</tr>';
 
-          tbody.prepend(tr);
+          tbody.append(tr);
         });
 
-        tbody.find("tr:gt(49)").remove();
+        // Update lastChecked AFTER rendering
+        lastChecked = resp.last_checked;
         $("#last-updated").text("Updated: " + new Date().toLocaleTimeString());
       }
     },

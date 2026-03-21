@@ -142,15 +142,17 @@ class DashboardController < ApplicationController
 
   private
   def get_live_attendance
-    since = params[:since].present? ? 
-      (Time.zone.parse(params[:since]) rescue 10.minutes.ago) : 
-      10.minutes.ago
+    since = if params[:since].present?
+    Time.zone.parse(params[:since]) rescue 10.minutes.ago
+  else
+    10.minutes.ago
+  end
 
-    attendances = TrnMemberAttendance
-      .where(att_compcode: @compcode)
-      .where('att_punch_time > ?', since)
-      .order(att_punch_time: :desc)
-      .limit(20)
+  attendances = TrnMemberAttendance
+    .where(att_compcode: @compcode)
+    .where('att_punch_time > ?', since)
+    .order(att_punch_time: :desc)
+    .limit(20)
 
     member_ids = attendances.map(&:att_member_id).uniq
 
