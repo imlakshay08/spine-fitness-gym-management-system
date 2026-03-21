@@ -14,7 +14,7 @@ def create
     return
   end
 
-  # 1️⃣ Find mapping
+  # Find mapping
   mapping = TrnMemberBiometricMapping.find_by(
     mbm_compcode:       compcode,
     mbm_device_user_id: device_user_id,
@@ -26,7 +26,7 @@ def create
     return
   end
 
-  # 2️⃣ Find member directly — no association
+  # Find member directly — no association
   member = MstMembersList.find_by(
     id:            mapping.mbm_member_id,
     mmbr_compcode: compcode
@@ -37,13 +37,13 @@ def create
     return
   end
 
-  # 3️⃣ Duplicate check
+  # Duplicate check
   if duplicate_punch?(member.id, punch_time)
     render json: { status: true, message: "Duplicate ignored" }
     return
   end
 
-  # 4️⃣ Subscription check
+  # Subscription check
   subscription = latest_subscription(member.id, compcode)
 
   if subscription && subscription.ms_end_date >= Date.today
@@ -54,7 +54,7 @@ def create
     reason     = "Subscription expired"
   end
 
-  # 5️⃣ Save attendance
+  # Save attendance
   TrnMemberAttendance.create!(
     att_compcode:       compcode,
     att_member_id:      member.id.to_s,

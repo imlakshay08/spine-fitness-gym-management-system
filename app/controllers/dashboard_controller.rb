@@ -12,7 +12,7 @@ class DashboardController < ApplicationController
     @compcode = session[:loggedUserCompCode]
 
     # Stock
-    @stock_list = MstStockList.where(sl_compcode: @compcode)
+    #@stock_list = MstStockList.where(sl_compcode: @compcode)
 
     # Latest subscriptions
     @latest_subs = latest_subscriptions.to_a
@@ -39,7 +39,14 @@ class DashboardController < ApplicationController
     @due_members = @latest_subs.select { |s| due_amount(s) > 0 }
   end
 
-  # ---------------- BULK LOADERS ----------------
+  def ajax_process
+    @compcode = session[:loggedUserCompCode]
+
+    if params[:identity] == 'GET_LIVE_ATTENDANCE'
+      get_live_attendance
+      return
+    end
+  end
 
   def preload_members
     member_ids = @latest_subs.map(&:ms_member_id).uniq
@@ -131,5 +138,47 @@ class DashboardController < ApplicationController
         ON latest.ms_member_id = trn_member_subscriptions.ms_member_id
         AND latest.max_end_date = trn_member_subscriptions.ms_end_date
       SQL
+  end
+
+  private
+  def get_live_attendance
+    since = params[:since].present? ? 
+      (Time.zone.parse(params[:since]) rescue 10.minutes.ago) : 
+      10.minutes.ago
+
+    attendances = TrnMemberAttendance
+      .where(att_compcode: @compcode)
+      .where('att_punch_time > ?', since)
+      .order(att_punch_time: :desc)
+      .limit(20)
+
+    member_ids = attendances.map(&:att_member_id).uniq
+
+    members_map = MstMembersList
+      .where(mmbr_compcode: @compcode, id: member_ids)
+      .each_with_object({}) { |m, h| h[m.id.to_s] = m }
+
+    sub_map = TrnMemberSubscription
+      .where(ms_compcode: @compcode, ms_member_id: member_ids)
+      .order(ms_end_date: :desc)
+      .each_with_object({}) do |s, h|
+        h[s.ms_member_id.to_s] ||= s.ms_end_date >= Date.today ? 'Active' : 'Expired'
+      end
+
+    rows = attendances.map do |att|
+      mem = members_map[att.att_member_id.to_s]
+      {
+        member_name: mem&.mmbr_name || 'Unknown',
+        punch_time:  att.att_punch_time.strftime('%d-%b %I:%M %p'),
+        att_status:  att.att_status,
+        sub_status:  sub_map[att.att_member_id.to_s] || 'Unknown'
+      }
+    end
+
+    render json: {
+      status:       true,
+      data:         rows,
+      last_checked: Time.current.iso8601
+    }
   end
 end

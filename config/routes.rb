@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   get   "dashboard/search"=>"dashboard#index"
   post  "dashboard/search"=>"dashboard#index"
   post  "dashboard/ajax"=>"dashboard#index" 
+  post "dashboard/ajax_process" => "dashboard#ajax_process"
   resources :dashboard
 
 end
