@@ -156,7 +156,7 @@
 <script src='<%= root_url %>assets/plugins/fullcalendar/packages/timegrid/main.min.js'></script>
     <script src="<%= root_url %>assets/js/pages/calendar/calendar.min.js"></script>
 <%end%>
-  <script src="<%=root_url%>assets/js/package/<%=page_linked%>.js"></script>
+  <script src="<%=root_url%>assets/js/package/<%=page_linked%>.js?v=<%= Time.now.to_i %>"></script>
 <!-- notifications -->
 	<script src="<%=root_url%>assets/plugins/jquery-toast/dist/jquery.toast.min.js"></script>
 	<script src="<%=root_url%>assets/plugins/jquery-toast/dist/toast.js"></script>
