@@ -3,6 +3,9 @@ Rails.application.routes.draw do
   namespace :api do
     resources :biometric_attendances, only: [:create]
   end
+  get  '/iclock/cdata',      to: 'api/adms#handshake'
+  post '/iclock/cdata',      to: 'api/adms#receive'
+  get  '/iclock/getrequest', to: 'api/adms#handshake'
 end
 
 Rails.application.routes.draw do  
@@ -22,8 +25,8 @@ Rails.application.routes.draw do
   post  "dashboard/ajax"=>"dashboard#index" 
   post "dashboard/ajax_process" => "dashboard#ajax_process"
   resources :dashboard
-
 end
+
 Rails.application.routes.draw do
   get  'create_user/user_list_refresh'
  get   'create_user/index'=>'create_user#index'
