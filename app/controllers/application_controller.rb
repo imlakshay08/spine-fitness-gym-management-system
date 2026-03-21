@@ -541,7 +541,9 @@ end
  
   private
   def page_linked
-    return self.controller_name
+    name = self.controller_name
+    return 'dashboard_live' if name == 'dashboard'
+    name
   end
 
   private
