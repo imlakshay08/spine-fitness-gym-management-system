@@ -8,13 +8,13 @@ def create
   device_sn      = params[:device_sn].to_s
   punch_time     = Time.zone.parse(params[:timestamp]) rescue Time.current
 
-  # Reject punches older than today
+  # Reject old punches
   if punch_time.to_date < Date.today
     render json: { status: true, message: "Old punch ignored" }
     return
   end
 
-  # 1️Find biometric mapping
+  # 1️⃣ Find mapping
   mapping = TrnMemberBiometricMapping.find_by(
     mbm_compcode:       compcode,
     mbm_device_user_id: device_user_id,
@@ -26,19 +26,24 @@ def create
     return
   end
 
-  member = MstMembersList.find_by(id: mapping.mbm_member_id)
+  # 2️⃣ Find member directly — no association
+  member = MstMembersList.find_by(
+    id:            mapping.mbm_member_id,
+    mmbr_compcode: compcode
+  )
+
   unless member
     render json: { status: false, message: "Member not found" }, status: 404
     return
   end
 
-  # Duplicate check
+  # 3️⃣ Duplicate check
   if duplicate_punch?(member.id, punch_time)
     render json: { status: true, message: "Duplicate ignored" }
     return
   end
 
-  # Subscription check
+  # 4️⃣ Subscription check
   subscription = latest_subscription(member.id, compcode)
 
   if subscription && subscription.ms_end_date >= Date.today
@@ -49,7 +54,7 @@ def create
     reason     = "Subscription expired"
   end
 
-  # Save attendance
+  # 5️⃣ Save attendance
   TrnMemberAttendance.create!(
     att_compcode:       compcode,
     att_member_id:      member.id.to_s,
