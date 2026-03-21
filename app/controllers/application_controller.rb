@@ -542,7 +542,7 @@ end
   private
   def page_linked
     name = self.controller_name
-    return 'dashboard_live' if name == 'dashboard'
+    return 'dashboard_liv' if name == 'dashboard'
     name
   end
 
