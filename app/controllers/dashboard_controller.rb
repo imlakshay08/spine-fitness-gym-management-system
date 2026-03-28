@@ -170,7 +170,7 @@ class DashboardController < ApplicationController
       mem = members_map[att.att_member_id.to_s]
       {
         member_name: mem&.mmbr_name || 'Unknown',
-        punch_time:  att.att_punch_time.strftime('%d-%b %I:%M %p'),
+        punch_time:  att.att_punch_time.in_time_zone('Asia/Kolkata').strftime('%d-%b %I:%M %p'),        
         att_status:  att.att_status,
         sub_status:  sub_map[att.att_member_id.to_s] || 'Unknown'
       }
