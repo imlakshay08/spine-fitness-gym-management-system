@@ -79,7 +79,7 @@ end
   def duplicate_punch?(member_id, time)
     TrnMemberAttendance.where(
       att_member_id: member_id,
-      att_punch_time: time.beginning_of_minute..time.end_of_minute
+      att_punch_date: time.to_date  # one punch per day per member
     ).exists?
   end
 

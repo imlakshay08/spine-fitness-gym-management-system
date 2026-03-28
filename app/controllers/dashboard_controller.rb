@@ -149,9 +149,9 @@ class DashboardController < ApplicationController
 
     attendances = TrnMemberAttendance
       .where(att_compcode: @compcode)
-      .where('att_punch_time > ?', since)
+      .where(att_punch_date: Date.today)   # ← show ALL of today, not just last 10 min
       .order(att_punch_time: :desc)
-      .limit(20)
+      .limit(50)
 
     member_ids = attendances.map(&:att_member_id).uniq
 
