@@ -42,12 +42,11 @@ class Api::AdmsController < ApplicationController
   end
 
   private
-
-  def process_attendance(device_user_id, punch_time)
+  def process_attendance(device_user_id, punch_time, device_sn)
     mapping = TrnMemberBiometricMapping.find_by(
       mbm_compcode:       'SF',
       mbm_device_user_id: device_user_id,
-      mbm_device_sn:      'NFZ8253402448'
+      mbm_device_sn:      device_sn          # ← dynamic now
     )
     return unless mapping
 
@@ -58,7 +57,7 @@ class Api::AdmsController < ApplicationController
     return unless member
 
     already_exists = TrnMemberAttendance.where(
-      att_member_id: member.id.to_s,
+      att_member_id:  member.id.to_s,
       att_punch_time: punch_time.beginning_of_minute..punch_time.end_of_minute
     ).exists?
     return if already_exists
@@ -68,19 +67,14 @@ class Api::AdmsController < ApplicationController
       .order(ms_end_date: :desc)
       .first
 
-    if subscription && subscription.ms_end_date >= Date.today
-      att_status = "ALLOWED"
-      reason     = "Y"
-    else
-      att_status = "DENIED"
-      reason     = "Subscription expired"
-    end
+    att_status = (subscription && subscription.ms_end_date >= Date.today) ? "ALLOWED" : "DENIED"
+    reason     = att_status == "ALLOWED" ? "Y" : "Subscription expired"
 
     TrnMemberAttendance.create!(
       att_compcode:       'SF',
       att_member_id:      member.id.to_s,
       att_device_user_id: device_user_id,
-      att_device_sn:      'NFZ8253402448',
+      att_device_sn:      device_sn,          # ← dynamic now
       att_punch_time:     punch_time,
       att_punch_date:     punch_time.to_date,
       att_status:         att_status,
