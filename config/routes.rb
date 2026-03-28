@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   end
   get  '/iclock/cdata',      to: 'api/adms#handshake'
   post '/iclock/cdata',      to: 'api/adms#receive'
-  get  '/iclock/getrequest', to: 'api/adms#handshake'
+  get  '/iclock/getrequest', to: 'api/adms#getrequest'
 end
 
 Rails.application.routes.draw do  
