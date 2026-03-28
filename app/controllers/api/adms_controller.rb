@@ -1,6 +1,10 @@
 class Api::AdmsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
+  def getrequest
+   render plain: "OK"
+  end
+
   def handshake
     render plain: "OK"
   end
@@ -9,21 +13,29 @@ class Api::AdmsController < ApplicationController
     body = request.body.read
     Rails.logger.info "ADMS received: #{body}"
 
+    # Extract device SN from header line
+    sn_match = body.match(/SN=([^\s&\r\n]+)/i)
+    device_sn = sn_match ? sn_match[1] : 'NFZ8253402448'
+
     body.each_line do |line|
       line = line.strip
-      next unless line.start_with?("ATTLOG")
+      next if line.empty?
+      next if line.start_with?("ATTLOG")  # skip header line
 
       parts = line.split("\t")
-      next unless parts.length >= 3
+      next unless parts.length >= 2
 
-      device_user_id = parts[1].to_s.strip
-      timestamp      = parts[2].to_s.strip
-      punch_time     = Time.zone.parse(timestamp) rescue nil
+      device_user_id = parts[0].to_s.strip
+      timestamp      = parts[1].to_s.strip
+
+      # Skip non-data lines (letters only = header/command, not a punch)
+      next unless device_user_id.match?(/\A\d+\z/)
+
+      punch_time = Time.zone.parse(timestamp) rescue nil
       next unless punch_time
-
       next if punch_time.to_date < Date.today
 
-      process_attendance(device_user_id, punch_time)
+      process_attendance(device_user_id, punch_time, device_sn)
     end
 
     render plain: "OK"
