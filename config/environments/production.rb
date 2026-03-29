@@ -19,7 +19,7 @@ Rails.application.configure do
   # `config/secrets.yml.key`.
   config.read_encrypted_secrets = true
   config.public_file_server.headers = {
-    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+    'Cache-Control' => 'public, max-age=0, must-revalidate',
     'Pragma' => 'no-cache',
     'Expires' => '0'
   }
