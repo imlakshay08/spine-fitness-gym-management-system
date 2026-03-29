@@ -341,21 +341,68 @@ class MemberSubscriptionsController < ApplicationController
         end_date < Date.today ? "EXPIRED" : "ACTIVE"
     end
 
-    def get_member_subscriptions
+   def get_member_subscriptions
       @compcodes = session[:loggedUserCompCode]
 
       pages = params[:page].to_i > 0 ? params[:page] : 1
 
-      filter_search = params[:member_subscriptions].present? ?
-                      params[:member_subscriptions].to_s.strip :
-                      session[:req_member_subscriptions].to_s.strip
+      is_search = params[:server_request].to_s == 'Y'
+
+      if is_search
+        filter_search  = params[:member_subscriptions].to_s.strip
+        filter_name    = params[:member_name].to_s.strip
+        filter_contact = params[:member_contact].to_s.strip
+        @status_filter = params[:status_filter].to_s.strip
+
+        session[:req_member_subscriptions] = filter_search
+        session[:req_member_name]          = filter_name
+        session[:req_member_contact]       = filter_contact
+        session[:req_status_filter]        = @status_filter
+      else
+        filter_search  = session[:req_member_subscriptions].to_s.strip
+        filter_name    = session[:req_member_name].to_s.strip
+        filter_contact = session[:req_member_contact].to_s.strip
+        @status_filter = session[:req_status_filter].to_s.strip
+      end
+
+      @status_filter = 'A' unless @status_filter.present?
+
+      @member_subscriptions_search = filter_search
+      @member_name_search          = filter_name
+      @member_contact_search       = filter_contact
 
       iswhere = "ms_compcode ='#{@compcodes}'"
 
       if filter_search.present?
         iswhere += " AND (ms_sbscrptn_no LIKE '%#{filter_search}%')"
-        @member_subscriptions_search = filter_search
-        session[:req_member_subscriptions] = filter_search
+      end
+
+      if filter_name.present?
+        matching_member_ids = MstMembersList
+                               .where("mmbr_compcode = ? AND mmbr_name LIKE ?", @compcodes, "%#{filter_name}%")
+                               .pluck(:id)
+        if matching_member_ids.present?
+          iswhere += " AND ms_member_id IN (#{matching_member_ids.join(',')})"
+        else
+          iswhere += " AND ms_member_id = 0"
+        end
+      end
+
+      if filter_contact.present?
+        matching_contact_ids = MstMembersList
+                                .where("mmbr_compcode = ? AND mmbr_contact LIKE ?", @compcodes, "%#{filter_contact}%")
+                                .pluck(:id)
+        if matching_contact_ids.present?
+          iswhere += " AND ms_member_id IN (#{matching_contact_ids.join(',')})"
+        else
+          iswhere += " AND ms_member_id = 0"
+        end
+      end
+
+      if @status_filter == 'E'
+        iswhere += " AND ms_end_date < '#{Date.today}'"
+      else
+        iswhere += " AND ms_end_date >= '#{Date.today}'"
       end
 
       stdob = TrnMemberSubscription.where(iswhere).order("ms_sbscrptn_no ASC")
