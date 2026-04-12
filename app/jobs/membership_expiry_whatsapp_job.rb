@@ -27,8 +27,8 @@ class MembershipExpiryWhatsappJob < ApplicationJob
       next if member.nil? || member.mmbr_contact.blank?
 
       template = case type
-                  when :expiring then "membership_expiry_reminder"
-                  when :expired  then "membership_expired_alert"
+                  when :expiring then "membership_expiry_alert_new"
+                  when :expired  then "membership_expired_alert_new"
                   end
 
       already_sent = TrnWhatsappLog.where(
@@ -43,7 +43,7 @@ class MembershipExpiryWhatsappJob < ApplicationJob
       response = Meta::SendWhatsapp.send_template(
         phone: member.mmbr_contact,
         template: template,
-        body_values: [member.mmbr_name, sub.ms_end_date.strftime("%d %b %Y")]
+        body_values: [member.id.to_s, sub.ms_end_date.strftime("%d %b %Y")]
       )
 
       # Line 2
