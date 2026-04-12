@@ -26,7 +26,10 @@ class MembershipExpiryWhatsappJob < ApplicationJob
       member = MstMembersList.find_by(id: sub.ms_member_id)
       next if member.nil? || member.mmbr_contact.blank?
 
-      template = "membership_expiry_reminder"
+      template = case type
+                  when :expiring then "membership_expiry_reminder"
+                  when :expired  then "membership_expired_alert"
+                  end
 
       already_sent = TrnWhatsappLog.where(
         wl_subscription_id: sub.id,
@@ -36,18 +39,17 @@ class MembershipExpiryWhatsappJob < ApplicationJob
 
       next if already_sent
 
-      response = Interakt::SendWhatsapp.send_template(
+# Line 1
+      response = Meta::SendWhatsapp.send_template(
         phone: member.mmbr_contact,
         template: template,
-        body_values: [
-          member.mmbr_name,
-          sub.ms_end_date.strftime("%d %b %Y")
-        ]
+        body_values: [member.mmbr_name, sub.ms_end_date.strftime("%d %b %Y")]
       )
 
+      # Line 2
       success =
-        response[:http_code].between?(200,299) &&
-        response.dig(:body, "result") == true
+        response[:http_code].between?(200, 299) &&
+        response.dig(:body, "messages")&.first&.dig("id").present?
 
       TrnWhatsappLog.create!(
         wl_compcode: compcode,
@@ -56,7 +58,7 @@ class MembershipExpiryWhatsappJob < ApplicationJob
         wl_template_name: template,
         wl_sent_at: Time.current,
         wl_status: success ? "QUEUED" : "FAILED",
-        wl_interakt_msg_id: response.dig(:body, "id"),
+        wl_interakt_msg_id: response.dig(:body, "messages", 0, "id"),
         wl_api_response: response[:raw],
         wl_failed_reason: response[:raw]
       )
