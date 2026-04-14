@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_01_102318) do
   create_table "mst_category_lists", charset: "latin1", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "cat_compcode", limit: 12, default: "", null: false
     t.string "cat_code", limit: 10, default: "", null: false
@@ -141,6 +141,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
     t.string "plan_duration_days", limit: 3, default: "", null: false
     t.string "plan_amount", limit: 8, default: "", null: false
     t.string "plan_description", limit: 50, default: "", null: false
+    t.integer "plan_duration_months", default: 0
+    t.decimal "plan_mrp_amount", precision: 10, scale: 2, default: "0.0"
+    t.decimal "plan_final_amount", precision: 10, scale: 2, default: "0.0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -205,6 +208,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
   end
 
   create_table "trn_member_subscriptions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string   "ms_compcode",        limit: 12,  default: "", null: false
+    t.string   "ms_sbscrptn_no",     limit: 15,  default: "", null: false
+    t.integer  "ms_member_id",                   default: 0,  null: false
+    t.integer  "ms_plan_id",                     default: 0,  null: false
+    t.decimal  "ms_plan_amount",     precision: 10, scale: 2, default: "0.0"
+    t.decimal  "ms_final_amount",    precision: 10, scale: 2, default: "0.0"
+    t.decimal  "ms_discount_amount", precision: 10, scale: 2, default: "0.0"
+    t.date     "ms_start_date"
+    t.date     "ms_end_date"
+    t.decimal  "ms_amount_paid",     precision: 10, scale: 2, default: "0.0"
+    t.string   "ms_payment_mode",    limit: 20,  default: ""
+    t.string   "ms_status",          limit: 10,  default: "ACTIVE"
+    t.string   "ms_remarks",         limit: 200, default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -240,6 +256,46 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
     t.string "ur_rights", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+  end
+
+  create_table "trn_payments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string  "pay_compcode",  limit: 12,  default: "", null: false
+    t.string  "pay_no",        limit: 15,  default: "", null: false
+    t.string  "pay_ref_type",  limit: 30,  default: ""
+    t.integer "pay_ref_id"
+    t.date    "pay_date"
+    t.decimal "pay_amount",    precision: 10, scale: 2, default: "0.0"
+    t.string  "pay_mode",      limit: 20,  default: ""
+    t.string  "pay_remarks",   limit: 200, default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pay_no"], name: "index_trn_payments_on_pay_no"
+  end
+
+  create_table "trn_reminder_logs", force: :cascade do |t|
+    t.integer  "member_id",       null: false
+    t.integer  "subscription_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["member_id", "subscription_id"], name: "index_trn_reminder_logs_on_member_id_and_subscription_id", unique: true
+  end
+
+  create_table "trn_whatsapp_logs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string   "wl_compcode",        limit: 12,  default: ""
+    t.integer  "wl_member_id"
+    t.integer  "wl_subscription_id"
+    t.string   "wl_template_name",   limit: 60
+    t.string   "wl_status",          limit: 15,  default: "QUEUED"
+    t.datetime "wl_sent_at"
+    t.datetime "wl_delivered_at"
+    t.datetime "wl_read_at"
+    t.string   "wl_interakt_msg_id", limit: 100
+    t.text     "wl_api_response"
+    t.text     "wl_failed_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["wl_interakt_msg_id"], name: "index_trn_whatsapp_logs_on_wl_interakt_msg_id"
+    t.index ["wl_subscription_id", "wl_template_name", "wl_status"], name: "idx_whatsapp_logs_sub_template_status"
   end
 
   create_table "users", charset: "latin1", force: :cascade do |t|
