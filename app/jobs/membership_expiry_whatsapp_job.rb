@@ -39,7 +39,7 @@ class MembershipExpiryWhatsappJob < ApplicationJob
 
       next if already_sent
 
-# Line 1
+      # Line 1
       response = Meta::SendWhatsapp.send_template(
         phone: member.mmbr_contact,
         template: template,

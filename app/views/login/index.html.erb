@@ -1,55 +1,79 @@
 <!-- Main Wrapper -->
-        <div class="main-wrapper">
-		<section class="sign-in" style="margin-top: 50px;">
-		<div class="container">
-			<div class="signin-content" style="padding-bottom: 50px;">
-				<div class="signin-image">
-					<figure><img src="<%=root_url%>assets/img/pages/signin.jpg" alt="sing up image"></figure>
-					
-				</div>
-				 
-				<div class="signin-form">
-				<div class=" row">
-				<div class="col-md-12 text-center">
-					<img src="<%=root_url%>images/logo/ihmpusalogo.png" style="width:80px;">  
-					</div>
-					</div>
-				<div class="">
-					<h2 class="form-title">Login</h2>
-					</div>
-					<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
-					<%= form_tag({:action=>'create'} ,:multipart=>true,:id=>:myforms ) do  %>
-					
-							<% if flash[:error] %>
-						 <div class="alert <% if session[:isErrorhandled].to_i >0 %>alert-danger<% else %>alert-danger<% end %>" id="successXMessage">
-						   <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-						   <%= flash[:error] %>
-						</div>		 
-						 <% end %>
-						<div class="form-group">
-							<div class="">
-								<input name="userName" id="userName" type="text" placeholder="User Name"
-									class="form-control input-height" /> </div>
-						</div>
-						<div class="form-group">
-							<div class="">
-								<input name="userPassword" type="password" id="userPassword" placeholder="Password"
-									class="form-control input-height" /> </div>
-						</div>
-						
-						<div class="form-group form-button">
-							<button class="btn btn-round btn-primary" onclick="user_logins();" name="" id="">Login</button>
-						</div>
-						</form>
-						<% end %>
-					<div class="social-login">
-					
-					</div>
-				</div>
-			</div>
-			<div class="footer-text text-center">
-	        <p style="padding-bottom: 11px;">Powered by <a class="" target="_blank" href="https://github.com/imlakshay08">Lakshay Tyagi</a></p>
-	        </div>
-		</div>
-	</section>
-</div>
+<main class="card">
+<section class="hero">
+  <div class="brand">
+    <div class="brand-mark">S</div>
+    <div>
+      <div class="brand-name">SPINE INFRATECH</div>
+      <div class="brand-sub">FITNESS · STRENGTH · DISCIPLINE</div>
+    </div>
+  </div>
+  <div class="hero-copy">
+    <span class="eyebrow">Members Portal</span>
+    <h1 class="hero-title">UNLEASH YOUR<br><span class="accent">STRENGTH.</span></h1>
+    <p class="hero-lede">Track workouts, manage memberships and keep your gym running at peak performance — all from one dashboard.</p>
+  </div>
+</section>
+<section class="form-wrap">
+  <div class="form-inner">
+    <div class="welcome">Welcome Back</div>
+    <h2 class="form-title">Login to continue</h2>
+    <p class="form-sub">Sign in to your SPINE INFRATECH dashboard.</p>
+
+    <input type="hidden" id="rootXPath" value="<%= root_url %>" />
+
+    <%= form_tag({:action => 'create'}, :multipart => true, :id => :myforms, :autocomplete => "off") do %>
+
+      <% if flash[:error] %>
+        <div class="alert alert-danger" id="successXMessage">
+          <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+          <%= flash[:error] %>
+        </div>
+      <% end %>
+
+      <div class="field">
+        <label for="userName">Username</label>
+        <div class="control">
+          <span class="icon"><i class="fa-solid fa-user"></i></span>
+          <input name="userName" id="userName" type="text" placeholder="Enter your username" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="userPassword">Password</label>
+        <div class="control">
+          <span class="icon"><i class="fa-solid fa-lock"></i></span>
+          <input name="userPassword" id="userPassword" type="password" placeholder="••••••••" />
+          <button type="button" class="toggle-pass" onclick="var i=document.getElementById('userPassword');i.type=i.type==='password'?'text':'password';">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="row-between">
+        <label class="remember"><input type="checkbox" /> Remember me</label>
+        <a class="forgot" href="#">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-login" onclick="user_logins();">
+        <i class="fa-solid fa-dumbbell"></i> Login
+      </button>
+
+      <div class="divider">SECURE ACCESS</div>
+
+      <div class="foot">
+        <span>Powered by <a href="https://github.com/imlakshay08" target="_blank">Lakshay Tyagi</a></span>
+        <span>© 2026 SPINE INFRATECH</span>
+      </div>
+
+    <% end %>
+  </div>
+</section>
+</main>
+<script>
+  document.getElementById('myforms').addEventListener('submit', function() {
+    var btn = document.querySelector('.btn-login');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-spinner"></span> LOGGING IN...';
+  });
+</script>
