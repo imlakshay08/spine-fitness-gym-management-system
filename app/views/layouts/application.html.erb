@@ -10,6 +10,10 @@
 
 	<% if controller.controller_name !='login' && controller.controller_name !='student_info'%> 
 	<!-- google font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+
 	<link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet" type="text/css" />
 	<!-- icons -->
 	<link href="<%=root_url%>assets/fonts/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
@@ -45,6 +49,8 @@
 	  <link href="<%=root_url%>assets/plugins/select2/css/select2.css" rel="stylesheet" type="text/css" />
   <link href="<%=root_url%>assets/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
   <!-- style -->
+  <link rel="stylesheet" href="<%=root_url%>assets/css/dark-theme.css">
+
   <%end%>
    <% if controller.controller_name =='dashboard'%> 
   	<!-- full calendar -->
@@ -77,7 +83,7 @@
 	<link rel="shortcut icon" href="<%=root_url%>images/favicon.png" />
   </head>
  
-  <body class="page-header-fixed sidemenu-closed-hidelogo page-content-white page-md header-white white-sidebar-color logo-indigo">
+  <body class="page-header-fixed sidemenu-closed-hidelogo page-content-white page-md header-white white-sidebar-color logo-indigo spine-dark">
     <%= yield %>
 
     <% if controller.controller_name !='login' %> 

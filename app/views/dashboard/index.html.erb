@@ -18,6 +18,10 @@ begin
           <%= render "layouts/breadcrumbs" %>
         </div>
       </div>
+<div class="dash-greeting" style="margin-bottom:24px;">
+<h1>WELCOME BACK, <span class="accent"><%= session[:autherizedUserName]&.upcase || 'ADMIN' %>.</span></h1>
+  <p>Here's what's happening at the gym today.</p>
+</div>
 
       <%= form_tag({ action: 'index' }, multipart: true, id: 'myForms') do %>
       <input type="hidden" id="rootXPath" value="<%= root_url %>">
@@ -33,7 +37,7 @@ begin
           <div class="card-head">
             <header>
               Live Attendance
-              <span class="badge badge-success ml-2">● LIVE</span>
+                <span class="live-dot" style="margin-left:10px;">LIVE</span>
               <small class="text-muted ml-2" id="last-updated"></small>
             </header>
           </div>
@@ -63,8 +67,9 @@ begin
         <div class="row mb-4">
 
           <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card text-center stat-accent accent-orange">
               <div class="card-body">
+                <div class="stat-icon-box orange"><i class="fa-solid fa-check-circle"></i></div>
                 <h4><%= @active_count %></h4>
                 <p>Active Subscriptions</p>
               </div>
@@ -72,8 +77,9 @@ begin
           </div>
 
           <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card text-center stat-accent accent-yellow">
               <div class="card-body">
+                <div class="stat-icon-box yellow"><i class="fa-solid fa-clock"></i></div>
                 <h4><%= @expiring_count %></h4>
                 <p>Expiring Subscriptions(7 Days)</p>
               </div>
@@ -81,8 +87,9 @@ begin
           </div>
 
           <div class="col-md-3">
-            <div class="card text-center">
+            <div class="card text-center stat-accent accent-red">
               <div class="card-body">
+                <div class="stat-icon-box red"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <h4><%= @expired_count %></h4>
                 <p>Expired Subscriptions</p>
               </div>
@@ -90,8 +97,9 @@ begin
           </div>
 
           <div class="col-md-3">
-            <div class="card text-center bg-success text-white">
+            <div class="card text-center stat-accent accent-green">
               <div class="card-body">
+                <div class="stat-icon-box green"><i class="fa-solid fa-rupee-sign"></i></div>
                 <h4>₹ <%= @today_collection %></h4>
                 <p>Today's Collection</p>
               </div>
