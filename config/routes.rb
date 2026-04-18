@@ -11,6 +11,7 @@ end
 Rails.application.routes.draw do  
   get   '/index.html.var'=>'login#index'
   root  'login#index'  
+  get '/privacy', to: 'pages#privacy'
   get   '/404.shtml'=>"invoice#show" 
   get   "/404" ,:to =>"erros#not_found"
   get   "/422" ,:to =>"erros#not_found"
