@@ -165,6 +165,8 @@ Rails.application.routes.draw do
   get   'cron/send_expiry_whatsapp'=>'cron#send_expiry_whatsapp'
   post "/webhooks/interakt" => "webhooks/interakt#receive"
   get 'cron/sync_subscription_status'  => 'cron#sync_subscription_status' 
+  get  '/webhooks/meta' => 'webhooks/meta#verify'
+  post '/webhooks/meta' => 'webhooks/meta#receive'
   resources :cron
 end
 
