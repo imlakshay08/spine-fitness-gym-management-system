@@ -1,0 +1,22 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  wl_compcode: "SF"
+  wl_member_id: 1
+  wl_subscription_id: 1
+  wl_template_name: "membership_expiry_reminder"
+  wl_status: "DELIVERED"
+  wl_sent_at: "2025-03-28 10:00:00"
+  wl_delivered_at: "2025-03-28 10:01:00"
+  wl_interakt_msg_id: "msg_abc123"
+  wl_api_response: '{"result":true,"id":"msg_abc123"}'
+
+two:
+  wl_compcode: "SF"
+  wl_member_id: 2
+  wl_subscription_id: 2
+  wl_template_name: "membership_expiry_reminder"
+  wl_status: "FAILED"
+  wl_sent_at: "2025-03-28 10:00:00"
+  wl_failed_reason: "Invalid phone number"
+  wl_api_response: '{"result":false}'

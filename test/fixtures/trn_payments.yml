@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  pay_compcode: "SF"
+  pay_no: "PAY0001"
+  pay_ref_type: "MEMBER_SUBSCRIPTION"
+  pay_ref_id: 1
+  pay_date: "2025-01-01"
+  pay_amount: "1800.0"
+  pay_mode: "cash"
+  pay_remarks: "Subscription payment"
+
+two:
+  pay_compcode: "SF"
+  pay_no: "PAY0002"
+  pay_ref_type: "MEMBER_SUBSCRIPTION"
+  pay_ref_id: 2
+  pay_date: "2024-10-01"
+  pay_amount: "1800.0"
+  pay_mode: "upi"
+  pay_remarks: "Subscription payment"

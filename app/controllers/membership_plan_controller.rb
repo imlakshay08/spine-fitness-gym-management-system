@@ -187,7 +187,7 @@ class MembershipPlanController < ApplicationController
     def membership_plan_params
         @compcodes      = session[:loggedUserCompCode] 
         params[:plan_compcode]	    = @compcodes
-        params.permit(:plan_compcode,:plan_name,:plan_amount,:plan_description,:plan_duration_months)
+        params.permit(:plan_compcode,:plan_name,:plan_amount,:plan_description,:plan_duration_months,:plan_mrp_amount,:plan_final_amount)
 
     end
 end
