@@ -101,7 +101,7 @@
             <label style="font-size:12px; color:#777;">From Date</label>
             <div class="input-group">
               <span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-              <input type="text" name="from_date" id="from_date" class="form-control"
+              <input type="text" name="from_date" id="payments_from_date" class="form-control"
                      placeholder="From Date" autocomplete="off"
                      value="<%= @from_date.strftime('%d-%b-%Y') %>"/>
             </div>
@@ -111,7 +111,7 @@
             <label style="font-size:12px; color:#777;">To Date</label>
             <div class="input-group">
               <span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-              <input type="text" name="to_date" id="to_date" class="form-control"
+              <input type="text" name="to_date" id="payments_to_date" class="form-control"
                      placeholder="To Date" autocomplete="off"
                      value="<%= @to_date.strftime('%d-%b-%Y') %>"/>
             </div>
@@ -274,17 +274,3 @@
 </div>
 </div>
 
-<script>
-  // Initialize date pickers same as rest of app
-  $(document).ready(function() {
-    $('#from_date, #to_date').datepicker({
-      format: 'dd-M-yyyy',
-      autoclose: true,
-      todayHighlight: true
-    });
-  });
-
-  function applyFilter() {
-    $('#paymentFilterForm').submit();
-  }
-</script>
