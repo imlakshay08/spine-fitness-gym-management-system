@@ -238,7 +238,81 @@
 						</select>
 					</div>
 					
-				
+				<% if @member && @member.id %>
+<div class="form-group row" style="margin-top: 20px;">
+  <div class="col-md-12">
+    <div class="card" style="padding: 15px; border: 1px solid #444;">
+      <h5>Biometric Fingerprint</h5>
+
+      <% mapping = TrnMemberBiometricMapping.find_by(
+           mbm_compcode: session[:loggedUserCompCode],
+           mbm_member_id: @member.id.to_s,
+           mbm_is_active: 'Y'
+         ) %>
+
+      <% if mapping %>
+        <%# Mapping exists — show current mapping and options %>
+        <div class="row">
+          <div class="col-md-6">
+            <p>
+              <span class="badge badge-success">✓ Enrolled</span>
+              Device User ID: <strong><%= mapping.mbm_device_user_id %></strong>
+              &nbsp;|&nbsp; Device SN: <strong><%= mapping.mbm_device_sn %></strong>
+            </p>
+          </div>
+          <div class="col-md-6">
+            <button type="button" 
+              onclick="enrollFinger(<%= @member.id %>, '<%= @member.mmbr_name %>')"
+              class="btn btn-warning btn-sm">
+              👆 Re-enroll Finger
+            </button>
+            <button type="button"
+              onclick="removeMapping(<%= mapping.id %>)"
+              class="btn btn-danger btn-sm">
+              🗑 Remove Mapping
+            </button>
+          </div>
+        </div>
+      <% else %>
+        <%# No mapping — show enroll button %>
+        <div class="row">
+          <div class="col-md-12">
+            <p class="text-muted">No fingerprint enrolled for this member.</p>
+            <button type="button"
+              onclick="enrollFinger(<%= @member.id %>, '<%= @member.mmbr_name %>')"
+              class="btn btn-primary btn-sm">
+              👆 Enroll Fingerprint
+            </button>
+          </div>
+        </div>
+
+        <%# Manual mapping entry %>
+        <div class="row" style="margin-top: 15px;">
+          <div class="col-md-12">
+            <p class="text-muted" style="font-size: 12px;">
+              Or enter device user ID manually if finger already registered on device:
+            </p>
+          </div>
+          <div class="col-md-3">
+            <input type="text" id="manual_device_uid" 
+              class="form-control form-control-sm" 
+              placeholder="Device User ID (e.g. 71)"/>
+          </div>
+          <div class="col-md-3">
+            <button type="button"
+              onclick="saveManualMapping(<%= @member.id %>, '<%= @member.mmbr_name %>')"
+              class="btn btn-secondary btn-sm">
+              Save Manual Mapping
+            </button>
+          </div>
+        </div>
+      <% end %>
+
+      <div id="enroll-status" class="mt-2"></div>
+    </div>
+  </div>
+</div>
+<% end %>
 				</div>
 					<div class="form-group row">
 

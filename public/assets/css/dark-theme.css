@@ -563,3 +563,180 @@ table.dataTable tbody tr.even td,
 /* ── MOBILE: Scrollbar on table cards ── */
 .card-body::-webkit-scrollbar{width:4px;height:4px}
 .card-body::-webkit-scrollbar-thumb{background:var(--sp-border);border-radius:4px}
+
+/* ══════════════════════════════════════════════
+   FORM PAGES (Add/Edit) — MDL + card-box fixes
+   ══════════════════════════════════════════════ */
+
+/* ── Nested .card-box and inner cards ── */
+.card-box,
+.card.card-box,
+.card .card-box{
+  background:var(--sp-surface)!important;
+  border:1px solid var(--sp-border)!important;
+  border-radius:12px!important;
+  box-shadow:none!important;
+  color:var(--sp-text-2)!important;
+}
+
+/* ── Material Design Lite Tabs ── */
+.mdl-tabs,
+.mdl-tabs__tab-bar,
+.mdl-tabs__panel{
+  background:transparent!important;
+}
+.mdl-tabs__tab-bar{
+  border-bottom:1px solid var(--sp-border)!important;
+}
+.mdl-tabs__tab{
+  color:var(--sp-muted)!important;
+  font-family:'Oswald',sans-serif!important;
+  letter-spacing:1.5px!important;
+  text-transform:uppercase!important;
+}
+.mdl-tabs__tab:hover{
+  color:var(--sp-text-2)!important;
+  background:transparent!important;
+}
+.mdl-tabs__tab.is-active{
+  color:var(--sp-accent)!important;
+}
+.mdl-tabs.is-upgraded .mdl-tabs__tab.is-active::after,
+.mdl-tabs__tab-bar::after{
+  background:var(--sp-accent)!important;
+  height:2px!important;
+}
+
+/* ── MDL Buttons ── */
+.mdl-button{color:var(--sp-text-2)!important}
+.mdl-button--raised{
+  background:var(--sp-surface-2)!important;
+  color:var(--sp-text)!important;
+  box-shadow:none!important;
+}
+.mdl-button--raised.btn-primary,
+.mdl-button.btn-primary{
+  background:linear-gradient(90deg,var(--sp-accent),var(--sp-accent-2))!important;
+  color:#fff!important;
+  font-family:'Oswald',sans-serif!important;
+  letter-spacing:2px!important;
+  font-weight:600!important;
+  border:none!important;
+}
+.mdl-button--raised.btn-danger,
+.mdl-button.btn-danger{
+  background:linear-gradient(90deg,#dc2626,#ef4444)!important;
+  color:#fff!important;
+  font-family:'Oswald',sans-serif!important;
+  letter-spacing:2px!important;
+  font-weight:600!important;
+  border:none!important;
+}
+.mdl-button--raised.btn-info,
+.mdl-button.btn-info,
+.btn-info{
+  background:linear-gradient(90deg,#0ea5e9,#38bdf8)!important;
+  color:#fff!important;
+  border:none!important;
+}
+.btn-warning{
+  background:linear-gradient(90deg,#d97706,#f59e0b)!important;
+  color:#fff!important;border:none!important;
+}
+.btn-secondary{
+  background:var(--sp-surface-2)!important;
+  color:var(--sp-text-2)!important;
+  border:1px solid var(--sp-border)!important;
+}
+.btn-circle{border-radius:8px!important}
+
+/* ── form-button container ── */
+.form-button,
+.form-actions,
+.form-body,
+.form-horizontal{
+  background:transparent!important;
+}
+
+/* ── Required asterisk ── */
+.required{color:var(--sp-red)!important}
+
+/* ── Input groups (icon + input combos) ── */
+.input-group{background:transparent!important}
+.input-group-addon,
+.iconinput-pd{
+  background:var(--sp-bg-2)!important;
+  border:1px solid var(--sp-border)!important;
+  border-right:none!important;
+  color:var(--sp-muted)!important;
+}
+.input-group .form-control{
+  border-left:none!important;
+}
+
+/* ── Select / dropdowns ── */
+select.form-control,
+select.form-select,
+.form-select{
+  background:var(--sp-bg-2)!important;
+  border:1px solid var(--sp-border)!important;
+  color:var(--sp-text)!important;
+}
+.form-select option{
+  background:var(--sp-surface)!important;
+  color:var(--sp-text)!important;
+}
+.select-height{height:auto!important;padding:10px 12px!important}
+
+/* ── Modals ── */
+.modal-content{background:var(--sp-surface)!important;color:var(--sp-text)!important}
+.modal-title{color:var(--sp-text)!important}
+.btn-close,.close{
+  filter:invert(1) brightness(.7)!important;
+}
+
+/* ── Form labels in form-horizontal ── */
+.form-horizontal label,
+.form-group label,
+.form-group .col-md-3{
+  color:var(--sp-text-2)!important;
+}
+
+/* ── alert-success (green) ── */
+.alert-success{
+  background:var(--sp-green-bg)!important;
+  border:1px solid var(--sp-green-border)!important;
+  color:var(--sp-green)!important;
+}
+
+/* ── Profile / file upload ── */
+.profile-img-wrap,
+.fileupload{
+  background:var(--sp-surface-2)!important;
+}
+.custom-file-upload p{color:var(--sp-text-2)!important}
+
+/* ── KILL stray white from MDL spinner / ripple ── */
+.mdl-spinner__layer{background:transparent!important}
+.mdl-js-ripple-effect .mdl-ripple{background:rgba(255,255,255,.1)!important}
+
+/* ── Final catch-all for any white card/panel inside content ── */
+.page-content .card,
+.page-content .card-body,
+.page-content .card-box,
+.page-content .form-body{
+  background-color:transparent!important;
+}
+.page-content > .row > .col-md-12 > .card,
+.page-content > .row > .col-sm-12 > .card{
+  background:var(--sp-surface)!important;
+}
+
+/* nested card inside outer card — make transparent so we don't get a "card on card" double-background */
+.card .card,
+.card .card-box,
+.card-body .card,
+.card-body .card-box{
+  background:transparent!important;
+  border:1px solid var(--sp-border)!important;
+}

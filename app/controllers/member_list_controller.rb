@@ -218,6 +218,47 @@ class MemberListController < ApplicationController
        redirect_to "#{root_url}member_list"
     end
 
+      def save_manual_mapping
+    compcode = session[:loggedUserCompCode]
+    member_id = params[:member_id].to_s
+    device_user_id = params[:device_user_id].to_s.strip
+
+    # Check if mapping already exists
+    existing = TrnMemberBiometricMapping.find_by(
+      mbm_compcode: compcode,
+      mbm_member_id: member_id
+    )
+
+    if existing
+      existing.update(
+        mbm_device_user_id: device_user_id,
+        mbm_is_active: 'Y'
+      )
+    else
+      TrnMemberBiometricMapping.create!(
+        mbm_compcode:       compcode,
+        mbm_member_id:      member_id,
+        mbm_device_user_id: device_user_id,
+        mbm_device_sn:      'NFZ8253402448',
+        mbm_is_active:      'Y'
+      )
+    end
+
+    render json: { status: true, message: "Mapping saved" }
+  rescue => e
+    render json: { status: false, message: e.message }
+  end
+
+  def remove_mapping
+    mapping = TrnMemberBiometricMapping.find_by(id: params[:mapping_id])
+    if mapping
+      mapping.update(mbm_is_active: 'N')
+      render json: { status: true }
+    else
+      render json: { status: false, message: "Not found" }
+    end
+  end
+
     private
     def get_member_list
         @compcodes      = session[:loggedUserCompCode] 
@@ -241,8 +282,7 @@ class MemberListController < ApplicationController
 
         subscriptions = TrnMemberSubscription.where("ms_compcode=? AND ms_member_id IN (?)", @compcodes, member_ids).order("ms_end_date DESC")
 
-        @latest_subscription_hash = subscriptions.group_by(&:ms_member_id).transform_values(&:first)
-
+        @latest_subscription_hash = subscriptions.group_by { |s| s.ms_member_id.to_i }.transform_values(&:first)
         return stdob
     end
 

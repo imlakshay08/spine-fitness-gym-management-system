@@ -236,3 +236,92 @@ function process_save_student_details(){
 }
 
 
+function enrollFinger(memberId, memberName) {
+  $("#enroll-status").html('<span class="text-info">⏳ Sending command to device...</span>');
+  
+  $.ajax({
+    url: 'http://localhost:5000/enroll',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      member_id: memberId,
+      member_name: memberName,
+      compcode: 'SF'
+    }),
+    success: function(resp) {
+      if (resp.status) {
+        $("#enroll-status").html(
+          '<span class="text-success">✓ ' + resp.message + '</span>'
+        );
+        // Reload after 3 seconds to show new mapping
+        setTimeout(function(){ location.reload(); }, 3000);
+      } else {
+        $("#enroll-status").html(
+          '<span class="text-danger">Error: ' + resp.message + '</span>'
+        );
+      }
+    },
+    error: function() {
+      $("#enroll-status").html(
+        '<span class="text-danger">⚠ Could not reach enrollment service. Is the gym laptop running?</span>'
+      );
+    }
+  });
+}
+
+function saveManualMapping(memberId, memberName) {
+  var deviceUserId = $.trim($("#manual_device_uid").val());
+  if (!deviceUserId) {
+    showToast("info", "Please enter Device User ID");
+    return;
+  }
+
+  var usePath = $.trim($("#rootXPath").val());
+  var formData = new FormData();
+  formData.append("member_id", memberId);
+  formData.append("device_user_id", deviceUserId);
+  formData.append("member_name", memberName);
+
+  $.ajax({
+    url: usePath + "member_list/save_manual_mapping",
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function(resp) {
+      if (resp.status) {
+        showToast("success", "Mapping saved successfully!");
+        setTimeout(function(){ location.reload(); }, 1000);
+      } else {
+        showToast("error", resp.message);
+      }
+    },
+    error: function() {
+      showToast("error", "Failed to save mapping");
+    }
+  });
+}
+
+function removeMapping(mappingId) {
+  if (!confirm("Remove this fingerprint mapping? Member won't be able to use biometric until re-enrolled.")) return;
+  
+  var usePath = $.trim($("#rootXPath").val());
+  var formData = new FormData();
+  formData.append("mapping_id", mappingId);
+
+  $.ajax({
+    url: usePath + "member_list/remove_mapping",
+    type: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function(resp) {
+      if (resp.status) {
+        showToast("success", "Mapping removed");
+        setTimeout(function(){ location.reload(); }, 1000);
+      } else {
+        showToast("error", resp.message);
+      }
+    }
+  });
+}

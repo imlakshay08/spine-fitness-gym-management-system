@@ -114,6 +114,8 @@ Rails.application.routes.draw do
   get   "member_list/:id/deletes"=>'member_list#destroy'
   post  "member_list/faculty_ajax_img"=>"member_list#save_faculty_img"
   post  "member_list/ajax_process"=>"member_list#ajax_process" 
+  post "member_list/save_manual_mapping" => "member_list#save_manual_mapping"
+  post "member_list/remove_mapping"      => "member_list#remove_mapping"
   resources :member_list
 end
 
