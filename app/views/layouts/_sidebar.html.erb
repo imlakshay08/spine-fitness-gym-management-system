@@ -38,6 +38,11 @@
               <a href="<%=root_url%>member_subscriptions" class="nav-link "> <i class="fa-solid fa-file-signature"></i><span class="title">Member Subscriptions</span>
               </a>
             </li>
+            </li>
+              <li class="nav-item <% if controller.controller_name == 'trn_payments' %>menucolor<% end %>">
+              <a href="<%=root_url%>trn_payments" class="nav-link "> <i class="fa-solid fa-indian-rupee-sign"></i><span class="title">Member Payments</span>
+              </a>
+            </li>
               <li class="nav-item <% if controller.controller_name == 'staff_list' %>menucolor<% end %>">
               <a href="<%=root_url%>staff_list" class="nav-link "> <i class="fa-solid fa-user-tie"></i><span class="title">Staff List</span>
               </a>
