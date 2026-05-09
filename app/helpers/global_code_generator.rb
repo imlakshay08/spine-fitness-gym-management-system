@@ -1,18 +1,17 @@
 module GlobalCodeGenerator
   def generate_code(table:, column:, prefix:, compcode:)
-    last_record = table.where("#{column} <> '' AND #{column} LIKE ?", "#{prefix}%")
-                       .where("#{column.split('_')[0]}_compcode = ?", compcode)
-                       .order("#{column} DESC").first
+    # Find the compcode column name for this table
+    compcode_column = table.column_names.find { |c| c.end_with?('_compcode') }
 
-    if last_record.present?
-      last_number = last_record.send(column).gsub(prefix, "").to_i
-    else
-      last_number = 0
-    end
+    last_record = table
+      .where("#{compcode_column} = ?", compcode)
+      .where("#{column} LIKE ?", "#{prefix}%")
+      .order(Arel.sql("CAST(REPLACE(#{column}, '#{prefix}', '') AS UNSIGNED) DESC"))
+      .first
 
-    new_number = last_number + 1
-    formatted_number = new_number.to_s.rjust(5, '0')  # 5-digit padding → 00001
+    last_number = last_record.present? ? last_record.send(column).gsub(prefix, '').to_i : 0
+    new_number  = last_number + 1
 
-    "#{prefix}#{formatted_number}"
+    "#{prefix}#{new_number.to_s.rjust(5, '0')}"
   end
 end
