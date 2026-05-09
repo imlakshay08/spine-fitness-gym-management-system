@@ -4,7 +4,7 @@ class TrnPaymentsController < ApplicationController
   before_action :require_login
   before_action :get_user_access_permissions
   skip_before_action :verify_authenticity_token, only: [:index]
-
+  helper_method :subscription_status
   def index
     @compcodes  = session[:loggedUserCompCode]
     @compDetail = MstCompany.where(["cmp_companycode = ?", @compcodes]).first
@@ -81,4 +81,8 @@ class TrnPaymentsController < ApplicationController
       @plan_wise[key][:total] += pay.pay_amount.to_f
     end
   end
+
+      def subscription_status(end_date)
+        end_date < Date.today ? "EXPIRED" : "ACTIVE"
+    end
 end
