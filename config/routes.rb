@@ -2,8 +2,8 @@
 Rails.application.routes.draw do
 namespace :api do
   resources :biometric_attendances, only: [:create]
-  get  'access_status', to: 'api/access_status#index'
-  post 'biometric_mappings/save_template', to: 'api/biometric_mappings#save_template'
+  get  'access_status', to: 'access_status#index'
+  post 'biometric_mappings/save_template', to: 'biometric_mappings#save_template'
   resources :biometric_mappings, only: [:create]
 end
   get  '/iclock/cdata',      to: 'api/adms#handshake'
