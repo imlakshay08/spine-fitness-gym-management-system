@@ -117,6 +117,7 @@
   </head>
  
   <body class="page-header-fixed sidemenu-closed-hidelogo page-content-white page-md header-white white-sidebar-color logo-indigo spine-dark">
+  <% if controller.controller_name != 'login' %>
   <div id="page-loader" class="active">
   <div class="loader-bar"></div>
   <div class="loader-content">
@@ -124,6 +125,7 @@
     <div class="loader-text">LOADING</div>
   </div>
 </div>
+  <% end %>
 
     <%= yield %>
 

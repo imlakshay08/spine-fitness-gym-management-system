@@ -36,44 +36,43 @@ class MemberSubscriptionsController < ApplicationController
             end
     end
 
-    def add_member_subscriptions
-        @compcodes      = session[:loggedUserCompCode]
-        @Lastcode=generate_code(table: TrnMemberSubscription,column: "ms_sbscrptn_no",prefix: "SUB",compcode: session[:loggedUserCompCode])
-        active_member_ids = TrnMemberSubscription
-                              .where(ms_compcode: @compcodes, ms_status: 'ACTIVE')
-                              .pluck(:ms_member_id)
+  def add_member_subscriptions
+    @compcodes = session[:loggedUserCompCode]
+    @Lastcode = generate_code(table: TrnMemberSubscription, column: "ms_sbscrptn_no", prefix: "SUB", compcode: session[:loggedUserCompCode])
+    @MemberList = MstMembersList.where(mmbr_compcode: @compcodes)
+    @MemberPlanList = MstMembershipPlan.where(plan_compcode: @compcodes)
+    @subscription = nil
 
-        @MemberList = MstMembersList
-                        .where(mmbr_compcode: @compcodes)
-                        
-        @MemberPlanList = MstMembershipPlan.where(["plan_compcode =?",@compcodes])         
-        @subscription = nil
-        if params[:renew].to_s == '1'
-            params[:id] = nil
-            @subscription = nil
-          member_id = params[:member_id].to_i
-          @latest = get_latest_subscription(member_id)
+    if params[:renew].to_s == '1'
+      params[:id] = nil
+      @subscription = nil
+      member_id = params[:member_id].to_i
 
-          if @latest
-            session[:sess_ms_member_id] = member_id
-            session[:sess_ms_plan_id]   = @latest.ms_plan_id
-            session[:sess_ms_start_date] = (@latest.ms_end_date + 1.day).strftime("%d-%m-%Y")
+      # Always set member_id in session regardless of whether they have history
+      session[:sess_ms_member_id] = member_id
 
-            # If previous plan was open plan, clear custom values
-            plan = MstMembershipPlan.find_by(id: @latest.ms_plan_id)
+      @latest = get_latest_subscription(member_id)
 
-            if plan&.plan_is_open.to_i == 1
-              session[:sess_ms_open_amount] = nil
-              session[:sess_ms_open_end_date] = nil
-            end
-          end
+      if @latest
+        session[:sess_ms_plan_id]    = @latest.ms_plan_id
+        # Start date = day after last subscription ended
+        session[:sess_ms_start_date] = (@latest.ms_end_date + 1.day).strftime("%d-%b-%Y")
+        plan = MstMembershipPlan.find_by(id: @latest.ms_plan_id)
+        if plan&.plan_is_open.to_i == 1
+          session[:sess_ms_open_amount]   = nil
+          session[:sess_ms_open_end_date] = nil
         end
-
-        if params[:id].to_i>0
-            @subscription = TrnMemberSubscription.where("ms_compcode=? AND id=?",@compcodes,params[:id]).first
-         end
+      else
+        # New member — no history, start from today
+        session[:sess_ms_plan_id]    = nil
+        session[:sess_ms_start_date] = Date.today.strftime("%d-%b-%Y")
+      end
     end
 
+    if params[:id].to_i > 0
+      @subscription = TrnMemberSubscription.where("ms_compcode=? AND id=?", @compcodes, params[:id]).first
+    end
+  end
     def ajax_process
       @compCodes       = session[:loggedUserCompCode]
       if params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'SAVESUBSCR'
