@@ -1,313 +1,255 @@
-# Spine Fitness – Gym Management System
+# Spine Fitness — Production Gym Management System
 
-Spine Fitness is a **gym management platform** built to digitize and automate the daily operations of a real gym located in **Dwarka, New Delhi**.
+A full-stack gym management platform built with Ruby on Rails, deployed in production and actively used by a real gym in Dwarka, New Delhi. Replaced physical notebooks with a centralized digital platform managing 200+ members, biometric attendance, automated WhatsApp notifications, and gate access control.
 
-The system replaces manual record-keeping (previously done using notebooks) with a centralized digital platform for managing **members, subscriptions, payments, attendance, and inventory**.
-
-The software is currently **deployed in production and actively used** by Spine Fitness Gym, which has:
-
-* **200+ registered members**
-* **100+ active members**
-* **Biometric attendance tracking**
+**🔗 Live:** [spine-fitness.com](https://spine-fitness.com)
 
 ---
 
-# Live Application
+## The Problem
 
-https://spine-fitness.com
+Spine Fitness Gym was managing 200+ members using physical registers and notebooks.
 
----
+- Membership renewals were missed — lost revenue
+- Attendance tracked inconsistently or not at all
+- Payment history scattered across different books
+- Expired members could still walk in — no enforcement
+- Member communication required manual phone calls
+- Inventory completely untracked
 
-# Problem
-
-The gym previously managed operations manually using notebooks and physical registers.
-
-This created several issues:
-
-* Member registrations recorded manually
-* Membership renewals difficult to track
-* Attendance monitoring inconsistent
-* Payment history not centralized
-* Inventory tracking unreliable
-* Member communication required manual effort
-
-This led to:
-
-* Human errors
-* Missed membership renewals
-* Lack of operational visibility
-* Time-consuming administrative work
+**Result:** Human errors, missed renewals, zero operational visibility, hours of admin work daily.
 
 ---
 
-# Solution
+## The Solution
 
-Spine Fitness provides a **web-based management platform** that allows gym administrators to manage all operations digitally.
-
-The system centralizes data and automates several workflows such as attendance tracking and member notifications.
-
-Gym administrators can now:
-
-* Manage member records
-* Track membership plans and renewals
-* Record and track payments
-* Monitor attendance through biometric devices
-* Manage inventory and staff
-* Send automated WhatsApp notifications
+A centralized web platform where gym administrators manage everything digitally — from member onboarding to automated WhatsApp expiry reminders and biometric gate control.
 
 ---
 
-# Key Features
+## Tech Stack
 
-## Member Management
-
-* Add and manage gym members
-* Maintain detailed member profiles
-* Track active and expired memberships
-
-## Membership Plans
-
-* Create and manage membership plans
-* Assign plans to members
-* Track subscription periods and renewal status
-
-## Payment Tracking
-
-* Record membership payments
-* Maintain payment history for each member
-
-## Biometric Attendance Integration
-
-* Integrated with fingerprint biometric device
-* Automatic attendance recording
-* Biometric ID mapped to gym members
-
-## WhatsApp Automation
-
-Automated WhatsApp messaging system used for:
-
-* Membership expiry reminders
-* Important notifications
-* Promotional offers
-* General communication with members
-
-## Inventory Management
-
-* Track gym equipment and stock
-* Manage stock issuance and usage
-
-## Staff & Trainer Management
-
-* Maintain records of trainers and staff members
-
-## Admin Dashboard
-
-Centralized dashboard for monitoring gym operations.
+| Layer | Technology |
+|---|---|
+| **Backend** | Ruby on Rails 7.1, Ruby 3.1.4 |
+| **Database** | MySQL (CleverCloud) |
+| **Frontend** | Hotwire (Turbo + Stimulus), jQuery, Bootstrap |
+| **Hosting** | Render |
+| **Biometric Bridge** | Python 3 (pyzk + Flask) — runs on gym laptop |
+| **WhatsApp API** | Meta WhatsApp Cloud API (direct integration) |
+| **PDF Reports** | Prawn |
+| **Scheduling** | cron-job.com |
+| **Hardware** | ZKTeco fingerprint biometric device |
 
 ---
 
-# Real-World Usage
-
-The system is actively used by a real business:
-
-**Spine Fitness Gym**
-Dwarka Sector 22 Market
-New Delhi, India
-
-Current system usage includes:
-
-* 200+ registered members
-* 100+ active members
-* Biometric attendance tracking
-* Automated WhatsApp notifications
-
-This project demonstrates the development and deployment of **production software used by a real business environment**.
-
----
-
-# Architecture Overview
+## Architecture
 
 ```
-Gym Admin
+Gym Admin (Browser)
    │
    ▼
-Web Application (Ruby on Rails)
+Ruby on Rails Application (Render)
    │
    ├── MySQL Database (CleverCloud)
    │
-   ├── WhatsApp Messaging (Interakt API)
+   ├── WhatsApp Messaging (Meta Cloud API)
    │
-   ├── Biometric Attendance Device API
+   ├── Scheduled Jobs (cron-job.com)
    │
-   └── Scheduled Jobs (cron-job.com)
+   └── REST API: POST /api/biometric_attendances
+                    ▲
+                    │ HTTP POST (every 20 seconds)
+                    │
+         ┌──────────┴──────────┐
+         │   Python Bridge      │         ┌─────────────────────┐
+         │   bridge.py          │         │  Android Phone       │
+         │   (gym laptop)       │         │  (Termux backup)     │
+         │   + sync_access.py   │         └──────────┬──────────┘
+         │   + enroll_api.py    │                    │
+         └──────────┬──────────┘                    │
+                    │ pyzk SDK (TCP)                 │
+                    └───────────────┬────────────────┘
+                                    ▼
+                         ┌─────────────────────┐
+                         │  ZKTeco Fingerprint  │
+                         │  Biometric Device    │
+                         │  (192.168.1.201)     │
+                         │  Door relay control  │
+                         └─────────────────────┘
 ```
 
-The Rails application acts as the central system that integrates all services and manages gym operations.
+---
+
+## Key Features
+
+### Member Management
+- Add and manage 200+ member profiles
+- Auto-generated member codes
+- Track active, expiring, and expired memberships
+- Partial payment support — real-world billing requirement
+
+### Biometric Attendance + Gate Control
+
+The most technically complex feature. The ZKTeco fingerprint device sits on the gym's local network and cannot reach cloud APIs directly.
+
+**Solution:** A Python bridge script running on the gym's Windows laptop:
+
+1. Connects to the ZK device over local LAN via `pyzk` SDK
+2. Polls attendance logs every 20 seconds
+3. Deduplicates locally using an in-memory set
+4. Forwards each new punch to the Rails API via HTTP POST
+
+**Gate Control via Template Management:**
+
+Expired members are blocked at the physical door — not just logged. When a subscription expires, the member's fingerprint template is deleted from the device. No template = device shows red ✗ = door relay does not fire. When a member renews, their saved template is restored from the database automatically at the next midnight sync.
+
+**Two-layer deduplication:**
+
+| Layer | Where | How |
+|---|---|---|
+| Layer 1 | Python bridge | In-memory set of `{user_id}-{timestamp}` keys |
+| Layer 2 | Rails API | DB check: same member + same minute |
+
+**Fingerprint Enrollment from Web UI:**
+
+A Flask API (`enroll_api.py`) runs on the gym laptop alongside the bridge. Staff click "Enroll Fingerprint" on the member profile page — the browser pings `localhost:5000/enroll`, which creates the device user and triggers the enrollment screen on the biometric device. Single button click, under 30 seconds.
+
+**Dual Bridge for Reliability:**
+
+Primary bridge on the gym laptop + backup bridge on an Android phone running Termux. If the laptop is off, attendance continues via the phone. Both can run simultaneously — Rails deduplication silently ignores double-sends.
+
+### WhatsApp Automation
+
+Replaced the original third-party provider (Interakt) with a direct **Meta WhatsApp Cloud API** integration after 0% delivery rate due to app being in development mode.
+
+**Pipeline:**
+```
+cron-job.org (daily 10:00 AM IST)
+    ↓
+MembershipExpiryWhatsappJob
+    ↓
+Meta WhatsApp Cloud API
+    ↓
+Member's WhatsApp
+    ↓
+Webhook → trn_whatsapp_logs updated: QUEUED → DELIVERED → READ
+```
+
+Full delivery tracking via webhook — messages are tracked through their complete lifecycle.
+
+### Admin Dashboard
+
+Single-screen overview: active/expiring/expired member counts, today's collections, due payments, attendance feed, inventory status. Bulk preloading with hash maps to avoid N+1 queries with 200+ members.
+
+### Subscription & Payment Tracking
+- Membership plan management
+- Partial payment support
+- Payment history per member
+- Auto-calculated due balances on dashboard
+
+### Inventory Management
+- Track gym equipment and supplements
+- Stock issuance and usage records
+
+### Staff & Trainer Management
+- Staff records with role-based access
+- Module-level permission system per department
 
 ---
 
-# Tech Stack
+## Database Design
 
-Backend
-Ruby on Rails
-
-Database
-MySQL (CleverCloud)
-
-Hosting
-Render
-
-Domain
-Namecheap
-
-Messaging Integration
-Interakt WhatsApp API
-
-Scheduling
-cron-job.com (for automated daily tasks)
-
-Hardware Integration
-Biometric fingerprint attendance device
-
----
-
-# Database Design
-
-The database is organized into **Master tables** and **Transaction tables**.
-
-## Master Tables
-
+**Master Tables** (static business data):
 ```
 mst_members_lists
 mst_membership_plans
 mst_staff_lists
 mst_trainer_lists
 mst_stock_lists
-mst_category_lists
 ```
 
-These tables store static business data.
-
-## Transaction Tables
-
+**Transaction Tables** (operational data):
 ```
 trn_member_subscriptions
 trn_member_attendances
+trn_member_biometric_mappings   ← includes finger template backup (LONGTEXT)
 trn_payments
-trn_stock_inventories
-trn_issue_amounts
-trn_reminder_logs
 trn_whatsapp_logs
-```
-
-These tables store dynamic operational data.
-
-## System Tables
-
-```
-users
-sessions
-trn_user_accesses
-trn_user_rights
 trn_audit_trials
 ```
 
-These tables manage authentication, authorization, and audit logging.
+**System Tables:**
+```
+users
+trn_user_accesses
+trn_user_rights
+```
 
 ---
 
-# Local Development Setup
-
-Clone the repository
+## Python Bridge Components
 
 ```
-git clone https://github.com/your-username/spinefitness.git
-cd spinefitness
+biometric_bridge/
+├── bridge.py           # Main attendance polling loop
+├── sync_access.py      # Nightly gate access sync (delete/restore templates)
+├── enroll_api.py       # Flask API for web-triggered fingerprint enrollment
+├── config.py           # Device IP, Rails URL, company code
+├── requirements.txt    # pyzk, requests, flask, flask-cors
+└── start_bridge.vbs    # Silent auto-start on Windows boot (no terminal window)
 ```
 
-Install dependencies
+---
 
-```
+## Local Development Setup
+
+```bash
+git clone https://github.com/imlakshay08/spine-fitness-gym-management-system
+cd spine-fitness-gym-management-system
 bundle install
-```
-
-Create database
-
-```
-rails db:create
-```
-
-Run migrations
-
-```
-rails db:migrate
-```
-
-Start the server
-
-```
+rails db:create db:migrate
 rails server
 ```
 
-Application will run at:
-
+For the Python bridge:
+```bash
+cd biometric_bridge
+pip install -r requirements.txt
+python bridge.py
 ```
-http://localhost:3000
-```
 
 ---
 
-# Technical Challenges
+## Real-World Usage
 
-## Biometric Device Integration
+**Spine Fitness Gym** — Dwarka Sector 22, New Delhi
 
-Integrating the biometric fingerprint device required mapping biometric IDs with gym members and synchronizing attendance records through an API.
-
-## WhatsApp API Integration
-
-Integrating the Interakt WhatsApp API required designing automated workflows for sending notifications and reminders.
-
-## Real Business Workflow Modeling
-
-The system needed to replicate real gym operations including membership management, attendance tracking, and payment recording.
+- 200+ registered members
+- 100+ active members
+- Biometric attendance running daily
+- Automated WhatsApp reminders sent every morning at 10 AM
+- Expired members physically blocked at the gate
+- Zero notebooks in use
 
 ---
 
-# Key Learnings
+## Blog Posts
 
-Building Spine Fitness provided experience with:
-
-* Designing software for a real-world business workflow
-* API integration with third-party services
-* Hardware integration with biometric attendance devices
-* Database design for subscription-based systems
-* Deploying and maintaining production Rails applications
-* Handling real user data and operational processes
+- [Building a Production Gym Management System with Ruby on Rails](https://imlakshay08-complete-ruby-on-rails.hashnode.dev/gym-management-system-with-ruby-on-rails)
+- [Connecting a Biometric Fingerprint Device to a Rails App Using Python](https://imlakshay08-complete-ruby-on-rails.hashnode.dev/connecting-a-biometric-fingerprint-device-to-a-rails-web-app-using-python)
+- [How I Ditched Interakt and Built a Direct WhatsApp Pipeline with Meta Cloud API](https://imlakshay08-complete-ruby-on-rails.hashnode.dev/how-i-ditched-interakt-and-built-a-direct-whatsapp-automation-pipeline-with-meta-cloud-api)
 
 ---
 
-# Future Improvements
+## Developer
 
-Planned improvements include:
-
-* Online payment gateway integration
-* Member self-service portal
-* Mobile application for members
-* Advanced analytics dashboard
-* Automated membership renewal system
-* Enhanced reporting tools
+**Lakshay Tyagi** — Ruby on Rails Developer
+- GitHub: [imlakshay08](https://github.com/imlakshay08)
+- Blog: [Complete Ruby on Rails on Hashnode](https://imlakshay08-complete-ruby-on-rails.hashnode.dev)
 
 ---
 
-# Developer
-
-Lakshay Tyagi
-Ruby on Rails Developer
-
-This project was developed independently as a real-world software solution for a local gym business.
-
----
-
-# License
+## License
 
 MIT License
