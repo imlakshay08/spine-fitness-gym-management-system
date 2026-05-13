@@ -7,6 +7,39 @@
 	<meta name="description" content="Spine Fitness" />
 	<meta name="author" content="Lakshay Tyagi" />
 	<title>Spine Fitness</title>
+<script>
+  (function(){
+    var hidden = false;
+    function hideLoader(){
+      if (hidden) return; hidden = true;
+      var el = document.getElementById('page-loader');
+      if (el) el.classList.remove('active');
+    }
+    // Primary: window.load — fires when EVERYTHING is loaded
+    if (document.readyState === 'complete') {
+      hideLoader();
+    } else {
+      window.addEventListener('load', hideLoader);
+      // Backup: readyState change
+      document.addEventListener('readystatechange', function(){
+        if (document.readyState === 'complete') hideLoader();
+      });
+      // Safety: max 12 seconds, then hide regardless
+      setTimeout(hideLoader, 12000);
+    }
+    // Show overlay when user clicks a real navigation link
+    document.addEventListener('click', function(e){
+      var a = e.target.closest('a');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      if (!href || href === '#' || href.indexOf('javascript:') === 0 || href.charAt(0) === '#') return;
+      if (a.target === '_blank' || a.hasAttribute('data-no-loader')) return;
+      hidden = false;
+      var el = document.getElementById('page-loader');
+      if (el) el.classList.add('active');
+    });
+  })();
+</script>
 
 	<% if controller.controller_name !='login' && controller.controller_name !='student_info'%> 
 	<!-- google font -->
@@ -84,6 +117,14 @@
   </head>
  
   <body class="page-header-fixed sidemenu-closed-hidelogo page-content-white page-md header-white white-sidebar-color logo-indigo spine-dark">
+  <div id="page-loader" class="active">
+  <div class="loader-bar"></div>
+  <div class="loader-content">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">LOADING</div>
+  </div>
+</div>
+
     <%= yield %>
 
     <% if controller.controller_name !='login' %> 

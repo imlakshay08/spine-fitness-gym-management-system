@@ -192,14 +192,28 @@ function process_save_student_details(){
      }}
    
   formData.append("identity", "SAVEFACLTY");
+  // Disable buttons + show spinner on Submit
+var $submitBtn = $('button.btn-primary').first();
+var originalText = $submitBtn.html();
+$submitBtn.prop('disabled', true)
+          .css({opacity: '0.7', cursor: 'not-allowed', 'pointer-events': 'none'})
+          .html('<span class="member-spinner"></span> SAVING...');
+$('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': 'none', opacity: '0.5'});
+
+// helper to reset (in case of error)
+function _resetSaveBtn(){
+  $submitBtn.prop('disabled', false)
+            .css({opacity: '', cursor: '', 'pointer-events': ''})
+            .html(originalText);
+  $('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': '', opacity: ''});
+}
+
   formData.append("mid", mid);  
  
   $.each(other_data,function(key,input){
       formData.append(input.name,input.value);
   });
   
-   $(".no_loader").removeClass("hidden").addClass("hidden");
-   $(".loader").removeClass("hidden");
     setTimeout(function(){
   $.ajax({
           url: usePath+"member_list/ajax_process",
@@ -212,22 +226,21 @@ function process_save_student_details(){
             
             if( resp.status ){
               $("#mid").val(resp.profileid);
-              $(".no_loader").removeClass("hidden");
-               $(".loader").removeClass("hidden").addClass("hidden");                          
+                                     
               showToast("success",resp.message);                  
                window.location.href = usePath + "member_list";
       
             }else{  
-              $(".no_loader").removeClass("hidden");
-               $(".loader").removeClass("hidden").addClass("hidden");                         
+                                      
               showToast("error",resp.message); 
+              _resetSaveBtn();
             }
 
           },
           error: function () {
-            $(".no_loader").removeClass("hidden");
-            $(".loader").removeClass("hidden").addClass("hidden");
+              showToast("error","An error occurred while saving. Please try again.");
               $(".process_save").show();
+              _resetSaveBtn();
           },
           cache: false
            });

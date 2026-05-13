@@ -98,18 +98,17 @@ function ValidateEmail(mail) {
 function set_global_focus(id){
   $("#"+id).focus();
 }
-
 function save_member_subscription(){
   var usePath           = $.trim( $("#rootXPath").val() );
   var formData          = new FormData();
   var other_data        = $('form#myforms').serializeArray();
-  var mid               = $.trim( $("#mid").val() ); 
-  var ms_sbscrptn_no      = $.trim( $("#ms_sbscrptn_no").val() );
-  var ms_member_id    = $.trim( $("#ms_member_id").val() );
-  var ms_plan_id       = $.trim( $("#ms_plan_id").val() ); 
-  var ms_start_date         = $.trim( $("#ms_start_date").val() );
-  var ms_amount_paid      = $.trim( $("#ms_amount_paid").val() );	
-  var ms_payment_mode      = $.trim( $("#ms_payment_mode").val() );	
+  var mid               = $.trim( $("#mid").val() );
+  var ms_sbscrptn_no    = $.trim( $("#ms_sbscrptn_no").val() );
+  var ms_member_id      = $.trim( $("#ms_member_id").val() );
+  var ms_plan_id        = $.trim( $("#ms_plan_id").val() );
+  var ms_start_date     = $.trim( $("#ms_start_date").val() );
+  var ms_amount_paid    = $.trim( $("#ms_amount_paid").val() );
+  var ms_payment_mode   = $.trim( $("#ms_payment_mode").val() );
 
   if( ms_sbscrptn_no == ''){
     showToast("info","Subscription No. is required.");
@@ -132,66 +131,68 @@ function save_member_subscription(){
     setTimeout(function(){ set_global_focus('ms_amount_paid');},500);
     return false;
   }
-var isOpen = $("#open_plan_row").is(":visible");
 
-if(isOpen){
-
-  var open_amount = $("#ms_open_amount").val();
-  var open_end = $("#ms_open_end_date").val();
-
-  if(open_amount == ""){
-    showToast("info","Custom amount required");
-    return false;
+  var isOpen = $("#open_plan_row").is(":visible");
+  if(isOpen){
+    var open_amount = $("#ms_open_amount").val();
+    var open_end = $("#ms_open_end_date").val();
+    if(open_amount == ""){
+      showToast("info","Custom amount required");
+      return false;
+    }
+    if(open_end == ""){
+      showToast("info","Custom end date required");
+      return false;
+    }
   }
 
-  if(open_end == ""){
-    showToast("info","Custom end date required");
-    return false;
-  }
-}
   formData.append("identity", "SAVESUBSCR");
-  formData.append("mid", mid);  
- 
+  formData.append("mid", mid);
   $.each(other_data,function(key,input){
-      formData.append(input.name,input.value);
+    formData.append(input.name,input.value);
   });
-  
-   $(".no_loader").removeClass("hidden").addClass("hidden");
-   $(".loader").removeClass("hidden");
-    setTimeout(function(){
-  $.ajax({
-          url: usePath+"member_subscriptions/ajax_process",
-          type: 'POST',
-          data: formData,
-          async: false,
-          contentType: false,
-          processData: false,
-          success: function (resp) {
-            
-            if( resp.status ){
-              $("#mid").val(resp.profileid);
-              $(".no_loader").removeClass("hidden");
-               $(".loader").removeClass("hidden").addClass("hidden");                          
-              showToast("success",resp.message);                  
-               window.location.href = usePath + "member_subscriptions";
-      
-            }else{  
-              $(".no_loader").removeClass("hidden");
-               $(".loader").removeClass("hidden").addClass("hidden");                         
-              showToast("error",resp.message); 
-            }
 
-          },
-          error: function () {
-            $(".no_loader").removeClass("hidden");
-            $(".loader").removeClass("hidden").addClass("hidden");
-              $(".process_save").show();
-          },
-          cache: false
-           });
+  // Disable buttons + show spinner on Submit
+  var $submitBtn = $('button.btn-primary').first();
+  var originalText = $submitBtn.html();
+  $submitBtn.prop('disabled', true)
+            .css({opacity: '0.7', cursor: 'not-allowed', 'pointer-events': 'none'})
+            .html('<span class="member-spinner"></span> SAVING...');
+  $('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': 'none', opacity: '0.5'});
 
-    },500);
+  function _resetSaveBtn(){
+    $submitBtn.prop('disabled', false)
+              .css({opacity: '', cursor: '', 'pointer-events': ''})
+              .html(originalText);
+    $('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': '', opacity: ''});
+  }
+
+  setTimeout(function(){
+    $.ajax({
+      url: usePath+"member_subscriptions/ajax_process",
+      type: 'POST',
+      data: formData,
+      async: false,
+      contentType: false,
+      processData: false,
+      success: function (resp) {
+        if( resp.status ){
+          $("#mid").val(resp.profileid);
+          showToast("success",resp.message);
+          window.location.href = usePath + "member_subscriptions";
+        }else{
+          showToast("error",resp.message);
+          _resetSaveBtn();
+        }
+      },
+      error: function () {
+        _resetSaveBtn();
+      },
+      cache: false
+    });
+  },500);
 }
+
 function fill_end_date() {
 
     var usePath   = $.trim($("#rootXPath").val());
