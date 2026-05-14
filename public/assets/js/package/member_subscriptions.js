@@ -80,13 +80,12 @@ function ValidateEmail(mail) {
 
   }
 
- $(document).on("keypress","#member_subscriptions, #member_name, #member_contact",function(e){
-    var keycode = (e.keyCode ? e.keyCode : e.which );
-      if( keycode == '13' ){
-        filter_member_subscriptions();
-      }
-  });
-
+$(document).on("keypress", "#member_search", function(e) {
+  var keycode = (e.keyCode ? e.keyCode : e.which);
+  if (keycode == '13') {
+    filter_member_subscriptions();
+  }
+});
   function filter_member_subscriptions(){
       var useroot = $("#rootXPath").val();
       $(".show_loader").removeClass("hidden");

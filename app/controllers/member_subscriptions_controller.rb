@@ -96,7 +96,7 @@ class MemberSubscriptionsController < ApplicationController
         @compcodes      = session[:loggedUserCompCode] 
         session[:isErrorhandled] = nil
         session[:postedpamams]   = nil
-        session[:req_member_subscription] = nil
+        session[:req_member_search]  = nil
         session[:req_status_filter]        = nil
         session[:req_plan_filter]          = nil
         isFlags = true
@@ -350,64 +350,43 @@ class MemberSubscriptionsController < ApplicationController
         end_date < Date.today ? "EXPIRED" : "ACTIVE"
     end
 
-   def get_member_subscriptions
+    def get_member_subscriptions
       @compcodes = session[:loggedUserCompCode]
-
-      pages = params[:page].to_i > 0 ? params[:page] : 1
-
-      is_search = params[:server_request].to_s == 'Y'
+      is_search  = params[:server_request].to_s == 'Y'
 
       if is_search
-        filter_search  = params[:member_subscriptions].to_s.strip
-        filter_name    = params[:member_name].to_s.strip
-        filter_contact = params[:member_contact].to_s.strip
+        filter_search  = params[:member_search].to_s.strip
         @status_filter = params[:status_filter].to_s.strip
-        @plan_filter   = params[:plan_filter].to_s.strip   
-        session[:req_member_subscriptions] = filter_search
-        session[:req_member_name]          = filter_name
-        session[:req_member_contact]       = filter_contact
-        session[:req_status_filter]        = @status_filter
-        session[:req_plan_filter]          = @plan_filter
+        @plan_filter   = params[:plan_filter].to_s.strip
+        session[:req_member_search]  = filter_search
+        session[:req_status_filter]  = @status_filter
+        session[:req_plan_filter]    = @plan_filter
       else
-        filter_search  = session[:req_member_subscriptions].to_s.strip
-        filter_name    = session[:req_member_name].to_s.strip
-        filter_contact = session[:req_member_contact].to_s.strip
+        filter_search  = session[:req_member_search].to_s.strip
         @status_filter = session[:req_status_filter].to_s.strip
-        @plan_filter   = session[:req_plan_filter].to_s.strip   
+        @plan_filter   = session[:req_plan_filter].to_s.strip
       end
 
       @status_filter = 'A' unless @status_filter.present?
-      @plan_filter   = '1' unless @plan_filter.present? 
-
-      @member_subscriptions_search = filter_search
-      @member_name_search          = filter_name
-      @member_contact_search       = filter_contact
+      @plan_filter   = '1' unless @plan_filter.present?
+      @member_search = filter_search
 
       iswhere = "ms_compcode ='#{@compcodes}'"
 
       if filter_search.present?
-        iswhere += " AND (ms_sbscrptn_no LIKE '%#{filter_search}%')"
-      end
+        # Search subscription no directly
+        sub_match = "ms_sbscrptn_no LIKE '%#{filter_search}%'"
 
-      if filter_name.present?
-        matching_member_ids = MstMembersList
-                               .where("mmbr_compcode = ? AND mmbr_name LIKE ?", @compcodes, "%#{filter_name}%")
-                               .pluck(:id)
-        if matching_member_ids.present?
-          iswhere += " AND ms_member_id IN (#{matching_member_ids.join(',')})"
-        else
-          iswhere += " AND ms_member_id = 0"
-        end
-      end
+        # Search member name and contact
+        matching_ids = MstMembersList
+                        .where("mmbr_compcode = ? AND (mmbr_name LIKE ? OR mmbr_contact LIKE ?)",
+                                @compcodes, "%#{filter_search}%", "%#{filter_search}%")
+                        .pluck(:id)
 
-      if filter_contact.present?
-        matching_contact_ids = MstMembersList
-                                .where("mmbr_compcode = ? AND mmbr_contact LIKE ?", @compcodes, "%#{filter_contact}%")
-                                .pluck(:id)
-        if matching_contact_ids.present?
-          iswhere += " AND ms_member_id IN (#{matching_contact_ids.join(',')})"
+        if matching_ids.present?
+          iswhere += " AND (#{sub_match} OR ms_member_id IN (#{matching_ids.join(',')}))"
         else
-          iswhere += " AND ms_member_id = 0"
+          iswhere += " AND (#{sub_match})"
         end
       end
 
@@ -417,13 +396,11 @@ class MemberSubscriptionsController < ApplicationController
         iswhere += " AND ms_end_date >= '#{Date.today}'"
       end
 
-    if @plan_filter.present? && @plan_filter != 'ALL'
-       iswhere += " AND ms_plan_id = '#{@plan_filter}'"
-    end
+      if @plan_filter.present?
+        iswhere += " AND ms_plan_id = '#{@plan_filter}'"
+      end
 
       stdob = TrnMemberSubscription.where(iswhere).order("ms_sbscrptn_no ASC")
-
-      # -------- PERFORMANCE FIX --------
 
       member_ids = stdob.map(&:ms_member_id).uniq
       plan_ids   = stdob.map(&:ms_plan_id).uniq
@@ -431,11 +408,10 @@ class MemberSubscriptionsController < ApplicationController
       @members_hash = MstMembersList
                         .where("mmbr_compcode=? AND id IN (?)", @compcodes, member_ids)
                         .index_by(&:id)
+      @plans_hash   = MstMembershipPlan
+                        .where("plan_compcode=? AND id IN (?)", @compcodes, plan_ids)
+                        .index_by(&:id)
 
-      @plans_hash = MstMembershipPlan
-                      .where("plan_compcode=? AND id IN (?)", @compcodes, plan_ids)
-                      .index_by(&:id)
- 
       return stdob
     end
 

@@ -29,54 +29,59 @@
                       <%= flash[:error] %>
                     </div>
                    <% end %>
-                                       <%= form_tag({:action=>'index'} ,:multipart=>true,:id=>'myForms') do  %>
+                      <%= form_tag({:action=>'index'}, :multipart=>true, :id=>'myForms') do %>
+                        <input type="hidden" id="rootXPath" value="<%=root_url%>"/>
+                        <input type="hidden" name="server_request" id="server_request" value="Y"/>
 
-                    <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
-                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
-                    <div class="row m-b-10">
-                   <label class="col-sm-12 col-md-1">Search</label>
-                    <div class="col-sm-12 col-md-2">  <input type="text" class="form-control" name="member_subscriptions" id="member_subscriptions"  autocomplete="off" placeholder="Subscription No."  value="<% if @member_subscriptions_search %><%=@member_subscriptions_search%><% end %>"/></div>
-                    
-                    <div class="col-sm-12 col-md-2">  <input type="text" class="form-control" name="member_name" id="member_name"  autocomplete="off" placeholder="Member Name"  value="<% if @member_name_search %><%=@member_name_search%><% end %>"/></div>
+                        <div class="row m-b-10 align-items-center">
 
-                    <div class="col-sm-12 col-md-2">  <input type="text" class="form-control" name="member_contact" id="member_contact"  autocomplete="off" placeholder="Contact No."  value="<% if @member_contact_search %><%=@member_contact_search%><% end %>"/></div>
+                          <label class="col-sm-12 col-md-1">Search</label>
 
-                      <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">  
-                     <label class="">Type</label>
-                    	<select class="form-select select-height"  name="status_filter" id="status_filter">									
-									 <option value="A" <%= 'selected' if @status_filter != 'E' %>>Active</option>
-                    <option value="E" <%= 'selected' if @status_filter == 'E' %>>Expired</option>
-								</select>
-                    </div>
+                          <div class="col-sm-12 col-md-3">
+                            <input type="text" class="form-control" name="member_search" id="member_search"
+                              autocomplete="off" placeholder="Subscription No. / Member Name / Contact"
+                              value="<% if @member_search %><%=@member_search%><% end %>"/>
+                          </div>
 
-                <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
-                  <label class="">Plan</label>
-                  <select class="form-select select-height" name="plan_filter" id="plan_filter">
-                    <option value="">All</option>
-                    <% if @MemberPlanList %>
-                      <% @MemberPlanList.each do |plan| %>
-                        <option value="<%= plan.id %>" <%= 'selected' if @plan_filter == plan.id.to_s %>><%= plan.plan_name %></option>
-                      <% end %>
-                    <% end %>
-                  </select>
-                </div>
+                          <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+                            <label class="mb-0">Type</label>
+                            <select class="form-select select-height" name="status_filter" id="status_filter">
+                              <option value="A" <%= 'selected' if @status_filter != 'E' %>>Active</option>
+                              <option value="E" <%= 'selected' if @status_filter == 'E' %>>Expired</option>
+                            </select>
+                          </div>
 
-                    <div class="col-sm-12 col-md-1 no_loader">  
-                    <button data-bs-toggle="button" onclick="filter_member_subscriptions();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
-											</button>
-                    </div>
+                          <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+                            <label class="mb-0">Plan</label>
+                            <select class="form-select select-height" name="plan_filter" id="plan_filter">
+                              <option value="" <%= 'selected' if @plan_filter.blank? %>>All</option>
+                              <% if @MemberPlanList %>
+                                <% @MemberPlanList.each do |plan| %>
+                                  <option value="<%= plan.id %>" <%= 'selected' if @plan_filter == plan.id.to_s %>><%= plan.plan_name %></option>
+                                <% end %>
+                              <% end %>
+                            </select>
+                          </div>
 
-                    <div class="col-sm-12 col-md-1 show_loader hidden">
-                    <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner  " >
-                      <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
-                    </div>
-                  </div>
-                    <div class="col-sm-12 col-md-2">  
-                    <a href="<%=root_url%>member_subscriptions/referesh_member_subscriptions" class="float-right">
-                    <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
-                    </div>
-                    </div>  
+                          <div class="col-sm-12 col-md-1 no_loader">
+                            <button type="button" onclick="filter_member_subscriptions();" class="btn btn-circle btn-default">
+                              <i class="fa fa-search"></i>
+                            </button>
+                          </div>
 
+                          <div class="col-sm-12 col-md-1 show_loader hidden">
+                            <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner">
+                              <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
+                            </div>
+                          </div>
+
+                          <div class="col-sm-12 col-md-2">
+                            <a href="<%=root_url%>member_subscriptions/referesh_member_subscriptions" class="float-right">
+                              <button type="button" class="btn btn-circle btn-info"><i class="fa fa-refresh"></i> Reset</button>
+                            </a>
+                          </div>
+
+                        </div>
                       <%end%>
                       <div class="row">
                       <div class="col-sm-12 col-md-3">  
