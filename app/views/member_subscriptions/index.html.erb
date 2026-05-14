@@ -49,6 +49,18 @@
 								</select>
                     </div>
 
+                <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+                  <label class="">Plan</label>
+                  <select class="form-select select-height" name="plan_filter" id="plan_filter">
+                    <option value="">All</option>
+                    <% if @MemberPlanList %>
+                      <% @MemberPlanList.each do |plan| %>
+                        <option value="<%= plan.id %>" <%= 'selected' if @plan_filter == plan.id.to_s %>><%= plan.plan_name %></option>
+                      <% end %>
+                    <% end %>
+                  </select>
+                </div>
+
                     <div class="col-sm-12 col-md-1 no_loader">  
                     <button data-bs-toggle="button" onclick="filter_member_subscriptions();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
 											</button>

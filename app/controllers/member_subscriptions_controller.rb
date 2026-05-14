@@ -16,6 +16,7 @@ class MemberSubscriptionsController < ApplicationController
         endingDate       =  Date.parse(month_ending.to_s)
         @enddate         =  endingDate.strftime('%d-%b-%Y')	
         @compDetail    =  MstCompany.where(["cmp_companycode = ?", @compcodes]).first
+        @MemberPlanList = MstMembershipPlan.where(plan_compcode: @compcodes)  
         @member_subscriptions = get_member_subscriptions()
         printPath     =  "member_subscriptions/1_prt_member_subscriptions.pdf"
         if params[:id] != nil && params[:id] != ''
@@ -96,6 +97,8 @@ class MemberSubscriptionsController < ApplicationController
         session[:isErrorhandled] = nil
         session[:postedpamams]   = nil
         session[:req_member_subscription] = nil
+        session[:req_status_filter]        = nil
+        session[:req_plan_filter]          = nil
         isFlags = true
         redirect_to "#{root_url}member_subscriptions"
     end
@@ -359,19 +362,22 @@ class MemberSubscriptionsController < ApplicationController
         filter_name    = params[:member_name].to_s.strip
         filter_contact = params[:member_contact].to_s.strip
         @status_filter = params[:status_filter].to_s.strip
-
+        @plan_filter   = params[:plan_filter].to_s.strip   
         session[:req_member_subscriptions] = filter_search
         session[:req_member_name]          = filter_name
         session[:req_member_contact]       = filter_contact
         session[:req_status_filter]        = @status_filter
+        session[:req_plan_filter]          = @plan_filter
       else
         filter_search  = session[:req_member_subscriptions].to_s.strip
         filter_name    = session[:req_member_name].to_s.strip
         filter_contact = session[:req_member_contact].to_s.strip
         @status_filter = session[:req_status_filter].to_s.strip
+        @plan_filter   = session[:req_plan_filter].to_s.strip   
       end
 
       @status_filter = 'A' unless @status_filter.present?
+      @plan_filter   = '1' unless @plan_filter.present? 
 
       @member_subscriptions_search = filter_search
       @member_name_search          = filter_name
@@ -411,6 +417,10 @@ class MemberSubscriptionsController < ApplicationController
         iswhere += " AND ms_end_date >= '#{Date.today}'"
       end
 
+    if @plan_filter.present? && @plan_filter != 'ALL'
+       iswhere += " AND ms_plan_id = '#{@plan_filter}'"
+    end
+
       stdob = TrnMemberSubscription.where(iswhere).order("ms_sbscrptn_no ASC")
 
       # -------- PERFORMANCE FIX --------
@@ -425,7 +435,7 @@ class MemberSubscriptionsController < ApplicationController
       @plans_hash = MstMembershipPlan
                       .where("plan_compcode=? AND id IN (?)", @compcodes, plan_ids)
                       .index_by(&:id)
-
+ 
       return stdob
     end
 
