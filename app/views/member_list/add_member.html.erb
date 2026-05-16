@@ -68,7 +68,7 @@
 					<div class="col-md-3">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-					<input name="mmbr_dob" id="mmbr_dob" type="text" placeholder="Select Date" autocomplete="off" maxlength="20" class="form-control" required value="<% if @member%><%=formatted_date(@member.mmbr_dob)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_dob'] %><% end %>"/>
+					<input name="mmbr_dob" id="mmbr_dob" type="text" placeholder="Enter Date Of Birth" autocomplete="off" maxlength="20" class="form-control" required value="<% if @member%><%=formatted_date(@member.mmbr_dob)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['mmbr_dob'] %><% end %>"/>
 					</div>
 						
 					</div>

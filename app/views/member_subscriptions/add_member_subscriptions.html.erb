@@ -98,7 +98,7 @@
 				<div class="col-md-4">
 					<input name="ms_open_amount" id="ms_open_amount"
 					type="text" class="form-control"
-					placeholder="Enter custom amount"
+					placeholder="Enter custom amount" autocomplete="off"
 					onkeypress="return isNumberMyKeys(event);" value="<% if @subscription %><%=@subscription.ms_open_amount%><% end %>"/>
 				</div>
 
@@ -109,7 +109,7 @@
 						<i class="fa fa-calendar"></i>
 					</span>
 					<input name="ms_open_end_date" id="ms_open_end_date"
-						type="text" class="form-control"
+						type="text" class="form-control" autocomplete="off"
 						placeholder="Select custom end date" value="<% if @subscription && @subscription.ms_open_end_date.present? %>
          <%=formatted_date(@subscription.ms_open_end_date)%>
        <% end %>"/>
@@ -126,7 +126,7 @@
 					<div class="col-md-4">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-					<input name="ms_start_date" id="ms_start_date" type="text" class="form-control" onchange="fill_end_date();" value="<% if @subscription %><%= formatted_date(@subscription.ms_start_date) %><% elsif session[:sess_ms_start_date].present? %><%= session[:sess_ms_start_date] %><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_start_date'] %><% end %>"<% if params[:renew].to_s == '1' %>readonly<% end %>/>
+					<input name="ms_start_date" id="ms_start_date" type="text" class="form-control" autocomplete="off" onchange="fill_end_date();" value="<% if @subscription %><%= formatted_date(@subscription.ms_start_date) %><% elsif session[:sess_ms_start_date].present? %><%= session[:sess_ms_start_date] %><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_start_date'] %><% end %>"<% if params[:renew].to_s == '1' %>readonly<% end %>/>
 					</div></div>
 						<label class=" col-md-2">End Date
 					<span class="required"> * </span>
@@ -134,7 +134,7 @@
 					<div class="col-md-4">
 					<div class="input-group">
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
-					<input name="ms_end_date" id="ms_end_date" type="text" readonly placeholder="Select End Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @subscription%><%=formatted_date(@subscription.ms_end_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_end_date'] %><% end %>"/>
+					<input name="ms_end_date" id="ms_end_date" type="text" autocomplete="off" readonly placeholder="Select End Date" autocomplete="off" maxlength="20" class="form-control" value="<% if @subscription%><%=formatted_date(@subscription.ms_end_date)%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_end_date'] %><% end %>"/>
 					</div></div>
 					</div>
 
@@ -144,7 +144,7 @@
 						<label class=" col-md-2">Amount Paid					
 						</label>
 						<div class="col-md-4">
-				        <input name="ms_amount_paid" id="ms_amount_paid" type="text" maxlength="6"  placeholder="Enter Amount Paid" class="form-control" value="<% if @subscription%><%=@subscription.ms_amount_paid%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_amount_paid'] %><% end %>" />
+				        <input name="ms_amount_paid" id="ms_amount_paid" type="text" maxlength="6"  placeholder="Enter Amount Paid" class="form-control" autocomplete="off" value="<% if @subscription%><%=@subscription.ms_amount_paid%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_amount_paid'] %><% end %>" />
 						</div>
 						<label class=" col-md-2">Payment Mode
 						</label>
@@ -163,7 +163,7 @@
 						<label class=" col-md-2">Remarks				
 						</label>
 						<div class="col-md-4">
-				        <input name="ms_remarks" id="ms_remarks" type="text" maxlength="25"  placeholder="Enter Remarks" class="form-control" value="<% if @subscription%><%=@subscription.ms_remarks%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_remarks'] %><% end %>" />
+				        <input name="ms_remarks" id="ms_remarks" type="text" maxlength="25"  placeholder="Enter Remarks(Optional)" class="form-control" value="<% if @subscription%><%=@subscription.ms_remarks%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_remarks'] %><% end %>" />
 						</div>
 					</div>
 
