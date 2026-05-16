@@ -187,7 +187,8 @@ class MemberSubscriptionsController < ApplicationController
             if mid.to_i == 0  
               if latest.present?
                 if latest.ms_end_date >= Date.parse(params[:ms_start_date])
-                  message = "Member already has an ACTIVE subscription until #{latest.ms_end_date.strftime('%d-%b-%Y')}. Please choose a start date after expiry."                  isFlags = false
+                  message = "Member already has an ACTIVE subscription until #{latest.ms_end_date.strftime('%d-%b-%Y')}. Please choose a start date after expiry."
+                  isFlags = false
                 end
               end
             end
