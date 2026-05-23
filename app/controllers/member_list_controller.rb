@@ -50,14 +50,14 @@ class MemberListController < ApplicationController
         end
     end
 
-    def referesh_member_list
-        @compcodes      = session[:loggedUserCompCode] 
-        session[:isErrorhandled] = nil
-        session[:postedpamams]   = nil
-        session[:req_member_list] = nil
-        isFlags = true
-        redirect_to "#{root_url}member_list"
-    end
+  def referesh_member_list
+    session[:isErrorhandled]           = nil
+    session[:postedpamams]             = nil
+    session[:req_member_list]          = nil
+    session[:req_member_status_filter] = nil
+    session[:req_member_plan_filter]   = nil  # ADD THIS
+    redirect_to "#{root_url}member_list"
+  end
 
     def create
       @compcodes      = session[:loggedUserCompCode] 
@@ -259,32 +259,135 @@ class MemberListController < ApplicationController
     end
   end
 
-    private
-    def get_member_list
-        @compcodes      = session[:loggedUserCompCode] 
-        pages = params[:page].to_i > 0 ? params[:page] : 1
-            
-          # if params[:server_request]!=nil && params[:server_request]!= ''
-           
-            #  session[:req_faculty_list] = nil
-          # end
-          filter_search = params[:member_list] !=nil && params[:member_list] != '' ? params[:member_list].to_s.strip : session[:req_member_list].to_s.strip       
-          iswhere       = "mmbr_compcode ='#{@compcodes}'"
-          if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( mmbr_code LIKE '%#{filter_search}%' OR mmbr_name LIKE '%#{filter_search}%' OR mmbr_contact LIKE '%#{filter_search}%')"
-            @member_list_search       = filter_search
-            session[:req_member_list] = filter_search
-          end    
-          
-        stdob =  MstMembersList.where(iswhere).order("mmbr_code ASC")
-
-        member_ids = stdob.map(&:id)
-
-        subscriptions = TrnMemberSubscription.where("ms_compcode=? AND ms_member_id IN (?)", @compcodes, member_ids).order("ms_end_date DESC")
-
-        @latest_subscription_hash = subscriptions.group_by { |s| s.ms_member_id.to_i }.transform_values(&:first)
-        return stdob
+   def profile
+    @compcodes = session[:loggedUserCompCode]
+    
+    # Load the member
+    @member = MstMembersList.where(
+      "mmbr_compcode = ? AND id = ?", @compcodes, params[:id]
+    ).first
+    
+    # If member not found, go back to list
+    if @member.nil?
+      redirect_to "#{root_url}member_list"
+      return
     end
+
+    # Load ALL subscriptions for this member, newest first
+    @subscriptions = TrnMemberSubscription.where(
+      "ms_compcode = ? AND ms_member_id = ?", @compcodes, @member.id
+    ).order("ms_end_date DESC")
+
+    # The latest subscription is the first one
+    @latest_sub = @subscriptions.first
+
+    # Load plan names for all subscriptions at once (no N+1 query)
+    plan_ids = @subscriptions.map(&:ms_plan_id).uniq
+    @plans_hash = MstMembershipPlan
+      .where("plan_compcode = ? AND id IN (?)", @compcodes, plan_ids)
+      .index_by(&:id)
+
+    # Load all payments for this member's subscriptions at once
+    sub_ids = @subscriptions.map(&:id)
+    @payments_hash = TrnPayment
+      .where(pay_ref_type: 'MEMBER_SUBSCRIPTION', pay_ref_id: sub_ids)
+      .group(:pay_ref_id)
+      .sum(:pay_amount).transform_keys(&:to_i)
+    # @payments_hash is now: { subscription_id => total_amount_paid }
+
+    # Load biometric mapping
+    @biometric = TrnMemberBiometricMapping.find_by(
+      mbm_compcode: @compcodes,
+      mbm_member_id: @member.id.to_s,
+      mbm_is_active: 'Y'
+    )
+
+    # Count attendance for this member (today and total)
+    @attendance_today = TrnMemberAttendance.where(
+      att_compcode: @compcodes,
+      att_member_id: @member.id,
+      att_punch_date: Date.today
+    ).count
+
+    @attendance_total = TrnMemberAttendance.where(
+      att_compcode: @compcodes,
+      att_member_id: @member.id
+    ).count
+  end
+
+    private
+ def get_member_list
+  @compcodes = session[:loggedUserCompCode]
+
+  # Read filters from params or session
+  if params[:server_request].present?
+    @member_status_filter = params[:status_filter].to_s.strip
+    @member_plan_filter   = params[:plan_filter].to_s.strip
+    session[:req_member_status_filter] = @member_status_filter
+    session[:req_member_plan_filter]   = @member_plan_filter
+  else
+    @member_status_filter = session[:req_member_status_filter].to_s.strip
+    @member_plan_filter   = session[:req_member_plan_filter].to_s.strip
+  end
+
+  # Load ALL members — 1 DB call
+  stdob = MstMembersList
+    .where("mmbr_compcode = ?", @compcodes)
+    .order("mmbr_code ASC")
+
+  member_ids = stdob.map(&:id)
+
+  # Load ALL latest subscriptions for these members — 1 DB call
+  subscriptions = TrnMemberSubscription
+    .where("ms_compcode = ? AND ms_member_id IN (?)", @compcodes, member_ids)
+    .order("ms_end_date DESC")
+
+  @latest_subscription_hash = subscriptions
+    .group_by { |s| s.ms_member_id.to_i }
+    .transform_values(&:first)
+
+  # Load plan names — 1 DB call
+  plan_ids = subscriptions.map(&:ms_plan_id).uniq
+  @plans_hash = MstMembershipPlan
+    .where("plan_compcode = ? AND id IN (?)", @compcodes, plan_ids)
+    .index_by(&:id)
+
+  # Load MemberPlanList for dropdown — 1 DB call
+  @MemberPlanList = MstMembershipPlan.where(plan_compcode: @compcodes)
+
+  # Sort in Ruby — zero extra DB calls
+  # Active (soonest expiry first) → Expired (most recent first) → No sub
+  stdob = stdob.sort_by do |member|
+    latest = @latest_subscription_hash[member.id]
+    if latest.nil?
+      [2, Date.today]
+    elsif latest.ms_end_date >= Date.today
+      [0, -latest.ms_end_date.to_time.to_i]
+    else
+      [1, -latest.ms_end_date.to_time.to_i]
+    end
+  end
+
+  # Status filter in Ruby — zero extra DB calls
+  stdob = case @member_status_filter
+  when 'E'  # Expired
+    stdob.select { |m| l = @latest_subscription_hash[m.id]; l && l.ms_end_date < Date.today }
+  when 'N'  # No subscription
+    stdob.select { |m| @latest_subscription_hash[m.id].nil? }
+  else      # Active (default)
+    stdob.select { |m| @latest_subscription_hash[m.id]&.ms_end_date&.>=(Date.today) }
+  end
+
+  # Plan filter in Ruby — zero extra DB calls
+  if @member_plan_filter.present?
+    stdob = stdob.select do |m|
+      latest = @latest_subscription_hash[m.id]
+      latest && latest.ms_plan_id.to_s == @member_plan_filter.to_s
+    end
+  end
+
+  return stdob
+end
 
     private
     def members_params

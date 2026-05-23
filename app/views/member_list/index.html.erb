@@ -39,47 +39,62 @@
                     </div>
                    <% end %>
 
-                    <%= form_tag({:action=>'index'} ,method: :get ,:multipart=>true,:id=>'myForms') do  %>
-                    <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
-                      <input type="hidden" name="server_request" id="server_request" value="Y"/>
-                    
-                    <div class="row m-b-10">
-                   <label class="col-sm-12 col-md-2">Name</label>
-                    <div class="col-sm-12 col-md-3">  <input type="text" class="form-control" name="member_list" id="member_list"  autocomplete="off" placeholder="Enter Member Name"  value="<% if @member_list_search %><%=@member_list_search%><% end %>"/></div>
-                    
-                  
-                    <div class="col-sm-12 col-md-1 no_loader">  
-                    <button data-bs-toggle="button" onclick="filter_member_list();" class="btn btn-circle btn-default" ><i class="fa fa-search"></i>
-											</button>
-                    </div>
-                    <div class="col-sm-12 col-md-1 show_loader hidden">
-                    <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner  " >
-                      <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
-                    </div>
-                  </div>
-                    <div class="col-sm-12 col-md-6 ">  
-                    <a href="<%=root_url%>member_list/referesh_member_list" class="float-right">
-                    <button type="button" class="btn btn-circle btn-info "><i class="fa fa-refresh"></i> Reset</button> </a>
-                    </div>
-                    </div>  
+          <%= form_tag({:action=>'index'}, method: :get, multipart: true, id: 'myForms') do %>
+          <input type="hidden" id="rootXPath" value="<%=root_url%>"/>
+          <input type="hidden" name="server_request" id="server_request" value="Y"/>
 
-                      <%end%>
-                      <div class="row">
-                      <div class="col-sm-12 col-md-3">  
-                      <a href="<%=root_url%>member_list/add_member"  class="">
-                      <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add Member</button> </a>
-                      </div>
-                      <div class="col-sm-12 col-md-9 hidden">  
-                      <a href="javascript:;" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
-                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
-                      </div>
- 
-                      <div class="col-sm-12 col-md-9 ">  
-                      <a href="<%=root_url%>member_list/1_prt_member_list.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
-                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">PDF</button> </a>
-                      </div>
- 
-                      </div>
+          <div class="row m-b-10 align-items-center">
+
+            <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+              <label class="mb-0">Type</label>
+              <select class="form-select select-height" name="status_filter" id="status_filter">
+                <option value=""  <%= 'selected' if @member_status_filter.blank? %>>All</option>
+                <option value="A" <%= 'selected' if @member_status_filter == 'A' %>>Active</option>
+                <option value="E" <%= 'selected' if @member_status_filter == 'E' %>>Expired</option>
+                <option value="N" <%= 'selected' if @member_status_filter == 'N' %>>No Sub</option>
+              </select>
+            </div>
+
+            <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+              <label class="mb-0">Plan</label>
+              <select class="form-select select-height" name="plan_filter" id="plan_filter">
+                <option value="" <%= 'selected' if @member_plan_filter.blank? %>>All</option>
+                <% if @MemberPlanList %>
+                  <% @MemberPlanList.each do |plan| %>
+                    <option value="<%= plan.id %>"
+                      <%= 'selected' if @member_plan_filter.to_s == plan.id.to_s %>
+                    ><%= plan.plan_name %></option>
+                  <% end %>
+                <% end %>
+              </select>
+            </div>
+
+            <div class="col-sm-12 col-md-1 no_loader">
+              <button type="button" onclick="filter_member_list();"
+                      class="btn btn-circle btn-default">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+
+            <div class="col-sm-12 col-md-1 show_loader hidden">
+              <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
+            </div>
+
+            <div class="col-sm-12 col-md-6 text-right d-flex justify-content-end align-items-center gap-2">
+              <a href="<%=root_url%>member_list/add_member">
+                <button type="button" class="btn btn-circle btn-success">
+                  <i class="fa fa-plus"></i> Add Member
+                </button>
+              </a>
+              <a href="<%=root_url%>member_list/referesh_member_list">
+                <button type="button" class="btn btn-circle btn-info">
+                  <i class="fa fa-refresh"></i> Reset
+                </button>
+              </a>
+            </div>
+
+          </div>
+          <% end %>
 										
                       <table
                       class="table table-striped table-bordered table-hover "
@@ -88,10 +103,14 @@
                         <tr>
                           <th>S.No</th>
                           <th>Member Code</th>
-                          <th>Member Name </th>
+                          <th>Member Name</th>
                           <th>Gender</th>
                           <th>Contact No.</th>
-                          <th> Action </th>
+                          <th>Plan</th>
+                          <th>Amount Paid</th>
+                          <th>Valid Till</th>
+                          <th>Status</th>
+                          <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -100,37 +119,114 @@
                          i = pagestart <= 1 ? 1 : ((pagestart - 1) * 10) + 1
                       if @member_list && @member_list.length>0 
                              @member_list.each do |member| %> 
-                        <tr class="odd gradeX">
-                        <td class="left"><%= i %></td>
-                        <td class="left"><%= member.mmbr_code%></td>
-                          <td class="left"><%= member.mmbr_name %></td>
-                          <%if member.mmbr_gender == ''%>
-                          <td class="left"></td>
-                          <%elsif member.mmbr_gender == 'M'%>
-                          <td class="left">Male</td>
-                          <%elsif member.mmbr_gender == 'F'%>
-                          <td class="left">Female</td>
-                          <%elsif member.mmbr_gender == 'Oth'%>
-                          <td class="left">Other</td>
-                          <%end%>
-                          <td class="left"><%= member.mmbr_contact %></td>
-                          <td> 
-                            <a href="<%= root_url %>member_list/add_member/<%= member.id %>" class="tblEditBtn">
-                              <i class="fa fa-pencil"></i>
-                            </a> 
-                             
-                            <a class="tblDelBtn" onclick="alertChecked('<%= root_url %>member_list/<%= member.id %>/deletes')">
-                              <i class="fa fa-trash-o"></i>
-                            </a> 
-                            <% latest = @latest_subscription_hash[member.id] %>
-                        <% if latest.nil? || latest.ms_end_date < Date.today %>
-                          <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%=member.id%>"
-                            class="btn btn-warning btn-xs">
-                            Renew
-                          </a>
-                        <% end %>
-                          </td>
-                        </tr>
+                              <%
+                                latest  = @latest_subscription_hash[member.id]
+                                plan    = latest ? @plans_hash[latest.ms_plan_id.to_i] : nil
+                                is_active = latest && latest.ms_end_date >= Date.today
+                                days_left = latest ? (latest.ms_end_date - Date.today).to_i : nil
+                              %>
+                              <tr class="odd gradeX">
+                                <td><%= i %></td>
+                                <td><%= member.mmbr_code %></td>
+                                <td class="left">
+                                  <a href="<%= root_url %>member_list/profile/<%= member.id %>" style="color: inherit; text-decoration: underline; cursor: pointer;">
+                                    <%= member.mmbr_name %>
+                                  </a>
+                                </td>
+                                <td>
+                                  <% if member.mmbr_gender == 'M' %>Male
+                                  <% elsif member.mmbr_gender == 'F' %>Female
+                                  <% elsif member.mmbr_gender == 'Oth' %>Other
+                                  <% else %>—
+                                  <% end %>
+                                </td>
+
+                                <td><%= member.mmbr_contact %></td>
+
+                                <%# --- NEW: Plan --- %>
+                                <td>
+                                  <% if plan %>
+                                    <%= plan.plan_name %>
+                                  <% else %>
+                                    <span style="color:#aaa;">—</span>
+                                  <% end %>
+                                </td>
+
+                                <%# --- NEW: Amount Paid --- %>
+                                <td>
+                                  <% if latest %>
+                                    <strong>₹<%= number_with_delimiter(latest.ms_amount_paid.to_i) %></strong>
+                                    <% if latest.ms_payment_mode.present? %>
+                                      &nbsp;<span class="badge 
+                                        <%= latest.ms_payment_mode.downcase == 'cash' ? 'badge-success' : 'badge-info' %>">
+                                        <%= latest.ms_payment_mode.upcase %>
+                                      </span>
+                                    <% end %>
+                                  <% else %>
+                                    <span style="color:#aaa;">—</span>
+                                  <% end %>
+                                </td>
+
+                                <%# --- NEW: Valid Till --- %>
+                                <td>
+                                  <% if latest %>
+                                    <%= formatted_date(latest.ms_end_date) %>
+                                    <br/>
+                                    <% if days_left && days_left >= 0 %>
+                                      <span class="badge <%= days_left <= 7 ? 'badge-danger' : days_left <= 30 ? 'badge-warning' : 'badge-success' %>"
+                                            style="font-size:10px;">
+                                        <%= days_left == 0 ? 'Expires today' : "#{days_left}d left" %>
+                                      </span>
+                                    <% end %>
+                                  <% else %>
+                                    <span style="color:#aaa;">—</span>
+                                  <% end %>
+                                </td>
+
+                                <%# --- NEW: Status --- %>
+                                <td>
+                                  <% if latest.nil? %>
+                                    <span class="badge badge-default">No Sub</span>
+                                  <% elsif is_active %>
+                                    <span class="badge badge-success">Active</span>
+                                  <% else %>
+                                    <span class="badge badge-danger">Expired</span>
+                                  <% end %>
+                                </td>
+
+                            <td style="white-space: nowrap;">
+                              <%# View profile %>
+                              <a href="<%= root_url %>member_list/profile/<%= member.id %>"
+                                title="View profile">
+                                <i class="fa fa-eye" style="color:#5b9bd5; font-size:16px; margin-right:6px;"></i>
+                              </a>
+
+                              <%# Edit %>
+                              <a href="<%= root_url %>member_list/add_member/<%= member.id %>"
+                                class="tblEditBtn"
+                                title="Edit member">
+                                <i class="fa fa-pencil"></i>
+                              </a>
+
+                              <%# Delete %>
+                              <a class="tblDelBtn"
+                                title="Delete member"
+                                onclick="alertChecked('<%= root_url %>member_list/<%= member.id %>/deletes')"
+                                style="margin-left:6px;">
+                                <i class="fa fa-trash-o"></i>
+                              </a>
+
+                              <%# Renew — only when expired or no subscription %>
+                              <% latest = @latest_subscription_hash[member.id] %>
+                              <% if latest.nil? || latest.ms_end_date < Date.today %>
+                                <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= member.id %>"
+                                  title="Renew subscription"
+                                  style="margin-left:6px;">
+                                  <i class="fa fa-refresh" style="color:#f0a500; font-size:16px;"></i>
+                                </a>
+                              <% end %>
+                            </td>
+                              </tr>
                         <% i += 1 %>
                             <% end %>
                             <% end %>

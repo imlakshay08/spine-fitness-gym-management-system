@@ -119,9 +119,12 @@ begin
       <ul class="list-group list-group-flush">
         <% @expired_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
-          <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
-            <span class="text-danger">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="<%= root_url %>member_list/profile/<%= sub.ms_member_id %>"
+              style="color:inherit; text-decoration:underline;">
+              <%= mem&.mmbr_name || "Unknown Member" %>
+            </a>
+            <span class="text-danger" style="font-size:12px;">
               <%= sub.ms_end_date.strftime("%d-%b") %>
             </span>
           </li>
@@ -141,9 +144,12 @@ begin
       <ul class="list-group list-group-flush">
         <% @expiring_subs.each do |sub| %>
           <% mem = get_member_detail(sub.ms_member_id) %>
-          <li class="list-group-item d-flex justify-content-between">
-            <span><%= mem&.mmbr_name || "Unknown Member" %></span>
-            <span class="text-warning">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="<%= root_url %>member_list/profile/<%= sub.ms_member_id %>"
+              style="color:inherit; text-decoration:underline;">
+              <%= mem&.mmbr_name || "Unknown Member" %>
+            </a>
+            <span class="text-warning" style="font-size:12px;">
               <%= sub.ms_end_date.strftime("%d-%b") %>
             </span>
           </li>

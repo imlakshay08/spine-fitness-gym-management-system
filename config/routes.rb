@@ -4,6 +4,10 @@ namespace :api do
   resources :biometric_attendances, only: [:create]
   get  'access_status', to: 'access_status#index'
   post 'biometric_mappings/save_template', to: 'biometric_mappings#save_template'
+  get  'member_mappings',                    to: 'member_mappings#index'
+  post 'member_mappings/deactivate_all',     to: 'member_mappings#deactivate_all'
+  get  'all_mappings',                       to: 'member_mappings#all_mappings'
+  post 'member_mappings/deactivate',         to: 'member_mappings#deactivate'
   resources :biometric_mappings, only: [:create]
 end
   get  '/iclock/cdata',      to: 'api/adms#handshake'
@@ -95,7 +99,7 @@ Rails.application.routes.draw do
   get   'membership_plan/search' =>'membership_plan#index'
   get   'membership_plan/add_membership_plan'=>'membership_plan#add_membership_plan'
   post  'membership_plan/add_membership_plan'=>'membership_plan#add_membership_plan'
-  get   "membership_plan/:id"=>'stock_inventory#index'
+  get   "membership_plan/:id"=>'membership_plan#index'
   get   "membership_plan/add_membership_plan/:id"=>'membership_plan#add_membership_plan'
   get   "membership_plan/:id/deletes"=>'membership_plan#destroy'
   resources :membership_plan
@@ -114,8 +118,9 @@ Rails.application.routes.draw do
   get   "member_list/:id/deletes"=>'member_list#destroy'
   post  "member_list/faculty_ajax_img"=>"member_list#save_faculty_img"
   post  "member_list/ajax_process"=>"member_list#ajax_process" 
-  post "member_list/save_manual_mapping" => "member_list#save_manual_mapping"
-  post "member_list/remove_mapping"      => "member_list#remove_mapping"
+  post  "member_list/save_manual_mapping" => "member_list#save_manual_mapping"
+  post  "member_list/remove_mapping"      => "member_list#remove_mapping"
+  get   'member_list/profile/:id' => 'member_list#profile'
   resources :member_list
 end
 

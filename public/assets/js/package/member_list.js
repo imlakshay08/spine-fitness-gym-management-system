@@ -113,35 +113,18 @@ function ValidateEmail(mail) {
   }
 
   $(document).on("keypress","#member_list",function(e){
-
     var keycode = (e.keyCode ? e.keyCode : e.which );
-
       if( keycode == '13' ){
-
         filter_member_list();
-
       }
-
-  
-
   });
 
   function filter_member_list(){
-
       var useroot = $("#rootXPath").val();
-
-     
-
       $(".show_loader").removeClass("hidden");
-
-      $(".no_loader").removeClass("hidden").addClass("hidden")
-
+      $(".no_loader").removeClass("hidden").addClass("hidden");
       $("form#myForms").submit(); 
-
-  
-
   }
-
 
 function set_global_focus(id){
   $("#"+id).focus();
@@ -250,6 +233,9 @@ function _resetSaveBtn(){
 
 
 function enrollFinger(memberId, memberName) {
+    var btn = event.target;
+  btn.disabled = true;
+  btn.innerText = 'Enrolling...';
   $("#enroll-status").html('<span class="text-info">⏳ Sending command to device...</span>');
   
   $.ajax({
@@ -338,3 +324,16 @@ function removeMapping(mappingId) {
     }
   });
 }
+
+$(document).ready(function() {
+  // Auto capitalize first letter of each word as user types
+  $(document).on("input", "#mmbr_name", function() {
+    var pos = this.selectionStart; // remember cursor position
+    var val = $(this).val();
+    var capitalized = val.replace(/\b\w/g, function(char) {
+      return char.toUpperCase();
+    });
+    $(this).val(capitalized);
+    this.setSelectionRange(pos, pos); // restore cursor position
+  });
+});

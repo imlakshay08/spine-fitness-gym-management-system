@@ -903,3 +903,6 @@ select.form-select:hover,
 .select2-selection__placeholder{
   color:var(--sp-muted)!important;
 }
+#mmbr_name {
+  text-transform: capitalize;
+}

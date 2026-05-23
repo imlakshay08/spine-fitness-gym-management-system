@@ -400,7 +400,7 @@ class MemberSubscriptionsController < ApplicationController
         iswhere += " AND ms_plan_id = '#{@plan_filter}'"
       end
 
-      stdob = TrnMemberSubscription.where(iswhere).order("ms_sbscrptn_no ASC")
+      stdob = TrnMemberSubscription.where(iswhere).order("ms_end_date ASC")
 
       member_ids = stdob.map(&:ms_member_id).uniq
       plan_ids   = stdob.map(&:ms_plan_id).uniq

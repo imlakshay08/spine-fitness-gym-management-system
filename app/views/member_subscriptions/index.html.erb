@@ -33,88 +33,78 @@
                         <input type="hidden" id="rootXPath" value="<%=root_url%>"/>
                         <input type="hidden" name="server_request" id="server_request" value="Y"/>
 
-                        <div class="row m-b-10 align-items-center">
+                      <div class="row m-b-10 align-items-center">
 
-                          <label class="col-sm-12 col-md-1">Search</label>
-
-                          <div class="col-sm-12 col-md-3">
-                            <input type="text" class="form-control" name="member_search" id="member_search"
-                              autocomplete="off" placeholder="Subscription No. / Member Name / Contact"
-                              value="<% if @member_search %><%=@member_search%><% end %>"/>
-                          </div>
-
-                          <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
-                            <label class="mb-0">Type</label>
-                            <select class="form-select select-height" name="status_filter" id="status_filter">
-                              <option value="A" <%= 'selected' if @status_filter != 'E' %>>Active</option>
-                              <option value="E" <%= 'selected' if @status_filter == 'E' %>>Expired</option>
-                            </select>
-                          </div>
-
-                          <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
-                            <label class="mb-0">Plan</label>
-                            <select class="form-select select-height" name="plan_filter" id="plan_filter">
-                              <option value="" <%= 'selected' if @plan_filter.blank? %>>All</option>
-                              <% if @MemberPlanList %>
-                                <% @MemberPlanList.each do |plan| %>
-                                  <option value="<%= plan.id %>" <%= 'selected' if @plan_filter == plan.id.to_s %>><%= plan.plan_name %></option>
-                                <% end %>
-                              <% end %>
-                            </select>
-                          </div>
-
-                          <div class="col-sm-12 col-md-1 no_loader">
-                            <button type="button" onclick="filter_member_subscriptions();" class="btn btn-circle btn-default">
-                              <i class="fa fa-search"></i>
-                            </button>
-                          </div>
-
-                          <div class="col-sm-12 col-md-1 show_loader hidden">
-                            <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner">
-                              <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
-                            </div>
-                          </div>
-
-                          <div class="col-sm-12 col-md-2">
-                            <a href="<%=root_url%>member_subscriptions/referesh_member_subscriptions" class="float-right">
-                              <button type="button" class="btn btn-circle btn-info"><i class="fa fa-refresh"></i> Reset</button>
-                            </a>
-                          </div>
-
+                        <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+                          <label class="mb-0">Type</label>
+                          <select class="form-select select-height" name="status_filter" id="status_filter">
+                            <option value="A" <%= 'selected' if @status_filter != 'E' %>>Active</option>
+                            <option value="E" <%= 'selected' if @status_filter == 'E' %>>Expired</option>
+                          </select>
                         </div>
+
+                        <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+                          <label class="mb-0">Plan</label>
+                          <select class="form-select select-height" name="plan_filter" id="plan_filter">
+                            <option value="" <%= 'selected' if @plan_filter.blank? %>>All</option>
+                            <% if @MemberPlanList %>
+                              <% @MemberPlanList.each do |plan| %>
+                                <option value="<%= plan.id %>" <%= 'selected' if @plan_filter == plan.id.to_s %>><%= plan.plan_name %></option>
+                              <% end %>
+                            <% end %>
+                          </select>
+                        </div>
+
+                        <div class="col-sm-12 col-md-1 no_loader">
+                          <button type="button" onclick="filter_member_subscriptions();" class="btn btn-circle btn-default">
+                            <i class="fa fa-search"></i>
+                          </button>
+                        </div>
+
+                        <div class="col-sm-12 col-md-1 show_loader hidden">
+                          <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner">
+                            <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
+                          </div>
+                        </div>
+
+                        <div class="col-sm-12 col-md-6 text-right">
+                          <a href="<%=root_url%>member_subscriptions/referesh_member_subscriptions">
+                            <button type="button" class="btn btn-circle btn-info">
+                              <i class="fa fa-refresh"></i> Reset
+                            </button>
+                          </a>
+                        </div>
+
+                      </div>
                       <%end%>
                       <div class="row">
                       <div class="col-sm-12 col-md-3">  
                       <a href="<%=root_url%>member_subscriptions/add_member_subscriptions"  class="">
                       <button type="button" class="btn btn-circle btn-success"><i class="fa fa-plus"></i> Add Member Subscriptions</button> </a>
                       </div> 
-                      <div class="col-sm-12 col-md-9 hidden">  
-                      <a href="javascript:;" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for excel download">
-                      <button type="button" class="btn dark btn-outline m-b-10" style="float:right;">CSV</button> </a>
 
-                      </div>
 
-                      <div class="col-sm-12 col-md-9 ">  
-                      <a href="<%=root_url%>member_subscriptions/1_prt_member_subscriptions.pdf" target="_blank" class="float-right" data-placement="bottom" data-toggle="tooltip" title="" data-original-title="Click for pdf download">
-                      <button type="button" class="btn dark btn-outline m-b-10 " style="float:right;">PDF</button> </a>
-                      </div>
                       </div>
 											
 												<table 
                         class="table table-striped table-bordered table-hover "
                         id="example4">
-													<thead>
-														<tr>
-															<th>S.No</th>
-                              <th>Subscription No.</th>
-                              <th>Member Name</th>
-                              <th>Contact No.</th>
-                              <th>Plan</th>
-                            	<th>Start Date</th>
-                              <th>End Date</th>
-                              <th>Status</th>
-														</tr>
-													</thead>
+                        <thead>
+                          <tr>
+                            <th>S.No</th>
+                            <th>Subscription No.</th>
+                            <th>Member Name</th>
+                            <th>Contact No.</th>
+                            <th>Plan</th>
+                            <th>Amount Paid</th>
+                            <th>Mode</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Days Left</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
 													<tbody>
                                          <% pagestart = params[:page].present? ? params[:page].to_i : 1 %>
                           <% i = pagestart <= 1 ? 1 : ((pagestart - 1) * 10) + 1 %>
@@ -129,23 +119,70 @@
                           memberphone = memberobj&.mmbr_contact
                           planname    = planobj&.plan_name
                           %>
-														<tr  class="odd gradeX">
-															<td><%= i %></td>
-                            	<td><%= subscription.ms_sbscrptn_no %></td>
-                               <td> <%=membername%></td>
-                               <td><%=memberphone%></td>
-                            	<td><%=planname%></td>
-                              <td><%= formatted_date(subscription.ms_start_date) %></td>
-                            	<td><%= formatted_date(subscription.ms_end_date) %></td>
+                        <%
+                          status    = subscription_status(subscription.ms_end_date)
+                          days_left = (subscription.ms_end_date - Date.today).to_i
+                        %>
+                        <tr class="odd gradeX">
+                          <td><%= i %></td>
+                          <td><%= subscription.ms_sbscrptn_no %></td>
+                          <td><%= membername %></td>
+                          <td><%= memberphone %></td>
+                          <td><%= planname %></td>
+
+                          <%# --- NEW: Amount Paid --- %>
                           <td>
-                            <% status = subscription_status(subscription.ms_end_date) %>
+                            <strong>₹<%= number_with_delimiter(subscription.ms_amount_paid.to_i) %></strong>
+                          </td>
+
+                          <%# --- NEW: Payment Mode --- %>
+                          <td>
+                            <% if subscription.ms_payment_mode.present? %>
+                              <span class="badge <%= subscription.ms_payment_mode.downcase == 'cash' ? 'badge-success' : 'badge-info' %>">
+                                <%= subscription.ms_payment_mode.upcase %>
+                              </span>
+                            <% else %>
+                              <span style="color:#aaa;">—</span>
+                            <% end %>
+                          </td>
+
+                          <td><%= formatted_date(subscription.ms_start_date) %></td>
+                          <td><%= formatted_date(subscription.ms_end_date) %></td>
+
+                          <%# --- NEW: Days Left --- %>
+                          <td>
+                            <% if status == "EXPIRED" %>
+                              <span class="badge badge-danger">Expired</span>
+                            <% elsif days_left == 0 %>
+                              <span class="badge badge-danger">Today</span>
+                            <% elsif days_left <= 7 %>
+                              <span class="badge badge-danger"><%= days_left %>d</span>
+                            <% elsif days_left <= 30 %>
+                              <span class="badge badge-warning"><%= days_left %>d</span>
+                            <% else %>
+                              <span class="badge badge-success"><%= days_left %>d</span>
+                            <% end %>
+                          </td>
+
+                          <%# Status --- %>
+                          <td>
                             <% if status == "ACTIVE" %>
                               <span class="badge badge-success">ACTIVE</span>
                             <% else %>
                               <span class="badge badge-danger">EXPIRED</span>
                             <% end %>
-                          </td>														
-                          </tr>
+                          </td>
+
+                          <%# --- NEW: Renew action --- %>
+                    <td style="white-space:nowrap;">
+                      <% if status == "EXPIRED" %>
+                        <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= subscription.ms_member_id %>"
+                          title="Renew subscription">
+                          <i class="fa fa-refresh" style="color:#f0a500; font-size:16px;"></i>
+                        </a>
+                      <% end %>
+                    </td>
+                        </tr>
                           <% i += 1 %>
                             <% end %>
                             <% end %>
