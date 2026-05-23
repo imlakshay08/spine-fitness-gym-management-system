@@ -35,4 +35,5 @@ class Api::MemberMappingsController < ApplicationController
   else
     render json: { status: false, message: "Not found" }
   end
+ end
 end
