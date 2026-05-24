@@ -1,37 +1,44 @@
+# bridge.py
 from zk import ZK
 import requests
 import time
-import os
+import threading
+from datetime import datetime, date
 from config import *
+# from sync_access import sync_device_access #commentthis
 
-LAST_SENT_FILE = "last_sent_keys.txt"
-
-def load_last_sent():
-    if os.path.exists(LAST_SENT_FILE):
-        with open(LAST_SENT_FILE, 'r') as f:
-            return set(line.strip() for line in f if line.strip())
-    return set()
-
-def save_key(key):
-    with open(LAST_SENT_FILE, 'a') as f:
-        f.write(key + '\n')
+SYNC_HOUR = 0  # midnight
 
 def send_to_rails(payload):
     try:
         response = requests.post(
             RAILS_API_URL,
             json=payload,
-            timeout=5
+            timeout=15
         )
         print(f"Sent: {payload} | Response: {response.status_code}")
-        return response.status_code
     except Exception as e:
         print("Rails API error:", e)
-        return None
+
+def sync_scheduler():
+    """Runs sync once at midnight every day"""
+    print("Sync scheduler started — will sync at midnight daily")
+    # Run once on startup
+    print("Running initial sync on startup...")
+    #sync_device_access() #commentthis
+
+    while True:
+        now = datetime.now()
+        if now.hour == SYNC_HOUR and now.minute == 0:
+            print(f"Midnight sync starting...")
+            #sync_device_access() #commentthis
+            time.sleep(61)  # prevent double trigger within same minute
+        time.sleep(30)
 
 def main():
-    last_sent = load_last_sent()
-    print(f"Loaded {len(last_sent)} previously sent keys")
+    # Start sync scheduler in background thread
+    sync_thread = threading.Thread(target=sync_scheduler, daemon=True)
+    sync_thread.start()
 
     zk = ZK(
         DEVICE_IP,
@@ -47,31 +54,30 @@ def main():
     try:
         conn = zk.connect()
         conn.disable_device()
-        device_sn = conn.get_serialnumber()
-        print(f"Connected. Serial: {device_sn}")
+        print("Connected to device")
+        print(f"Fetching TODAY's attendance logs only ({date.today()})...")
+
+        last_sent = set()
 
         while True:
+            today = date.today()
             attendances = conn.get_attendance()
+            device_sn = conn.get_serialnumber()
 
             for att in attendances:
+                if att.timestamp.date() != today:
+                    continue
                 key = f"{att.user_id}-{att.timestamp}"
-
                 if key in last_sent:
                     continue
-
                 payload = {
                     "compcode": COMP_CODE,
-                    "user_id":  str(att.user_id),
+                    "user_id": att.user_id,
                     "timestamp": att.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                     "device_sn": device_sn
                 }
-
-                status_code = send_to_rails(payload)
-
-                # Only mark as sent if Rails accepted it
-                if status_code in [200, 404]:
-                    last_sent.add(key)
-                    save_key(key)
+                send_to_rails(payload)
+                last_sent.add(key)
 
             time.sleep(POLL_INTERVAL_SECONDS)
 

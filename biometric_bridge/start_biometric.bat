@@ -1,2 +1,3 @@
-cd C:\biometric_bridge
+@echo off
+cd /d C:\biometric_bridge
 python bridge.py

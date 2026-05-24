@@ -35,13 +35,20 @@ class Api::MemberMappingsController < ApplicationController
 
     # POST /api/member_mappings/deactivate_all — deactivate all mappings for member
     def deactivate_all
-    TrnMemberBiometricMapping.where(
-        mbm_compcode:  params[:compcode],
-        mbm_member_id: params[:member_id].to_s,
-        mbm_is_active: 'Y'
-    ).update_all(mbm_is_active: 'N')
+      member_id = params[:member_id].to_s.strip
+      compcode  = params[:compcode].to_s.strip
 
-    render json: { status: true }
+      Rails.logger.info "deactivate_all called: compcode=#{compcode} member_id=#{member_id}"
+
+      count = TrnMemberBiometricMapping.where(
+        mbm_compcode:  compcode,
+        mbm_member_id: member_id,
+        mbm_is_active: 'Y'
+      ).update_all(mbm_is_active: 'N')
+
+      Rails.logger.info "deactivate_all: updated #{count} rows"
+
+      render json: { status: true, updated: count }
     end
 
     def deactivate
