@@ -5,9 +5,9 @@ from zk.finger import Finger
 import requests
 from config import *
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
-MY_DEVICE_USER_ID = "71"  # your device user id
+RAILS_API_BASE = ""
+DEVICE_SN = ""
+MY_DEVICE_USER_ID = ""  # your device user id
 
 def block_me():
     zk = ZK(DEVICE_IP, port=DEVICE_PORT, timeout=DEVICE_TIMEOUT,

@@ -11,7 +11,7 @@ templates = conn.get_templates()
 
 print("=== USERS ===")
 for u in users:
-    if str(u.user_id) == '71':
+    if str(u.user_id) == '':
         print(f"FOUND YOU: uid={u.uid} user_id={u.user_id} name={u.name}")
 
 print("\n=== YOUR TEMPLATES ===")

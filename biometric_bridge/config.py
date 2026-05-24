@@ -1,8 +1,8 @@
 # config.py
 
 DEVICE_IP = ""
-DEVICE_PORT = 
-DEVICE_TIMEOUT = 
+DEVICE_PORT = ''
+DEVICE_TIMEOUT = ''
 
 RAILS_API_URL = ""
 COMP_CODE = ""
