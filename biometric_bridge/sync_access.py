@@ -5,8 +5,8 @@ from zk.finger import Finger
 import requests
 from config import *
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
+RAILS_API_BASE = ""
+DEVICE_SN = ""
 
 def get_access_status():
     try:

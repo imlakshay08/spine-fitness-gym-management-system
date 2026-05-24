@@ -10,8 +10,8 @@ import threading
 app = Flask(__name__)
 CORS(app)  # allow browser requests from any origin
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
+RAILS_API_BASE = ""
+DEVICE_SN = ""
 
 _enrollment_locks = {}
 _locks_mutex = threading.Lock()
