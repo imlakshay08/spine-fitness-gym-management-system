@@ -234,38 +234,43 @@ function _resetSaveBtn(){
 
 function enrollFinger(memberId, memberName) {
     var btn = event.target;
-  btn.disabled = true;
-  btn.innerText = 'Enrolling...';
-  $("#enroll-status").html('<span class="text-info">⏳ Sending command to device...</span>');
-  
-  $.ajax({
-    url: 'http://localhost:5000/enroll',
-    type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({
-      member_id: memberId,
-      member_name: memberName,
-      compcode: 'SF'
-    }),
-    success: function(resp) {
-      if (resp.status) {
-        $("#enroll-status").html(
-          '<span class="text-success">✓ ' + resp.message + '</span>'
-        );
-        // Reload after 3 seconds to show new mapping
-        setTimeout(function(){ location.reload(); }, 3000);
-      } else {
-        $("#enroll-status").html(
-          '<span class="text-danger">Error: ' + resp.message + '</span>'
-        );
-      }
-    },
-    error: function() {
-      $("#enroll-status").html(
-        '<span class="text-danger">⚠ Could not reach enrollment service. Is the gym laptop running?</span>'
-      );
-    }
-  });
+    btn.disabled = true;
+    btn.innerText = 'Enrolling...';
+    $("#enroll-status").html('<span class="text-info">⏳ Sending command to device...</span>');
+    
+    $.ajax({
+        url: 'http://localhost:5000/enroll',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            member_id: memberId,
+            member_name: memberName,
+            compcode: 'SF'
+        }),
+        success: function(resp) {
+            if (resp.status) {
+                $("#enroll-status").html(
+                    '<span class="text-success">✓ ' + resp.message + '</span>'
+                );
+                setTimeout(function(){ location.reload(); }, 3000);
+            } else {
+                // ← Re-enable on failure so staff can try again
+                btn.disabled = false;
+                btn.innerText = '👆 Enroll Fingerprint';
+                $("#enroll-status").html(
+                    '<span class="text-danger">Error: ' + resp.message + '</span>'
+                );
+            }
+        },
+        error: function() {
+            // ← Re-enable on network error so staff can try again
+            btn.disabled = false;
+            btn.innerText = '👆 Enroll Fingerprint';
+            $("#enroll-status").html(
+                '<span class="text-danger">⚠ Could not reach enrollment service. Is the gym laptop running?</span>'
+            );
+        }
+    });
 }
 
 function saveManualMapping(memberId, memberName) {
