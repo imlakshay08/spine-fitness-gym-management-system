@@ -1,0 +1,2 @@
+[phases.build]
+cmds = ['bundle exec bootsnap precompile app/ lib/']
