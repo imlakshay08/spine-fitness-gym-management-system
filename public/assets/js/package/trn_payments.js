@@ -1,9 +1,10 @@
 
 
   function applyFilter() {
-    $('#paymentFilterForm').submit();
+      var useroot = $("#rootXPath").val();
+      $('#paymentFilterForm').attr("action",useroot+"trn_payments/search");
+      $('#paymentFilterForm').submit();
   }
-
   
 $(document).ready(function(){
     flatpickr("#payments_from_date", {

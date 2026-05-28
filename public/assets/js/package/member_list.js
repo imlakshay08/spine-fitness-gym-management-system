@@ -123,6 +123,7 @@ function ValidateEmail(mail) {
       var useroot = $("#rootXPath").val();
       $(".show_loader").removeClass("hidden");
       $(".no_loader").removeClass("hidden").addClass("hidden");
+      $("form#myForms").attr("action", useroot + "member_list/search");
       $("form#myForms").submit(); 
   }
 

@@ -39,7 +39,7 @@
                     </div>
                    <% end %>
 
-          <%= form_tag({:action=>'index'}, method: :get, multipart: true, id: 'myForms') do %>
+          <%= form_tag({:action=>'index'}, :multipart=>true, id: 'myForms') do %>
           <input type="hidden" id="rootXPath" value="<%=root_url%>"/>
           <input type="hidden" name="server_request" id="server_request" value="Y"/>
 

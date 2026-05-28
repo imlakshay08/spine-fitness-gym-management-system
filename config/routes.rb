@@ -269,4 +269,6 @@ Rails.application.routes.draw do
   get  'trn_payments'       => 'trn_payments#index'
   post 'trn_payments'       => 'trn_payments#index'
   get  'trn_payments/index' => 'trn_payments#index'
+  post 'trn_payments/search' => 'trn_payments#index'
+  get 'trn_payments/search' => 'trn_payments#index'
 end
