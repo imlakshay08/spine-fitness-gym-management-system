@@ -906,3 +906,47 @@ select.form-select:hover,
 #mmbr_name {
   text-transform: capitalize;
 }
+/* Table loading overlay */
+.table-loading-wrapper {
+  position: relative;
+}
+
+.table-loader-overlay {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 10;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.table-loader-overlay.active {
+  display: flex;
+}
+
+.table-loader-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: #ff6b35;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.table-loader-text {
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  opacity: 0.85;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

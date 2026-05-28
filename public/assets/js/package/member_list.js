@@ -121,6 +121,7 @@ function ValidateEmail(mail) {
 
   function filter_member_list(){
       var useroot = $("#rootXPath").val();
+      $("#member-table-loader").addClass("active");
       $(".show_loader").removeClass("hidden");
       $(".no_loader").removeClass("hidden").addClass("hidden");
       $("form#myForms").attr("action", useroot + "member_list/search");

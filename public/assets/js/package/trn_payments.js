@@ -2,6 +2,9 @@
 
   function applyFilter() {
       var useroot = $("#rootXPath").val();
+      $("#payments-table-loader").addClass("active");
+      $(".show_loader_pay").removeClass("hidden");
+      $(".no_loader_pay").addClass("hidden");
       $('#paymentFilterForm').attr("action",useroot+"trn_payments/search");
       $('#paymentFilterForm').submit();
   }

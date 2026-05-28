@@ -88,6 +88,7 @@ $(document).on("keypress", "#member_search", function(e) {
 });
   function filter_member_subscriptions(){
       var useroot = $("#rootXPath").val();
+      $("#subscription-table-loader").addClass("active");
       $(".show_loader").removeClass("hidden");
       $(".no_loader").removeClass("hidden").addClass("hidden");
       $("form#myForms").attr("action",useroot+"member_subscriptions/search");
