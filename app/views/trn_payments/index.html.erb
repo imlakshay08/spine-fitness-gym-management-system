@@ -95,6 +95,7 @@
       <div class="card-body">
 
         <%= form_tag({ action: 'index' }, :multipart=>true, id: 'paymentFilterForm') do %>
+          <input type="hidden"  id="rootXPath" value="<%=root_url%>"/>                                        
         <div class="row" style="align-items:flex-end;">
 
           <div class="col-md-2">
