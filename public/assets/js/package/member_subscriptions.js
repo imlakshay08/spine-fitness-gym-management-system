@@ -99,98 +99,103 @@ function set_global_focus(id){
   $("#"+id).focus();
 }
 function save_member_subscription(){
-  var usePath           = $.trim( $("#rootXPath").val() );
-  var formData          = new FormData();
-  var other_data        = $('form#myforms').serializeArray();
-  var mid               = $.trim( $("#mid").val() );
-  var ms_sbscrptn_no    = $.trim( $("#ms_sbscrptn_no").val() );
-  var ms_member_id      = $.trim( $("#ms_member_id").val() );
-  var ms_plan_id        = $.trim( $("#ms_plan_id").val() );
-  var ms_start_date     = $.trim( $("#ms_start_date").val() );
-  var ms_amount_paid    = $.trim( $("#ms_amount_paid").val() );
-  var ms_payment_mode   = $.trim( $("#ms_payment_mode").val() );
+  var usePath        = $.trim($("#rootXPath").val());
+  var formData       = new FormData();
+  var other_data     = $('form#myforms').serializeArray();
+  var mid            = $.trim($("#mid").val());
+  var ms_sbscrptn_no = $.trim($("#ms_sbscrptn_no").val());
+  var ms_member_id   = $.trim($("#ms_member_id").val());
+  var ms_plan_id     = $.trim($("#ms_plan_id").val());
+  var ms_start_date  = $.trim($("#ms_start_date").val());
+  var ms_amount_paid = $.trim($("#ms_amount_paid").val());
 
-  if( ms_sbscrptn_no == ''){
-    showToast("info","Subscription No. is required.");
-    setTimeout(function(){ set_global_focus('ms_sbscrptn_no');},500);
+  // Remove any previous error banner
+  $("#form-error-banner").remove();
+
+  if (ms_sbscrptn_no == '') {
+    showFormError("Subscription No. is required.");
+    set_global_focus('ms_sbscrptn_no');
     return false;
-  }else if( ms_member_id == ''){
-    showToast("info","Member is required.");
-    setTimeout(function(){ set_global_focus('ms_member_id');},500);
+  } else if (ms_member_id == '') {
+    showFormError("Please select a Member. Choose one from the dropdown and click Submit again.");
+    set_global_focus('ms_member_id');
     return false;
-  }else if( ms_plan_id == ''){
-    showToast("info","Plan is required.");
-    setTimeout(function(){ set_global_focus('ms_plan_id');},500);
+  } else if (ms_plan_id == '') {
+    showFormError("Please select a Plan. Choose one from the dropdown and click Submit again.");
+    set_global_focus('ms_plan_id');
     return false;
-  }else if( ms_start_date == ''){
-    showToast("info","Start Date is required.");
-    setTimeout(function(){ set_global_focus('ms_start_date');},500);
+  } else if (ms_start_date == '') {
+    showFormError("Start Date is required. Select a date and click Submit again.");
+    set_global_focus('ms_start_date');
     return false;
-  }else if( ms_amount_paid == ''){
-    showToast("info","Amount is required.");
-    setTimeout(function(){ set_global_focus('ms_amount_paid');},500);
+  } else if (ms_amount_paid == '') {
+    showFormError("Amount Paid is required. Fill it in and click Submit again.");
+    set_global_focus('ms_amount_paid');
     return false;
   }
 
   var isOpen = $("#open_plan_row").is(":visible");
-  if(isOpen){
-    var open_amount = $("#ms_open_amount").val();
-    var open_end = $("#ms_open_end_date").val();
-    if(open_amount == ""){
-      showToast("info","Custom amount required");
+  if (isOpen) {
+    if ($.trim($("#ms_open_amount").val()) == "") {
+      showFormError("Custom amount is required for Open plan. Fill it in and click Submit again.");
+      set_global_focus('ms_open_amount');
       return false;
     }
-    if(open_end == ""){
-      showToast("info","Custom end date required");
+    if ($.trim($("#ms_open_end_date").val()) == "") {
+      showFormError("Custom end date is required for Open plan. Select a date and click Submit again.");
+      set_global_focus('ms_open_end_date');
       return false;
     }
   }
 
   formData.append("identity", "SAVESUBSCR");
   formData.append("mid", mid);
-  $.each(other_data,function(key,input){
-    formData.append(input.name,input.value);
+  $.each(other_data, function(key, input){
+    formData.append(input.name, input.value);
   });
 
-  // Disable buttons + show spinner on Submit
-  var $submitBtn = $('button.btn-primary').first();
+  var $submitBtn   = $('button.btn-primary').first();
   var originalText = $submitBtn.html();
   $submitBtn.prop('disabled', true)
-            .css({opacity: '0.7', cursor: 'not-allowed', 'pointer-events': 'none'})
-            .html('<span class="member-spinner"></span> SAVING...');
-  $('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': 'none', opacity: '0.5'});
+    .css({opacity:'0.7', cursor:'not-allowed', 'pointer-events':'none'})
+    .html('<span class="member-spinner"></span> SAVING...');
+  $('button.btn-danger, a:has(button.btn-danger)')
+    .css({'pointer-events':'none', opacity:'0.5'});
 
   function _resetSaveBtn(){
     $submitBtn.prop('disabled', false)
-              .css({opacity: '', cursor: '', 'pointer-events': ''})
-              .html(originalText);
-    $('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': '', opacity: ''});
+      .css({opacity:'', cursor:'', 'pointer-events':''})
+      .html(originalText);
+    $('button.btn-danger, a:has(button.btn-danger)')
+      .css({'pointer-events':'', opacity:''});
   }
 
   setTimeout(function(){
     $.ajax({
-      url: usePath+"member_subscriptions/ajax_process",
+      url: usePath + "member_subscriptions/ajax_process",
       type: 'POST',
       data: formData,
       async: false,
       contentType: false,
       processData: false,
-      success: function (resp) {
-        if( resp.status ){
+      success: function(resp) {
+        if (resp.status) {
           $("#mid").val(resp.profileid);
-          showToast("success",resp.message);
+          showToast("success", resp.message);
           window.location.href = usePath + "member_subscriptions";
-        }else{
-          showToast("error",resp.message);
+        } else {
+          // Server errors like active subscription conflict — inline banner
+          showFormError(resp.message);
           _resetSaveBtn();
         }
       },
-      error: function () {
+      error: function() {
+        showFormError("An error occurred while saving. Please try again.");
         _resetSaveBtn();
       },
       cache: false
     });
-  },500);
+  }, 500);
 }
 
 function fill_end_date() {
