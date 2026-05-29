@@ -213,6 +213,26 @@
   <% end %>
     </body>
 	<script>
+function showFormError(message) {
+  $("#form-error-banner").remove();
+  var html = '<div id="form-error-banner" style="' +
+    'background:#f8d7da; border:2px solid #f5c6cb; color:#721c24; ' +
+    'padding:14px 18px; border-radius:6px; margin-bottom:20px; ' +
+    'font-size:14px; font-weight:600; display:flex; ' +
+    'align-items:flex-start; gap:10px;">' +
+    '<i class="fa fa-exclamation-circle" style="font-size:20px; ' +
+    'margin-top:1px; flex-shrink:0;"></i>' +
+    '<div>' +
+    '<div style="font-size:14px; font-weight:700; margin-bottom:3px;">' +
+    'Not saved — please fix before continuing</div>' +
+    '<div style="font-size:13px; font-weight:400;">' + message + '</div>' +
+    '</div>' +
+    '</div>';
+  $(".form-body").prepend(html);
+  $("html, body").animate({
+    scrollTop: $("#form-error-banner").offset().top - 80
+  }, 400);
+}
 	function showToast(type, message, heading = '', position = 'top-center', hideAfter = 3000) {
     let bgColor = ''; // Corrected variable name
 

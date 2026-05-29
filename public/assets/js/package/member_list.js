@@ -131,108 +131,101 @@ function ValidateEmail(mail) {
 function set_global_focus(id){
   $("#"+id).focus();
 }
-
 function process_save_student_details(){
-  var usePath           = $.trim( $("#rootXPath").val() );
-  var formData          = new FormData();
-  var other_data        = $('form#myforms').serializeArray();
-  var mid               = $.trim( $("#mid").val() ); 
-  var mmbr_code      = $.trim( $("#mmbr_code").val() );
-  var mmbr_name    = $.trim( $("#mmbr_name").val() );
-  var mmbr_gender       = $.trim( $("#mmbr_gender").val() ); 
-  var mmbr_dob         = $.trim( $("#mmbr_dob").val() );
-  var mmbr_contact      = $.trim( $("#mmbr_contact").val() );	
-  var mmbr_email      = $.trim( $("#mmbr_email").val() );	
+  var usePath      = $.trim($("#rootXPath").val());
+  var formData     = new FormData();
+  var other_data   = $('form#myforms').serializeArray();
+  var mid          = $.trim($("#mid").val());
+  var mmbr_code    = $.trim($("#mmbr_code").val());
+  var mmbr_name    = $.trim($("#mmbr_name").val());
+  var mmbr_gender  = $.trim($("#mmbr_gender").val());
+  var mmbr_contact = $.trim($("#mmbr_contact").val());
+  var mmbr_email   = $.trim($("#mmbr_email").val());
 
-  if( mmbr_code == ''){
-    showToast("info","Member Code is required.");
-    setTimeout(function(){ set_global_focus('mmbr_code');},500);
+  // Remove any previous error banner
+  $("#form-error-banner").remove();
+
+  if (mmbr_code == '') {
+    showFormError("Member Code is required.");
+    set_global_focus('mmbr_code');
     return false;
-  }else if( mmbr_name == ''){
-    showToast("info","Name is required.");
-    setTimeout(function(){ set_global_focus('mmbr_name');},500);
+  } else if (mmbr_name == '') {
+    showFormError("Name is required. Fill it in and click Submit again.");
+    set_global_focus('mmbr_name');
     return false;
-  }else if( mmbr_gender == ''){
-    showToast("info","Gender is required.");
-    setTimeout(function(){ set_global_focus('mmbr_gender');},500);
+  } else if (mmbr_gender == '') {
+    showFormError("Gender is required. Fill it in and click Submit again.");
+    set_global_focus('mmbr_gender');
     return false;
-  }else if( mmbr_contact == ''){
-    showToast("info","Contact No. is required.");
-    setTimeout(function(){ set_global_focus('mmbr_contact');},500);
+  } else if (mmbr_contact == '') {
+    showFormError("Contact No. is required. Fill it in and click Submit again.");
+    set_global_focus('mmbr_contact');
     return false;
   }
-  
-      if (mmbr_contact) {
-      if (mmbr_contact.length <= 9 || mmbr_contact.length > 10) {
-        showToast("info","Mobile Number should be of 10 digits!");
-          $("#mmbr_contact").focus();
-          return false;
-      }
+
+  if (mmbr_contact.length < 10 || mmbr_contact.length > 10) {
+    showFormError("Mobile Number must be exactly 10 digits. Please correct it and click Submit again.");
+    $("#mmbr_contact").focus();
+    return false;
+  }
+
+  if (mmbr_email != '') {
+    if (!check_email_validation(mmbr_email, 'mmbr_email')) {
+      showFormError("Please enter a valid Email address.  Correct it and click Submit again.");
+      set_global_focus('mmbr_email');
+      return false;
     }
-  
-    if (mmbr_email!=''){
-      if (!check_email_validation(mmbr_email, 'mmbr_email')) {
-       setTimeout(function(){ set_global_focus('mmbr_email');},500);
-       return false;
-     }}
-   
+  }
+
   formData.append("identity", "SAVEFACLTY");
-  // Disable buttons + show spinner on Submit
-var $submitBtn = $('button.btn-primary').first();
-var originalText = $submitBtn.html();
-$submitBtn.prop('disabled', true)
-          .css({opacity: '0.7', cursor: 'not-allowed', 'pointer-events': 'none'})
-          .html('<span class="member-spinner"></span> SAVING...');
-$('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': 'none', opacity: '0.5'});
-
-// helper to reset (in case of error)
-function _resetSaveBtn(){
-  $submitBtn.prop('disabled', false)
-            .css({opacity: '', cursor: '', 'pointer-events': ''})
-            .html(originalText);
-  $('button.btn-danger, a:has(button.btn-danger)').css({'pointer-events': '', opacity: ''});
-}
-
-  formData.append("mid", mid);  
- 
-  $.each(other_data,function(key,input){
-      formData.append(input.name,input.value);
+  formData.append("mid", mid);
+  $.each(other_data, function(key, input){
+    formData.append(input.name, input.value);
   });
-  
-    setTimeout(function(){
-  $.ajax({
-          url: usePath+"member_list/ajax_process",
-          type: 'POST',
-          data: formData,
-          async: false,
-          contentType: false,
-          processData: false,
-          success: function (resp) {
-            
-            if( resp.status ){
-              $("#mid").val(resp.profileid);
-                                     
-              showToast("success",resp.message);                  
-               window.location.href = usePath + "member_list";
-      
-            }else{  
-                                      
-              showToast("error",resp.message); 
-              _resetSaveBtn();
-            }
 
-          },
-          error: function () {
-              showToast("error","An error occurred while saving. Please try again.");
-              $(".process_save").show();
-              _resetSaveBtn();
-          },
-          cache: false
-           });
+  var $submitBtn  = $('button.btn-primary').first();
+  var originalText = $submitBtn.html();
+  $submitBtn.prop('disabled', true)
+    .css({opacity:'0.7', cursor:'not-allowed', 'pointer-events':'none'})
+    .html('<span class="member-spinner"></span> SAVING...');
+  $('button.btn-danger, a:has(button.btn-danger)')
+    .css({'pointer-events':'none', opacity:'0.5'});
 
-    },500);
+  function _resetSaveBtn(){
+    $submitBtn.prop('disabled', false)
+      .css({opacity:'', cursor:'', 'pointer-events':''})
+      .html(originalText);
+    $('button.btn-danger, a:has(button.btn-danger)')
+      .css({'pointer-events':'', opacity:''});
+  }
+
+  setTimeout(function(){
+    $.ajax({
+      url: usePath + "member_list/ajax_process",
+      type: 'POST',
+      data: formData,
+      async: false,
+      contentType: false,
+      processData: false,
+      success: function(resp) {
+        if (resp.status) {
+          $("#mid").val(resp.profileid);
+          showToast("success", resp.message);
+          window.location.href = usePath + "member_list";
+        } else {
+          // Server error — show inline banner, never toaster
+          showFormError(resp.message);
+          _resetSaveBtn();
+        }
+      },
+      error: function() {
+        showFormError("An error occurred while saving. Please try again.");
+        _resetSaveBtn();
+      },
+      cache: false
+    });
+  }, 500);
 }
-
 
 function enrollFinger(memberId, memberName) {
     var btn = event.target;

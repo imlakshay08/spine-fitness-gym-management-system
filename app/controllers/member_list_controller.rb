@@ -95,11 +95,20 @@ class MemberListController < ApplicationController
 
             currentgrp =  params[:cur_mmbr_code].to_s.strip
             newgroup   =  params[:mmbr_code].to_s.strip
-            mobileno   =  params[:mmbr_contact].to_s.strip
-            if mobileno.length<10
+              mobileno = params[:mmbr_contact].to_s.strip
+              if mobileno.length < 10
                 message = "Mobile number should be 10 digits!"
                 isFlags = false
-            end 
+              else
+                duplicate = MstMembersList.where(
+                  "mmbr_compcode = ? AND mmbr_contact = ? AND id != ?",
+                  @compcodes, mobileno, params[:mid].to_i
+                ).first
+                if duplicate
+                  message = "Contact #{mobileno} already exists for '#{duplicate.mmbr_name}' (#{duplicate.mmbr_code}). Cannot save duplicate."
+                  isFlags = false
+                end
+              end
 
               if params[:mid].to_i>0
                  if currentgrp.to_s.downcase != newgroup.to_s.downcase
