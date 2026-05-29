@@ -43,56 +43,15 @@
           <input type="hidden" id="rootXPath" value="<%=root_url%>"/>
           <input type="hidden" name="server_request" id="server_request" value="Y"/>
 
-          <div class="row m-b-10 align-items-center">
-
-            <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
-              <label class="mb-0">Type</label>
-              <select class="form-select select-height" name="status_filter" id="status_filter">
-                <option value="A" <%= 'selected' if @member_status_filter == 'A' %>>Active</option>
-                <option value="E" <%= 'selected' if @member_status_filter == 'E' %>>Expired</option>
-                <option value="N" <%= 'selected' if @member_status_filter == 'N' %>>No Sub</option>
-              </select>
+            <div class="row m-b-10 align-items-center">
+              <div class="col-sm-12 col-md-12 d-flex justify-content-end align-items-center gap-2">
+                <a href="<%=root_url%>member_list/add_member">
+                  <button type="button" class="btn btn-circle btn-success">
+                    <i class="fa fa-plus"></i> Add Member
+                  </button>
+                </a>
+              </div>
             </div>
-
-            <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
-              <label class="mb-0">Plan</label>
-              <select class="form-select select-height" name="plan_filter" id="plan_filter">
-                <option value="" <%= 'selected' if @member_plan_filter.blank? %>>All</option>
-                <% if @MemberPlanList %>
-                  <% @MemberPlanList.each do |plan| %>
-                    <option value="<%= plan.id %>"
-                      <%= 'selected' if @member_plan_filter.to_s == plan.id.to_s %>
-                    ><%= plan.plan_name %></option>
-                  <% end %>
-                <% end %>
-              </select>
-            </div>
-
-            <div class="col-sm-12 col-md-1 no_loader">
-              <button type="button" onclick="filter_member_list();"
-                      class="btn btn-circle btn-default">
-                <i class="fa fa-search"></i>
-              </button>
-            </div>
-
-            <div class="col-sm-12 col-md-1 show_loader hidden">
-              <img src="<%=root_url%>/images/spining_loader.gif" width="30px">
-            </div>
-
-            <div class="col-sm-12 col-md-6 text-right d-flex justify-content-end align-items-center gap-2">
-              <a href="<%=root_url%>member_list/add_member">
-                <button type="button" class="btn btn-circle btn-success">
-                  <i class="fa fa-plus"></i> Add Member
-                </button>
-              </a>
-              <a href="<%=root_url%>member_list/referesh_member_list">
-                <button type="button" class="btn btn-circle btn-info">
-                  <i class="fa fa-refresh"></i> Reset
-                </button>
-              </a>
-            </div>
-
-          </div>
           <% end %>
 										<div class="table-loading-wrapper" id="member-table-wrapper">
                   <div class="table-loader-overlay" id="member-table-loader">

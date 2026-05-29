@@ -315,29 +315,18 @@ class MemberListController < ApplicationController
     ).count
   end
 
-    private
+  private
  def get_member_list
   @compcodes = session[:loggedUserCompCode]
 
-  # Read filters from params or session
-  if params[:server_request].present?
-    @member_status_filter = params[:status_filter].to_s.strip
-    @member_plan_filter   = params[:plan_filter].to_s.strip
-    session[:req_member_status_filter] = @member_status_filter
-    session[:req_member_plan_filter]   = @member_plan_filter
-  else
-    @member_status_filter = session[:req_member_status_filter].to_s.strip
-    @member_plan_filter   = session[:req_member_plan_filter].to_s.strip
-  end
-
-  # Load ALL members — 1 DB call
+  # Load ALL members alphabetically — 1 DB call
   stdob = MstMembersList
     .where("mmbr_compcode = ?", @compcodes)
-    .order("mmbr_code ASC")
+    .order("mmbr_name ASC")
 
   member_ids = stdob.map(&:id)
 
-  # Load ALL latest subscriptions for these members — 1 DB call
+  # Load latest subscriptions — 1 DB call
   subscriptions = TrnMemberSubscription
     .where("ms_compcode = ? AND ms_member_id IN (?)", @compcodes, member_ids)
     .order("ms_end_date DESC")
@@ -352,42 +341,8 @@ class MemberListController < ApplicationController
     .where("plan_compcode = ? AND id IN (?)", @compcodes, plan_ids)
     .index_by(&:id)
 
-  # Load MemberPlanList for dropdown — 1 DB call
-  @MemberPlanList = MstMembershipPlan.where(plan_compcode: @compcodes)
-
-  # Sort in Ruby — zero extra DB calls
-  # Active (soonest expiry first) → Expired (most recent first) → No sub
-  stdob = stdob.sort_by do |member|
-    latest = @latest_subscription_hash[member.id]
-    if latest.nil?
-      [2, Date.today]
-    elsif latest.ms_end_date >= Date.today
-      [0, -latest.ms_end_date.to_time.to_i]
-    else
-      [1, -latest.ms_end_date.to_time.to_i]
-    end
-  end
-
-  # Status filter in Ruby — zero extra DB calls
-  stdob = case @member_status_filter
-  when 'E'  # Expired
-    stdob.select { |m| l = @latest_subscription_hash[m.id]; l && l.ms_end_date < Date.today }
-  when 'N'  # No subscription
-    stdob.select { |m| @latest_subscription_hash[m.id].nil? }
-  else      # Active (default)
-    stdob.select { |m| @latest_subscription_hash[m.id]&.ms_end_date&.>=(Date.today) }
-  end
-
-  # Plan filter in Ruby — zero extra DB calls
-  if @member_plan_filter.present?
-    stdob = stdob.select do |m|
-      latest = @latest_subscription_hash[m.id]
-      latest && latest.ms_plan_id.to_s == @member_plan_filter.to_s
-    end
-  end
-
   return stdob
-end
+ end
 
     private
     def members_params
