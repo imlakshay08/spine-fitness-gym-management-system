@@ -25,7 +25,7 @@ class DashboardController < ApplicationController
     # Categorisation
     today = Date.today
 
-    @expired_subs  = @latest_subs.select { |s| s.ms_end_date < today }
+    @expired_subs  = @latest_subs.select { |s| s.ms_end_date < today && s.ms_end_date >= today - 30 }
     @expiring_subs = @latest_subs.select { |s| s.ms_end_date.between?(today, today + 7) }
     @active_subs   = @latest_subs.select { |s| s.ms_end_date > today + 7 }
 
@@ -126,8 +126,13 @@ class DashboardController < ApplicationController
   end
 
   def latest_subscriptions
+    valid_member_ids = MstMembersList
+      .where(mmbr_compcode: session[:loggedUserCompCode])
+      .pluck(:id)
+
     TrnMemberSubscription
       .where(ms_compcode: session[:loggedUserCompCode])
+      .where(ms_member_id: valid_member_ids)
       .joins(<<~SQL)
         INNER JOIN (
           SELECT ms_member_id, MAX(ms_end_date) AS max_end_date
@@ -139,7 +144,7 @@ class DashboardController < ApplicationController
         AND latest.max_end_date = trn_member_subscriptions.ms_end_date
       SQL
   end
-
+  
   def get_live_attendance
     since = if params[:since].present?
       Time.zone.parse(params[:since]) rescue 10.minutes.ago
