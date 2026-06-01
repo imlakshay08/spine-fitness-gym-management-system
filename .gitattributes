@@ -12,5 +12,6 @@ vendor/* linguist-vendored
 # Ignore JS/CSS from language detection
 *.js linguist-detectable=false
 *.css linguist-detectable=false
+*.html linguist-detectable=false
 public/* linguist-vendored
 app/assets/* linguist-vendored
