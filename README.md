@@ -239,6 +239,7 @@ python bridge.py
 - [Building a Production Gym Management System with Ruby on Rails](https://imlakshay08-complete-ruby-on-rails.hashnode.dev/gym-management-system-with-ruby-on-rails)
 - [Connecting a Biometric Fingerprint Device to a Rails App Using Python](https://imlakshay08-complete-ruby-on-rails.hashnode.dev/connecting-a-biometric-fingerprint-device-to-a-rails-web-app-using-python)
 - [How I Ditched Interakt and Built a Direct WhatsApp Pipeline with Meta Cloud API](https://imlakshay08-complete-ruby-on-rails.hashnode.dev/how-i-ditched-interakt-and-built-a-direct-whatsapp-automation-pipeline-with-meta-cloud-api)
+- [From Polling to Production: How I Upgraded My Biometric Integration with Gate Control, Auto-Enrollment, and 24/7 Reliability](https://imlakshay08-complete-ruby-on-rails.hashnode.dev/from-polling-to-production-how-i-upgraded-my-biometric-integration-with-gate-control-auto-enrollment-and-24-7-reliability)
 
 ---
 
