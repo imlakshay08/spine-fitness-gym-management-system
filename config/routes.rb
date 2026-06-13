@@ -8,6 +8,7 @@ namespace :api do
   post 'member_mappings/deactivate_all',     to: 'member_mappings#deactivate_all'
   get  'all_mappings',                       to: 'member_mappings#all_mappings'
   post 'member_mappings/deactivate',         to: 'member_mappings#deactivate'
+  get 'device_audit', to: 'member_mappings#device_audit'
   resources :biometric_mappings, only: [:create]
 end
   get  '/iclock/cdata',      to: 'api/adms#handshake'
