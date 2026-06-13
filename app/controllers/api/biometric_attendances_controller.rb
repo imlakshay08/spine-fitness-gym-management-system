@@ -18,7 +18,8 @@ def create
   mapping = TrnMemberBiometricMapping.find_by(
     mbm_compcode:       compcode,
     mbm_device_user_id: device_user_id,
-    mbm_device_sn:      device_sn
+    mbm_device_sn:      device_sn,
+    mbm_is_active:      'Y'   # ← add this
   )
 
   unless mapping
