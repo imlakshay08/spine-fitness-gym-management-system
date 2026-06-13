@@ -99,4 +99,11 @@ class Api::MemberMappingsController < ApplicationController
     render json: { status: false, message: "Not found" }
   end
  end
+
+ # in Api::MemberMappingsController
+  def max_ids
+    max_uid     = TrnMemberBiometricMapping.where(mbm_compcode: params[:compcode], mbm_device_sn: params[:device_sn]).maximum(:mbm_uid).to_i
+    max_user_id = TrnMemberBiometricMapping.where(mbm_compcode: params[:compcode], mbm_device_sn: params[:device_sn]).maximum("CAST(mbm_device_user_id AS UNSIGNED)").to_i
+    render json: { status: true, max_uid: max_uid, max_device_user_id: max_user_id }
+  end
 end
