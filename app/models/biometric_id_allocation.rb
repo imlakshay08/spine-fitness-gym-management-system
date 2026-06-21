@@ -1,0 +1,2 @@
+class BiometricIdAllocation < ApplicationRecord
+end
