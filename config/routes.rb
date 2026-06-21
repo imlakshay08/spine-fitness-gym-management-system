@@ -4,6 +4,7 @@ namespace :api do
   resources :biometric_attendances, only: [:create]
   get  'access_status', to: 'access_status#index'
   post 'biometric_mappings/save_template', to: 'biometric_mappings#save_template'
+  post 'biometric_mappings/allocate_ids', to: 'biometric_mappings#allocate_ids'
   get  'member_mappings',                    to: 'member_mappings#index'
   post 'member_mappings/deactivate_all',     to: 'member_mappings#deactivate_all'
   get  'all_mappings',                       to: 'member_mappings#all_mappings'
