@@ -337,3 +337,23 @@ $(document).ready(function() {
     this.setSelectionRange(pos, pos); // restore cursor position
   });
 });
+
+$(document).ready(function () {
+  if (!$("#members_table").length) return;
+  var rootPath = $("#rootXPath").val();
+
+  $("#members_table").DataTable({
+    processing: true,
+    serverSide: true,
+    searchDelay: 350,
+    order: [[2, "asc"]],            // default sort: Member Name
+    ajax: {
+      url: rootPath + "member_list/datatable",
+      type: "POST"
+    },
+    columnDefs: [
+      { targets: 0, width: 10, orderable: false },  // S.No
+      { targets: 9, orderable: false }              // Action
+    ]
+  });
+});

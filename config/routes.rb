@@ -114,6 +114,8 @@ Rails.application.routes.draw do
   post  'member_list/index'=>'member_list#index'
   post  'member_list/search' =>'member_list#index'
   get   'member_list/search' =>'member_list#index'
+  post 'member_list/datatable' => 'member_list#datatable'
+  get  'member_list/datatable' => 'member_list#datatable'
   get   'member_list/add_member'=>'member_list#add_member'
   post  'member_list/add_member'=>'member_list#add_member'
   get   "member_list/:id"=>'member_list#index'

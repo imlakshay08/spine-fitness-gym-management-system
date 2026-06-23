@@ -7,7 +7,7 @@ class MemberListController < ApplicationController
     helper_method :currency_formatted,:year_month_days_formatted,:formatted_date,:format_oblig_date,:get_dob_calculate
     def index
         @compcodes      = session[:loggedUserCompCode] 
-        @member_list = get_member_list()
+       # @member_list = get_member_list()
         @member     = nil
         @compDetail    =  MstCompany.where(["cmp_companycode = ?", @compcodes]).first
         printPath     =  "member_list/1_prt_member_list.pdf"
@@ -28,6 +28,88 @@ class MemberListController < ApplicationController
                 end
             end
     end
+
+  def datatable
+    compcode = session[:loggedUserCompCode]
+    vc       = view_context
+
+    draw    = params[:draw].to_i
+    start   = params[:start].to_i
+    length  = params[:length].to_i
+    length  = 10 if length <= 0
+    search  = params.dig(:search, :value).to_s.strip.downcase
+    ord_idx = params.dig(:order, "0", :column).to_i
+    ord_dir = (params.dig(:order, "0", :dir) == "desc") ? :desc : :asc
+
+    # --- same data loading as the page (3 queries total) ---
+    members    = MstMembersList.where("mmbr_compcode = ?", compcode)
+                               .order("mmbr_name ASC").to_a
+    member_ids = members.map(&:id)
+
+    subs = TrnMemberSubscription
+             .where("ms_compcode = ? AND ms_member_id IN (?)", compcode, member_ids)
+             .order("ms_end_date DESC")
+    latest_sub = subs.group_by { |s| s.ms_member_id.to_i }.transform_values(&:first)
+
+    plan_ids = subs.map(&:ms_plan_id).uniq
+    plans    = MstMembershipPlan.where("plan_compcode = ? AND id IN (?)", compcode, plan_ids)
+                                .index_by(&:id)
+
+    records_total = members.size
+
+    # --- build a searchable struct per member ---
+    rows = members.map do |m|
+      latest    = latest_sub[m.id]
+      plan      = latest ? plans[latest.ms_plan_id.to_i] : nil
+      is_active = latest && latest.ms_end_date >= Date.today
+      days_left = latest ? (latest.ms_end_date - Date.today).to_i : nil
+      gender    = case m.mmbr_gender
+                  when 'M' then 'Male'
+                  when 'F' then 'Female'
+                  when 'Oth' then 'Other'
+                  else '—' end
+      plan_name   = plan ? plan.plan_name.to_s : ''
+      amount      = latest ? latest.ms_amount_paid.to_i : nil
+      pay_mode    = (latest && latest.ms_payment_mode.present?) ? latest.ms_payment_mode.to_s.upcase : ''
+      valid_till  = latest ? latest.ms_end_date.strftime("%d-%b-%Y") : ''
+      status_text = latest.nil? ? 'No Sub' : (is_active ? 'Active' : 'Expired')
+
+      { m: m, latest: latest, plan_name: plan_name, gender: gender, amount: amount,
+        pay_mode: pay_mode, valid_till: valid_till, days_left: days_left,
+        is_active: is_active, status_text: status_text,
+        haystack: [m.mmbr_code, m.mmbr_name, m.mmbr_contact, gender, plan_name,
+                   amount, pay_mode, valid_till, status_text].join(" ").downcase }
+    end
+
+    # --- global search (all columns) ---
+    rows = rows.select { |r| r[:haystack].include?(search) } if search.present?
+    records_filtered = rows.size
+
+    # --- sort + paginate ---
+    rows      = sort_member_rows(rows, ord_idx, ord_dir)
+    page_rows = rows[start, length] || []
+
+    # --- build the JSON cells (HTML allowed) ---
+    data = page_rows.each_with_index.map do |r, idx|
+      m = r[:m]
+      [
+        start + idx + 1,
+        ERB::Util.html_escape(m.mmbr_code),
+        "<a href=\"#{root_url}member_list/profile/#{m.id}\" style=\"color:inherit;text-decoration:underline;\">#{ERB::Util.html_escape(m.mmbr_name)}</a>",
+        r[:gender],
+        ERB::Util.html_escape(m.mmbr_contact),
+        (r[:plan_name].present? ? ERB::Util.html_escape(r[:plan_name]) : "<span style='color:#aaa;'>—</span>"),
+        amount_cell_html(r, vc),
+        valid_till_cell_html(r),
+        status_cell_html(r),
+        action_cell_html(r)
+      ]
+    end
+
+    render json: { draw: draw, recordsTotal: records_total,
+                   recordsFiltered: records_filtered, data: data }
+  end
+
 
     def ajax_process
       @compCodes       = session[:loggedUserCompCode]
@@ -352,6 +434,65 @@ class MemberListController < ApplicationController
 
   return stdob
  end
+
+   def sort_member_rows(rows, idx, dir)
+    sorted = case idx
+             when 1 then rows.sort_by { |r| r[:m].mmbr_code.to_s }
+             when 2 then rows.sort_by { |r| r[:m].mmbr_name.to_s.downcase }
+             when 3 then rows.sort_by { |r| r[:gender].to_s }
+             when 4 then rows.sort_by { |r| r[:m].mmbr_contact.to_s }
+             when 5 then rows.sort_by { |r| r[:plan_name].to_s.downcase }
+             when 6 then rows.sort_by { |r| r[:amount].to_i }
+             when 7 then rows.sort_by { |r| r[:latest] ? r[:latest].ms_end_date : Date.new(1900) }
+             when 8 then rows.sort_by { |r| r[:status_text] }
+             else        rows.sort_by { |r| r[:m].mmbr_name.to_s.downcase }
+             end
+    dir == :desc ? sorted.reverse : sorted
+  end
+
+  def amount_cell_html(r, vc)
+    return "<span style='color:#aaa;'>—</span>" unless r[:latest]
+    html = "<strong>₹#{vc.number_with_delimiter(r[:amount])}</strong>"
+    if r[:pay_mode].present?
+      badge = (r[:pay_mode].downcase == 'cash') ? 'badge-success' : 'badge-info'
+      html += " <span class=\"badge #{badge}\">#{ERB::Util.html_escape(r[:pay_mode])}</span>"
+    end
+    html
+  end
+
+  def valid_till_cell_html(r)
+    return "<span style='color:#aaa;'>—</span>" unless r[:latest]
+    html = r[:valid_till].dup
+    if r[:days_left] && r[:days_left] >= 0
+      cls   = r[:days_left] <= 7 ? 'badge-danger' : (r[:days_left] <= 30 ? 'badge-warning' : 'badge-success')
+      label = r[:days_left] == 0 ? 'Expires today' : "#{r[:days_left]}d left"
+      html += "<br/><span class=\"badge #{cls}\" style=\"font-size:10px;\">#{label}</span>"
+    end
+    html
+  end
+
+  def status_cell_html(r)
+    if r[:latest].nil?
+      "<span class=\"badge badge-default\">No Sub</span>"
+    elsif r[:is_active]
+      "<span class=\"badge badge-success\">Active</span>"
+    else
+      "<span class=\"badge badge-danger\">Expired</span>"
+    end
+  end
+
+  def action_cell_html(r)
+    m = r[:m]
+    html = +""
+    html << "<a href=\"#{root_url}member_list/profile/#{m.id}\" title=\"View profile\"><i class=\"fa fa-eye\" style=\"color:#5b9bd5;font-size:16px;margin-right:6px;\"></i></a>"
+    html << "<a href=\"#{root_url}member_list/add_member/#{m.id}\" class=\"tblEditBtn\" title=\"Edit member\"><i class=\"fa fa-pencil\"></i></a>"
+    html << "<a class=\"tblDelBtn\" title=\"Delete member\" onclick=\"alertChecked('#{root_url}member_list/#{m.id}/deletes')\" style=\"margin-left:6px;\"><i class=\"fa fa-trash-o\"></i></a>"
+    if r[:latest].nil? || r[:latest].ms_end_date < Date.today
+      html << "<a href=\"#{root_url}member_subscriptions/add_member_subscriptions?renew=1&member_id=#{m.id}\" title=\"Renew subscription\" style=\"margin-left:6px;\"><i class=\"fa fa-refresh\" style=\"color:#f0a500;font-size:16px;\"></i></a>"
+    end
+    html
+  end
+
 
     private
     def members_params
