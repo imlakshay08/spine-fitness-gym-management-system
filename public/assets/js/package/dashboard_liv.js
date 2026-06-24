@@ -69,3 +69,43 @@ $(document).ready(function() {
   fetchLiveAttendance();
   setInterval(fetchLiveAttendance, 5000);
 });
+
+/* ---- Collect Payment modal (dashboard due-members list) ---- */
+function openCollectPayment(subId, dueAmount, memberName){
+  document.getElementById('cp_subscription_id').value = subId;
+  document.getElementById('cp_amount').value = dueAmount;
+  document.getElementById('cp_member_label').textContent = memberName || "";
+  var btn = document.getElementById('cp_save_btn');
+  btn.disabled = false; btn.textContent = "Save Payment";
+  document.getElementById('collectPaymentModal').style.display = 'block';
+}
+function closeCollectPayment(){
+  document.getElementById('collectPaymentModal').style.display = 'none';
+}
+function submitCollectPayment(){
+  var usePath = $.trim($("#rootXPath").val());
+  var amount  = $.trim($("#cp_amount").val());
+  if (amount === "" || parseFloat(amount) <= 0){ alert("Enter a valid amount."); return; }
+
+  var $btn = $("#cp_save_btn");
+  $btn.prop("disabled", true).text("Saving...");
+
+  $.ajax({
+    url: usePath + "member_subscriptions/ajax_process",
+    type: "POST",
+    dataType: "json",
+    data: {
+      identity: "COLLECTPAY",
+      subscription_id: $("#cp_subscription_id").val(),
+      pay_amount: amount,
+      pay_mode: $("#cp_mode").val(),
+      pay_date: $.trim($("#cp_date").val()),
+      pay_remarks: $.trim($("#cp_remarks").val())
+    },
+    success: function(resp){
+      if (resp.status){ location.reload(); }
+      else { alert(resp.message); $btn.prop("disabled", false).text("Save Payment"); }
+    },
+    error: function(){ alert("Error saving payment. Please try again."); $btn.prop("disabled", false).text("Save Payment"); }
+  });
+}

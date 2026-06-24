@@ -20,7 +20,17 @@
   days_left   = @latest_sub ? (@latest_sub.ms_end_date - Date.today).to_i : nil
   latest_plan = @latest_sub ? @plans_hash[@latest_sub.ms_plan_id.to_i] : nil
   amount_paid = @latest_sub ? @payments_hash[@latest_sub.id.to_i].to_f : 0
+
+  # Dues on the latest subscription (mirror the dashboard's rule:
+  # open plans and skip-due subscriptions never carry dues)
+  latest_is_open = latest_plan && latest_plan.plan_is_open.to_i == 1
+  dues = 0
+  if @latest_sub && !latest_is_open && @latest_sub.ms_skip_due_check.to_i != 1
+    dues = @latest_sub.ms_final_amount.to_f - amount_paid
+  end
 %>
+
+<input type="hidden" id="rootXPath" value="<%= root_url %>"/>
 
 <!-- TOP ACTION BAR -->
 <div class="row" style="margin-bottom: 16px;">
@@ -43,6 +53,18 @@
         <i class="fa fa-plus"></i> Add subscription
       </button>
     </a>
+    <% if dues > 0 %>
+      &nbsp;
+      <button type="button" class="btn btn-circle btn-warning" onclick="openCollectPayment();">
+        <i class="fa fa-money"></i> Collect Payment (₹<%= number_with_delimiter(dues.to_i) %> due)
+      </button>
+    <% end %>
+    <% if @latest_sub %>
+      &nbsp;
+      <button type="button" class="btn btn-circle btn-primary" onclick="openExtendModal();">
+        <i class="fa fa-calendar-plus-o"></i> Extend / Freeze
+      </button>
+    <% end %>
   </div>
 </div>
 
@@ -284,6 +306,66 @@
     </div>
   </div>
 </div>
+
+<!-- COLLECT PAYMENT MODAL -->
+<% if @latest_sub %>
+<div id="collectPaymentModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999;">
+  <div style="background:#1e1e2d; color:#fff; max-width:460px; margin:7% auto; padding:24px; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.5);">
+    <h4 style="margin:0 0 16px;">Collect Payment</h4>
+    <input type="hidden" id="cp_subscription_id" value="<%= @latest_sub.id %>">
+
+    <div class="form-group">
+      <label>Amount (₹)</label>
+      <input type="number" id="cp_amount" class="form-control" value="<%= dues.to_i %>" min="1">
+    </div>
+    <div class="form-group">
+      <label>Payment Mode</label>
+      <select id="cp_mode" class="form-control">
+        <option value="cash">Cash</option>
+        <option value="upi">UPI</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="text" id="cp_date" class="form-control" value="<%= Date.today.strftime('%d-%b-%Y') %>">
+    </div>
+    <div class="form-group">
+      <label>Remarks (optional)</label>
+      <input type="text" id="cp_remarks" class="form-control" placeholder="e.g. cleared balance">
+    </div>
+
+    <div style="text-align:right; margin-top:18px;">
+      <button type="button" class="btn btn-default" onclick="closeCollectPayment();">Cancel</button>
+      <button type="button" class="btn btn-success" id="cp_save_btn" onclick="submitCollectPayment();">Save Payment</button>
+    </div>
+  </div>
+</div>
+<% end %>
+
+<!-- EXTEND / FREEZE MODAL -->
+<% if @latest_sub %>
+<div id="extendModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999;">
+  <div style="background:#1e1e2d; color:#fff; max-width:460px; margin:7% auto; padding:24px; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,0.5);">
+    <h4 style="margin:0 0 6px;">Extend / Freeze Membership</h4>
+    <p style="margin:0 0 16px; color:#aaa;">Current end date: <strong style="color:#fff;"><%= formatted_date(@latest_sub.ms_end_date) %></strong></p>
+    <input type="hidden" id="ext_subscription_id" value="<%= @latest_sub.id %>">
+
+    <div class="form-group">
+      <label>Extend by (days)</label>
+      <input type="number" id="ext_days" class="form-control" value="" min="1" placeholder="e.g. 15">
+    </div>
+    <div class="form-group">
+      <label>Reason (optional)</label>
+      <input type="text" id="ext_reason" class="form-control" placeholder="e.g. travel, injury freeze, goodwill">
+    </div>
+
+    <div style="text-align:right; margin-top:18px;">
+      <button type="button" class="btn btn-default" onclick="closeExtendModal();">Cancel</button>
+      <button type="button" class="btn btn-success" id="ext_save_btn" onclick="submitExtend();">Save</button>
+    </div>
+  </div>
+</div>
+<% end %>
 
 </div>
 </div>

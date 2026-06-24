@@ -357,3 +357,73 @@ $(document).ready(function () {
     ]
   });
 });
+
+/* ---- Collect Payment modal (member profile) ---- */
+function openCollectPayment(){
+  document.getElementById('collectPaymentModal').style.display = 'block';
+}
+function closeCollectPayment(){
+  document.getElementById('collectPaymentModal').style.display = 'none';
+}
+function submitCollectPayment(){
+  var usePath = $.trim($("#rootXPath").val());
+  var amount  = $.trim($("#cp_amount").val());
+  if (amount === "" || parseFloat(amount) <= 0){ alert("Enter a valid amount."); return; }
+
+  var $btn = $("#cp_save_btn");
+  $btn.prop("disabled", true).text("Saving...");
+
+  $.ajax({
+    url: usePath + "member_subscriptions/ajax_process",
+    type: "POST",
+    dataType: "json",
+    data: {
+      identity: "COLLECTPAY",
+      subscription_id: $("#cp_subscription_id").val(),
+      pay_amount: amount,
+      pay_mode: $("#cp_mode").val(),
+      pay_date: $.trim($("#cp_date").val()),
+      pay_remarks: $.trim($("#cp_remarks").val())
+    },
+    success: function(resp){
+      if (resp.status){ location.reload(); }
+      else { alert(resp.message); $btn.prop("disabled", false).text("Save Payment"); }
+    },
+    error: function(){ alert("Error saving payment. Please try again."); $btn.prop("disabled", false).text("Save Payment"); }
+  });
+}
+
+/* ---- Extend / Freeze modal (member profile) ---- */
+function openExtendModal(){
+  var btn = document.getElementById('ext_save_btn');
+  btn.disabled = false; btn.textContent = "Save";
+  document.getElementById('extendModal').style.display = 'block';
+}
+function closeExtendModal(){
+  document.getElementById('extendModal').style.display = 'none';
+}
+function submitExtend(){
+  var usePath = $.trim($("#rootXPath").val());
+  var days    = $.trim($("#ext_days").val());
+  if (days === "" || parseInt(days, 10) <= 0){ alert("Enter a valid number of days."); return; }
+
+  var $btn = $("#ext_save_btn");
+  $btn.prop("disabled", true).text("Saving...");
+
+  $.ajax({
+    url: usePath + "member_subscriptions/ajax_process",
+    type: "POST",
+    dataType: "json",
+    data: {
+      identity: "EXTENDSUB",
+      subscription_id: $("#ext_subscription_id").val(),
+      extend_days: days,
+      extend_reason: $.trim($("#ext_reason").val())
+    },
+    success: function(resp){
+      if (resp.status){ location.reload(); }
+      else { alert(resp.message); $btn.prop("disabled", false).text("Save"); }
+    },
+    error: function(){ alert("Error extending membership. Please try again."); $btn.prop("disabled", false).text("Save"); }
+  });
+}

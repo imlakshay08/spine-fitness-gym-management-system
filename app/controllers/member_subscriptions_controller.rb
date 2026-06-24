@@ -86,9 +86,110 @@ class MemberSubscriptionsController < ApplicationController
       if params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'SAVESUBSCR'
         create();
         return 
-      elsif params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'FILLENDDATE' 
+      elsif params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'FILLENDDATE'
         fill_end_date();
         return
+      elsif params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'COLLECTPAY'
+        collect_payment();
+        return
+      elsif params[:identity] != nil && params[:identity] != '' && params[:identity] ==  'EXTENDSUB'
+        extend_subscription();
+        return
+      end
+    end
+
+    # Records an additional payment against an existing subscription (partial
+    # dues, split cash+UPI, pay-later). Appends to the trn_payments ledger and
+    # re-syncs the subscription's denormalized ms_amount_paid so every screen
+    # (Member List uses that field; Profile/Dashboard use the ledger) agrees.
+    def collect_payment
+      @compcodes = session[:loggedUserCompCode]
+      message    = ""
+      isFlags    = true
+
+      subscription = TrnMemberSubscription.where(
+        "ms_compcode = ? AND id = ?", @compcodes, params[:subscription_id]
+      ).first
+
+      if subscription.nil?
+        message = "Subscription not found."
+        isFlags = false
+      elsif params[:pay_amount].to_f <= 0
+        message = "Enter a valid payment amount."
+        isFlags = false
+      elsif params[:pay_mode].to_s.blank?
+        message = "Select a payment mode."
+        isFlags = false
+      end
+
+      if isFlags
+        TrnPayment.create(
+          pay_compcode: @compcodes,
+          pay_no: generate_code(table: TrnPayment, column: "pay_no", prefix: "PAY", compcode: @compcodes),
+          pay_ref_type: 'MEMBER_SUBSCRIPTION',
+          pay_ref_id: subscription.id,
+          pay_date: params[:pay_date].presence || Date.today.strftime("%d-%b-%Y"),
+          pay_amount: params[:pay_amount],
+          pay_mode: params[:pay_mode],
+          pay_remarks: params[:pay_remarks].presence || 'Dues payment'
+        )
+
+        # Keep the denormalized field in sync with the ledger total.
+        total_paid = TrnPayment.where(
+          pay_ref_type: 'MEMBER_SUBSCRIPTION', pay_ref_id: subscription.id
+        ).sum(:pay_amount)
+        subscription.update(ms_amount_paid: total_paid)
+
+        message = "Payment recorded successfully"
+        process_request_log_data("SAVE", "Member Subscription",
+          "Collected payment #{params[:pay_amount]} for subscription #{subscription.ms_sbscrptn_no}")
+      end
+
+      respond_to do |format|
+        format.json { render json: { status: isFlags, message: message } }
+      end
+    end
+
+    # Pushes a subscription's end date forward by N days (membership freeze /
+    # hold for travel or injury, or a goodwill extension). Date-axis only —
+    # it does NOT touch the payment ledger. Recomputes status and appends a
+    # short audit note to the subscription's remarks.
+    def extend_subscription
+      @compcodes = session[:loggedUserCompCode]
+      message    = ""
+      isFlags    = true
+      days       = params[:extend_days].to_i
+
+      subscription = TrnMemberSubscription.where(
+        "ms_compcode = ? AND id = ?", @compcodes, params[:subscription_id]
+      ).first
+
+      if subscription.nil?
+        message = "Subscription not found."
+        isFlags = false
+      elsif days <= 0
+        message = "Enter a valid number of days."
+        isFlags = false
+      end
+
+      if isFlags
+        new_end = subscription.ms_end_date + days.days
+        reason  = params[:extend_reason].to_s.strip
+        note    = "[+#{days}d on #{Date.today.strftime('%d-%b-%Y')}#{reason.present? ? ": #{reason}" : ''}]"
+
+        subscription.update(
+          ms_end_date: new_end,
+          ms_status:   subscription_status(new_end),
+          ms_remarks:  [subscription.ms_remarks.to_s.strip, note].reject(&:blank?).join(' ')
+        )
+
+        message = "Membership extended by #{days} day(s). New end date: #{new_end.strftime('%d-%b-%Y')}."
+        process_request_log_data("UPDATE", "Member Subscription",
+          "Extended subscription #{subscription.ms_sbscrptn_no} by #{days} days (#{reason})")
+      end
+
+      respond_to do |format|
+        format.json { render json: { status: isFlags, message: message } }
       end
     end
 
