@@ -129,7 +129,7 @@
 					<span class="input-group-addon iconinput-pd"><i class="fa fa-calendar"></i></span>
 					<input name="ms_start_date" id="ms_start_date" type="text" class="form-control" autocomplete="off" onchange="fill_end_date();" value="<% if @subscription %><%= formatted_date(@subscription.ms_start_date) %><% elsif session[:sess_ms_start_date].present? %><%= session[:sess_ms_start_date] %><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_start_date'] %><% end %>"<% if params[:renew].to_s == '1' %>readonly<% end %>/>
 					</div></div>
-						<label class=" col-md-2">End Date
+						<label class=" col-md-2" id="ms_end_date_label">End Date
 					<span class="required"> * </span>
 						</label>
 					<div class="col-md-4">
@@ -142,7 +142,7 @@
 					
 		               <div class="form-group row">
 				
-						<label class=" col-md-2">Amount Paid					
+						<label class=" col-md-2" id="ms_amount_paid_label">Amount Paid
 						</label>
 						<div class="col-md-4">
 				        <input name="ms_amount_paid" id="ms_amount_paid" type="text" maxlength="6"  placeholder="Enter Amount Paid" class="form-control" autocomplete="off" value="<% if @subscription%><%=@subscription.ms_amount_paid%><% elsif session[:postedpamams] != nil %><%= session[:postedpamams]['ms_amount_paid'] %><% end %>" />

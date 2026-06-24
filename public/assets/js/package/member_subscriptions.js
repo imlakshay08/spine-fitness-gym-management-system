@@ -100,6 +100,14 @@ function set_global_focus(id){
 }
 function save_member_subscription(){
   var usePath        = $.trim($("#rootXPath").val());
+
+  // For Open plans, Amount Paid is hidden and mirrors the Custom Amount.
+  // Set it BEFORE the form is serialized so the value gets submitted.
+  var isOpenPlan = $("#open_plan_row").is(":visible");
+  if (isOpenPlan) {
+    $("#ms_amount_paid").val($.trim($("#ms_open_amount").val()));
+  }
+
   var formData       = new FormData();
   var other_data     = $('form#myforms').serializeArray();
   var mid            = $.trim($("#mid").val());
@@ -128,7 +136,7 @@ function save_member_subscription(){
     showFormError("Start Date is required. Select a date and click Submit again.");
     set_global_focus('ms_start_date');
     return false;
-  } else if (ms_amount_paid == '') {
+  } else if (ms_amount_paid == '' && !isOpenPlan) {
     showFormError("Amount Paid is required. Fill it in and click Submit again.");
     set_global_focus('ms_amount_paid');
     return false;
@@ -231,6 +239,13 @@ function fill_end_date() {
                     $("#ms_end_date").prop("readonly", false);
                     $("#ms_end_date").val("");
 
+                    // Open plan uses Custom End Date / Custom Amount instead, so
+                    // hide the duplicate default End Date and Amount Paid fields.
+                    $("#ms_end_date_label").hide();
+                    $("#ms_end_date").closest(".col-md-4").hide();
+                    $("#ms_amount_paid_label").hide();
+                    $("#ms_amount_paid").closest(".col-md-4").hide();
+
                 } else {
 
                     // NORMAL PLAN
@@ -241,6 +256,12 @@ function fill_end_date() {
 
                     $("#ms_end_date").prop("readonly", true);
                     $("#ms_end_date").val(resp.end_date);
+
+                    // Restore the default End Date and Amount Paid fields.
+                    $("#ms_end_date_label").show();
+                    $("#ms_end_date").closest(".col-md-4").show();
+                    $("#ms_amount_paid_label").show();
+                    $("#ms_amount_paid").closest(".col-md-4").show();
 
                 }
 
