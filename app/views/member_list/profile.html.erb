@@ -38,7 +38,7 @@
       </button>
     </a>
     &nbsp;
-    <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= @member.id %>">
+    <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= @member.id %>&from=member_list">
       <button type="button" class="btn btn-circle btn-success">
         <i class="fa fa-plus"></i> Add subscription
       </button>
@@ -159,7 +159,7 @@
           <% end %>
         </div>
         <% if days_left <= 30 %>
-          <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= @member.id %>">
+          <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= @member.id %>&from=member_list">
             <button class="btn btn-warning btn-sm">
               <i class="fa fa-refresh"></i> Renew
             </button>
@@ -179,7 +179,7 @@
           &nbsp;·&nbsp;
           Last paid <strong>₹<%= number_with_delimiter(amount_paid.to_i) %></strong>
         </div>
-        <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= @member.id %>">
+        <a href="<%= root_url %>member_subscriptions/add_member_subscriptions?renew=1&member_id=<%= @member.id %>&from=member_list">
           <button class="btn btn-danger btn-sm">
             <i class="fa fa-refresh"></i> Renew now
           </button>
