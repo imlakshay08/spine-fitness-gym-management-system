@@ -33,6 +33,7 @@
 
 			<%= form_tag({action: 'create'}, multipart: :true, id: :myforms, class: "form-horizontal") do  %>
              			<input type="hidden"  id="rootXPath" value="<%=root_url%>"/>
+             			<input type="hidden"  id="returnXPath" value="<%= params[:from].to_s == 'member_list' ? 'member_list' : 'member_subscriptions' %>"/>
 						<input type="hidden" name="mid" id="mid" value="<% if @subscription && params[:renew].to_s != '1' %><%=@subscription.id%><% end %>"/>
 
 						<input type="hidden" name="cur_ms_sbscrptn_no" value="<% if @subscription && params[:renew].to_s != '1' %><%=@subscription.ms_sbscrptn_no%><% end %>"/>

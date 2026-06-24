@@ -488,7 +488,7 @@ class MemberListController < ApplicationController
     html << "<a href=\"#{root_url}member_list/add_member/#{m.id}\" class=\"tblEditBtn\" title=\"Edit member\"><i class=\"fa fa-pencil\"></i></a>"
     html << "<a class=\"tblDelBtn\" title=\"Delete member\" onclick=\"alertChecked('#{root_url}member_list/#{m.id}/deletes')\" style=\"margin-left:6px;\"><i class=\"fa fa-trash-o\"></i></a>"
     if r[:latest].nil? || r[:latest].ms_end_date < Date.today
-      html << "<a href=\"#{root_url}member_subscriptions/add_member_subscriptions?renew=1&member_id=#{m.id}\" title=\"Renew subscription\" style=\"margin-left:6px;\"><i class=\"fa fa-refresh\" style=\"color:#f0a500;font-size:16px;\"></i></a>"
+      html << "<a href=\"#{root_url}member_subscriptions/add_member_subscriptions?renew=1&member_id=#{m.id}&from=member_list\" title=\"Renew subscription\" style=\"margin-left:6px;\"><i class=\"fa fa-refresh\" style=\"color:#f0a500;font-size:16px;\"></i></a>"
     end
     html
   end

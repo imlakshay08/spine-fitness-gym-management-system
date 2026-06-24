@@ -182,7 +182,8 @@ function save_member_subscription(){
         if (resp.status) {
           $("#mid").val(resp.profileid);
           showToast("success", resp.message);
-          window.location.href = usePath + "member_subscriptions";
+          var returnPath = $.trim($("#returnXPath").val()) || "member_subscriptions";
+          window.location.href = usePath + returnPath;
         } else {
           // Server errors like active subscription conflict — inline banner
           showFormError(resp.message);
