@@ -548,7 +548,14 @@ class MemberSubscriptionsController < ApplicationController
             end_date: end_date.strftime("%d-%b-%Y")
           }
         else
-          render json: { status: false }
+          # Normal plan, but no start date chosen yet. Still report is_open:false
+          # so the UI toggles correctly (hide custom fields, restore the default
+          # End Date / Amount Paid). End date stays blank until a start date is set.
+          render json: {
+            status: true,
+            is_open: false,
+            end_date: ""
+          }
         end
 
       else
