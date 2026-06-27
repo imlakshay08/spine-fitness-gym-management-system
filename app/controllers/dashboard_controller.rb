@@ -46,9 +46,9 @@ class DashboardController < ApplicationController
     elsif heartbeat.bh_last_seen > 10.minutes.ago
       { status: 'online', label: 'Online' }
     elsif heartbeat.bh_last_seen > 1.hour.ago
-      { status: 'warning', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+      { status: 'warning', label: "Last seen #{helpers.time_ago_in_words(heartbeat.bh_last_seen)} ago" }
     else
-      { status: 'offline', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+      { status: 'offline', label: "Last seen #{helpers.time_ago_in_words(heartbeat.bh_last_seen)} ago" }
     end
     @due_members = @latest_subs.select { |s| due_amount(s) > 0 }
   end
@@ -216,9 +216,9 @@ class DashboardController < ApplicationController
     elsif heartbeat.bh_last_seen > 10.minutes.ago
       { status: 'online', label: 'Online' }
     elsif heartbeat.bh_last_seen > 1.hour.ago
-      { status: 'warning', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+      { status: 'warning', label: "Last seen #{helpers.time_ago_in_words(heartbeat.bh_last_seen)} ago" }
     else
-      { status: 'offline', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+      { status: 'offline', label: "Last seen #{helpers.time_ago_in_words(heartbeat.bh_last_seen)} ago" }
     end
     render json: result
   end
