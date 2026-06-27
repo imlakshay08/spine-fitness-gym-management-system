@@ -36,6 +36,20 @@ class DashboardController < ApplicationController
 
     # Metrics
     @today_collection = todays_collection
+    # Bridge heartbeat status
+    heartbeat = TrnBridgeHeartbeat.find_by(
+      bh_compcode:  @compcode,
+      bh_device_sn: 'NFZ8253402448'
+    )
+    @bridge_status = if heartbeat.nil?
+      { status: 'offline', label: 'Never connected' }
+    elsif heartbeat.bh_last_seen > 10.minutes.ago
+      { status: 'online', label: 'Online' }
+    elsif heartbeat.bh_last_seen > 1.hour.ago
+      { status: 'warning', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+    else
+      { status: 'offline', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+    end
     @due_members = @latest_subs.select { |s| due_amount(s) > 0 }
   end
 
@@ -46,6 +60,10 @@ class DashboardController < ApplicationController
       get_live_attendance
       return
     end
+    if params[:identity] == 'GET_BRIDGE_STATUS'
+      get_bridge_status
+      return
+   end
   end
 
   def preload_members
@@ -186,5 +204,22 @@ class DashboardController < ApplicationController
       data:         rows,
       last_checked: Time.current.iso8601
     }
+  end
+
+  def get_bridge_status
+    heartbeat = TrnBridgeHeartbeat.find_by(
+      bh_compcode:  @compcode,
+      bh_device_sn: 'NFZ8253402448'
+    )
+    result = if heartbeat.nil?
+      { status: 'offline', label: 'Never connected' }
+    elsif heartbeat.bh_last_seen > 10.minutes.ago
+      { status: 'online', label: 'Online' }
+    elsif heartbeat.bh_last_seen > 1.hour.ago
+      { status: 'warning', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+    else
+      { status: 'offline', label: "Last seen #{time_ago_in_words(heartbeat.bh_last_seen)} ago" }
+    end
+    render json: result
   end
 end

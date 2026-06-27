@@ -22,7 +22,21 @@ begin
 <h1>WELCOME BACK, <span class="accent"><%= session[:autherizedUserName]&.upcase || 'ADMIN' %>.</span></h1>
   <p>Here's what's happening at the gym today.</p>
 </div>
-
+<!-- Bridge Status Banner -->
+<div id="bridge-status-banner" class="alert" style="margin-bottom:16px; padding:10px 16px; border-radius:6px; font-size:14px;">
+  <% if @bridge_status[:status] == 'online' %>
+    <span style="color:#28a745;">● Biometric Bridge: Online</span>
+  <% elsif @bridge_status[:status] == 'warning' %>
+    <span style="color:#ffc107;">⚠ Biometric Bridge: <%= @bridge_status[:label] %></span>
+  <% else %>
+    <span style="color:#dc3545;">
+      ● Biometric Bridge: OFFLINE — <%= @bridge_status[:label] %>
+    </span>
+    <span style="color:#aaa; font-size:13px; margin-left:12px;">
+      Go to gym laptop → double-click <strong>"Restart Biometric Bridge"</strong> on Desktop → wait 30 seconds
+    </span>
+  <% end %>
+</div>
       <%= form_tag({ action: 'index' }, multipart: true, id: 'myForms') do %>
       <input type="hidden" id="rootXPath" value="<%= root_url %>">
       <input type="hidden" id="server_request" name="server_request" value="Y">

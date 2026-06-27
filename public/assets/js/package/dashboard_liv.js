@@ -109,3 +109,40 @@ function submitCollectPayment(){
     error: function(){ alert("Error saving payment. Please try again."); $btn.prop("disabled", false).text("Save Payment"); }
   });
 }
+function fetchBridgeStatus() {
+  var formData = new FormData();
+  formData.append("identity", "GET_BRIDGE_STATUS");
+  formData.append("server_request", "Y");
+
+  $.ajax({
+    url: usePath + "dashboard/ajax_process",
+    type: "POST",
+    data: formData,
+    async: true,
+    contentType: false,
+    processData: false,
+    success: function(resp) {
+      if (!resp) return;
+      var banner = $("#bridge-status-banner");
+
+      if (resp.status === "online") {
+        banner.html('<span style="color:#28a745;">● Biometric Bridge: Online</span>');
+      } else if (resp.status === "warning") {
+        banner.html('<span style="color:#ffc107;">⚠ Biometric Bridge: ' + resp.label + '</span>');
+      } else {
+        banner.html(
+          '<span style="color:#dc3545;">● Biometric Bridge: OFFLINE — ' + resp.label + '</span>' +
+          '<span style="color:#aaa; font-size:13px; margin-left:12px;">' +
+          'Go to gym laptop → double-click <strong>"Restart Biometric Bridge"</strong> on Desktop → wait 30 seconds' +
+          '</span>'
+        );
+      }
+    },
+    cache: false
+  });
+}
+
+$(document).ready(function() {
+  fetchBridgeStatus();
+  setInterval(fetchBridgeStatus, 30000); // update every 30 seconds
+});

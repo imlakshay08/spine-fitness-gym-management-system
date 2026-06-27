@@ -1,0 +1,2 @@
+class TrnBridgeHeartbeat < ApplicationRecord
+end
