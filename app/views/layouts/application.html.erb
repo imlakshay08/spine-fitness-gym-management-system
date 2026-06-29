@@ -208,8 +208,30 @@
    <!-- Jquery Toast css -->
 	<link rel="stylesheet" href="<%=root_url%>assets/plugins/jquery-toast/dist/jquery.toast.min.css">
   
-  <% if controller.controller_name !='fee_list' && controller.controller_name !='login' && controller.controller_name !='student_info'%> 
+  <% if controller.controller_name !='fee_list' && controller.controller_name !='login' && controller.controller_name !='student_info'%>
   <%= render "layouts/footer" %>
+  <% end %>
+
+  <% if controller.controller_name != 'login' && controller.controller_name != 'student_info' %>
+  <!-- Auto-logout after inactivity (keep in sync with INACTIVITY_TIMEOUT in ApplicationController) -->
+  <script>
+  (function(){
+    var IDLE_LIMIT_MS = 15 * 60 * 1000;   // 15 minutes
+    var LOGOUT_URL = "<%= root_url %>logout";
+    var idleTimer;
+    function logout(){
+      window.location.href = LOGOUT_URL;
+    }
+    function resetTimer(){
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(logout, IDLE_LIMIT_MS);
+    }
+    ['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(function(evt){
+      document.addEventListener(evt, resetTimer, { passive: true });
+    });
+    resetTimer();
+  })();
+  </script>
   <% end %>
     </body>
 	<script>

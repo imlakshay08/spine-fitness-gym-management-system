@@ -46,8 +46,11 @@ class ApplicationController < ActionController::Base
          end
       end
    end
+ INACTIVITY_TIMEOUT = 15.minutes
+
  private
   def require_login
+      return if logged_out_for_inactivity?
       @securedlogged = false
       current_user
       menu_access_allowed();
@@ -55,6 +58,20 @@ class ApplicationController < ActionController::Base
       if !@securedlogged
         redirect_to :controller=> :login
       end
+  end
+
+  private
+  def logged_out_for_inactivity?
+      return false if session[:logedUserId].blank?
+      last_seen = session[:last_seen_at].to_i
+      if last_seen > 0 && (Time.current.to_i - last_seen) > INACTIVITY_TIMEOUT.to_i
+        reset_session
+        flash[:error] = "You were logged out after 15 minutes of inactivity."
+        redirect_to :controller => :login
+        return true
+      end
+      session[:last_seen_at] = Time.current.to_i
+      false
   end
    private
    def get_all_family_information(compcode,regsitratino)
