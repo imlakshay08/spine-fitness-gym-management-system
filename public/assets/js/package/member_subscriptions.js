@@ -154,6 +154,16 @@ function save_member_subscription(){
       set_global_focus('ms_open_end_date');
       return false;
     }
+    // Custom end date must be after the start date, otherwise the record is
+    // born already-expired / zero-day. Dates are "d-M-Y" (e.g. 02-Aug-2025);
+    // swapping dashes for spaces gives a form Date parses reliably.
+    var openStart = new Date($.trim($("#ms_start_date").val()).replace(/-/g, " "));
+    var openEnd   = new Date($.trim($("#ms_open_end_date").val()).replace(/-/g, " "));
+    if (!isNaN(openStart) && !isNaN(openEnd) && openEnd <= openStart) {
+      showFormError("Custom end date must be after the start date.");
+      set_global_focus('ms_open_end_date');
+      return false;
+    }
   }
 
   formData.append("identity", "SAVESUBSCR");
@@ -283,5 +293,15 @@ $(document).ready(function() {
    $('#ms_member_id').on('select2:open', function () {
     $('.select2-search__field').focus();
   });
-  
+
+});
+
+// When the form loads with a plan already chosen (Renew prefills it from the
+// last subscription, Edit from the saved record), the onchange handler never
+// fires, so the Open-plan Custom Amount / Custom End Date fields stay hidden
+// until you toggle the dropdown. Run the same logic once on load to sync them.
+$(document).ready(function() {
+  if ($.trim($("#ms_plan_id").val()) !== "") {
+    fill_end_date();
+  }
 });

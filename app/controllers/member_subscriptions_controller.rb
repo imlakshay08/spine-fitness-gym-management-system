@@ -258,18 +258,26 @@ class MemberSubscriptionsController < ApplicationController
         params[:ms_skip_due_check] = is_open_plan ? 1 : 0
 
         if is_open_plan
-          open_amount = params[:ms_open_amount].to_f
+          if params[:ms_open_end_date].to_s.blank?
+            message = "Custom end date is required for an Open plan."
+            isFlags = false
+          else
+            open_amount = params[:ms_open_amount].to_f
+            open_end    = Date.parse(params[:ms_open_end_date])
+            start_dt    = Date.parse(params[:ms_start_date])
 
-          params[:ms_plan_amount]     = open_amount
-          params[:ms_final_amount]    = open_amount
-          params[:ms_discount_amount] = 0
-
-          open_end = Date.parse(params[:ms_open_end_date])
-
-          params[:ms_open_duration_days] =
-            (open_end - Date.parse(params[:ms_start_date])).to_i
-
-          params[:ms_end_date] = open_end
+            if open_end <= start_dt
+              # Reject a record that would be born already-expired / zero-day.
+              message = "Custom end date must be after the start date."
+              isFlags = false
+            else
+              params[:ms_plan_amount]        = open_amount
+              params[:ms_final_amount]       = open_amount
+              params[:ms_discount_amount]    = 0
+              params[:ms_open_duration_days] = (open_end - start_dt).to_i
+              params[:ms_end_date]           = open_end
+            end
+          end
 
         else
           params[:ms_plan_amount]     = plan.plan_mrp_amount
@@ -294,16 +302,18 @@ class MemberSubscriptionsController < ApplicationController
               end
             end
 
-              start_date = Date.parse(params[:ms_start_date])
+              if isFlags
+                start_date = Date.parse(params[:ms_start_date])
 
-              if is_open_plan
-                end_date = open_end   # already parsed
-              else
-                end_date = calculate_end_date(start_date, params[:ms_plan_id])
+                if is_open_plan
+                  end_date = open_end   # already parsed and validated above
+                else
+                  end_date = calculate_end_date(start_date, params[:ms_plan_id])
+                end
+
+                params[:ms_end_date] = end_date
+                params[:ms_status]   = subscription_status(end_date)
               end
-
-              params[:ms_end_date] = end_date
-              params[:ms_status]   = subscription_status(end_date)
 
               if params[:mid].to_i>0
                  if currentgrp.to_s.downcase != newgroup.to_s.downcase
