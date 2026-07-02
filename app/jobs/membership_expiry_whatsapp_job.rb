@@ -39,11 +39,15 @@ class MembershipExpiryWhatsappJob < ApplicationJob
 
       next if already_sent
 
+      # Parameters that fill the template's {{1}}/{{2}} placeholders. Built once
+      # so the message we send and the message we log are guaranteed identical.
+      body_values = [member.id.to_s, sub.ms_end_date.strftime("%d %b %Y")]
+
       # Line 1
       response = Meta::SendWhatsapp.send_template(
         phone: member.mmbr_contact,
         template: template,
-        body_values: [member.id.to_s, sub.ms_end_date.strftime("%d %b %Y")]
+        body_values: body_values
       )
 
       # Line 2
@@ -56,6 +60,7 @@ class MembershipExpiryWhatsappJob < ApplicationJob
         wl_member_id: member.id,
         wl_subscription_id: sub.id,
         wl_template_name: template,
+        wl_message_body: WhatsappTemplates.render(template, *body_values),
         wl_sent_at: Time.current,
         wl_status: success ? "QUEUED" : "FAILED",
         wl_interakt_msg_id: response.dig(:body, "messages", 0, "id"),

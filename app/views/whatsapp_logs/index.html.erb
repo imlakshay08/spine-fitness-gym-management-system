@@ -1,0 +1,374 @@
+<div class="page-wrapper">
+<%= render "layouts/header" %>
+<!-- start page container -->
+  <div class="page-container">
+    <%= render "layouts/sidebar" %>
+    <div class="page-content-wrapper">
+      <div class="page-content wa-logs">
+
+        <div class="page-bar">
+          <div class="page-title-breadcrumb">
+            <div class="pull-left">
+              <div class="page-title">WhatsApp Message Logs</div>
+            </div>
+            <%= render "layouts/breadcrumbs" %>
+          </div>
+        </div>
+
+        <%# ---------- Summary cards ---------- %>
+        <div class="row wa-stats">
+          <div class="col-md col-sm-6">
+            <div class="wa-stat-card wa-stat-total">
+              <div class="wa-stat-icon"><i class="fa-brands fa-whatsapp"></i></div>
+              <div class="wa-stat-body">
+                <div class="wa-stat-value"><%= @stats[:total] %></div>
+                <div class="wa-stat-label">Total Sent</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md col-sm-6">
+            <div class="wa-stat-card wa-stat-delivered">
+              <div class="wa-stat-icon"><i class="fa-solid fa-check-double"></i></div>
+              <div class="wa-stat-body">
+                <div class="wa-stat-value"><%= @stats[:delivered] %></div>
+                <div class="wa-stat-label">Delivered</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md col-sm-6">
+            <div class="wa-stat-card wa-stat-read">
+              <div class="wa-stat-icon"><i class="fa-solid fa-check-double"></i></div>
+              <div class="wa-stat-body">
+                <div class="wa-stat-value"><%= @stats[:read] %> <small><%= @stats[:read_rate] %>%</small></div>
+                <div class="wa-stat-label">Read</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md col-sm-6">
+            <div class="wa-stat-card wa-stat-pending">
+              <div class="wa-stat-icon"><i class="fa-solid fa-paper-plane"></i></div>
+              <div class="wa-stat-body">
+                <div class="wa-stat-value"><%= @stats[:pending] %></div>
+                <div class="wa-stat-label">In Transit</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md col-sm-6">
+            <div class="wa-stat-card wa-stat-failed">
+              <div class="wa-stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="wa-stat-body">
+                <div class="wa-stat-value"><%= @stats[:failed] %></div>
+                <div class="wa-stat-label">Failed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-body">
+
+                <%# ---------- Filters ---------- %>
+                <%= form_tag({ action: 'index' }, multipart: true, id: 'myForms') do %>
+                  <input type="hidden" id="rootXPath" value="<%= root_url %>"/>
+                  <input type="hidden" name="server_request" id="server_request" value="Y"/>
+
+                  <div class="row m-b-10 align-items-center">
+                    <div class="col-sm-12 col-md-3 d-flex align-items-center gap-2">
+                      <label class="mb-0">Message</label>
+                      <select class="form-select select-height" name="template_filter" id="template_filter">
+                        <option value="">All Types</option>
+                        <% @templates.each do |name, meta| %>
+                          <option value="<%= name %>" <%= 'selected' if @template_filter == name %>><%= meta[:label] %></option>
+                        <% end %>
+                      </select>
+                    </div>
+
+                    <div class="col-sm-12 col-md-2 d-flex align-items-center gap-2">
+                      <label class="mb-0">Status</label>
+                      <select class="form-select select-height" name="status_filter" id="status_filter">
+                        <% [['', 'All'], ['READ', 'Read'], ['DELIVERED', 'Delivered'], ['SENT', 'Sent'], ['QUEUED', 'Queued'], ['FAILED', 'Failed']].each do |val, lbl| %>
+                          <option value="<%= val %>" <%= 'selected' if @status_filter == val %>><%= lbl %></option>
+                        <% end %>
+                      </select>
+                    </div>
+
+                    <div class="col-sm-12 col-md-3">
+                      <input type="text" class="form-control" name="log_search" id="log_search"
+                             placeholder="Search member name / phone / code"
+                             value="<%= @search %>"/>
+                    </div>
+
+                    <div class="col-sm-12 col-md-1 no_loader">
+                      <button type="button" onclick="filter_whatsapp_logs();" class="btn btn-circle btn-default">
+                        <i class="fa fa-search"></i>
+                      </button>
+                    </div>
+
+                    <div class="col-sm-12 col-md-1 show_loader hidden">
+                      <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner">
+                        <img src="<%= root_url %>/images/spining_loader.gif" width="30px">
+                      </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-2 text-right">
+                      <a href="<%= root_url %>whatsapp_logs/refresh">
+                        <button type="button" class="btn btn-circle btn-info">
+                          <i class="fa fa-refresh"></i> Reset
+                        </button>
+                      </a>
+                    </div>
+                  </div>
+                <% end %>
+
+                <%# ---------- Table ---------- %>
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover wa-table" id="whatsapp_logs_table" style="width:100%">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Member</th>
+                        <th>Message</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Sent</th>
+                        <th>Delivered</th>
+                        <th>Read</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if @logs.present? %>
+                        <% @logs.each_with_index do |log, idx| %>
+                          <%
+                            member  = @members_hash[log.wl_member_id.to_s]
+                            name    = member&.mmbr_name.presence || "Unknown member"
+                            contact = member&.mmbr_contact
+                            code    = member&.mmbr_code
+                            message = wa_message_body(log, @subs_hash)
+                            info    = wa_status_info(log.wl_status)
+                          %>
+                          <tr>
+                            <td><%= idx + 1 %></td>
+
+                            <td class="wa-member-cell">
+                              <div class="wa-avatar"><%= name[0].to_s.upcase %></div>
+                              <div class="wa-member-meta">
+                                <div class="wa-member-name"><%= name %></div>
+                                <div class="wa-member-sub">
+                                  <% if code.present? %><span class="wa-code"><%= code %></span><% end %>
+                                  <% if contact.present? %><span class="wa-phone"><i class="fa fa-phone"></i> <%= contact %></span><% end %>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td class="wa-msg-cell">
+                              <div class="wa-msg-preview" title="<%= message %>"><%= truncate(message, length: 90) %></div>
+                            </td>
+
+                            <td>
+                              <span class="wa-type-badge wa-tone-<%= WhatsappTemplates.tone(log.wl_template_name) %>">
+                                <i class="<%= WhatsappTemplates.icon(log.wl_template_name) %>"></i>
+                                <%= WhatsappTemplates.label(log.wl_template_name) %>
+                              </span>
+                            </td>
+
+                            <td><%= wa_status_badge(log.wl_status) %></td>
+
+                            <td class="wa-time-cell"><%= wa_time(log.wl_sent_at) %></td>
+                            <td class="wa-time-cell"><%= wa_time(log.wl_delivered_at) %></td>
+                            <td class="wa-time-cell"><%= wa_time(log.wl_read_at) %></td>
+
+                            <td class="text-center">
+                              <button type="button" class="btn btn-sm btn-circle btn-success wa-view-btn"
+                                      data-target-detail="wa-detail-<%= log.id %>">
+                                <i class="fa fa-eye"></i>
+                              </button>
+                            </td>
+                          </tr>
+
+                          <%# Hidden detail, cloned into the modal on View click %>
+                          <div id="wa-detail-<%= log.id %>" class="wa-detail-source" style="display:none;">
+                            <div class="wa-detail-head">
+                              <div class="wa-avatar wa-avatar-lg"><%= name[0].to_s.upcase %></div>
+                              <div>
+                                <div class="wa-member-name"><%= name %></div>
+                                <div class="wa-member-sub">
+                                  <% if code.present? %><span class="wa-code"><%= code %></span><% end %>
+                                  <% if contact.present? %><span class="wa-phone"><i class="fa fa-phone"></i> <%= contact %></span><% end %>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="wa-chat">
+                              <div class="wa-bubble">
+                                <div class="wa-bubble-text"><%= simple_format(message) %></div>
+                                <div class="wa-bubble-meta">
+                                  <span><%= log.wl_sent_at&.strftime("%I:%M %p") %></span>
+                                  <%= wa_ticks_html(log.wl_status) %>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="wa-timeline">
+                              <div class="wa-timeline-item done">
+                                <span class="wa-dot"></span>
+                                <span class="wa-tl-label">Sent</span>
+                                <span class="wa-tl-time"><%= log.wl_sent_at ? log.wl_sent_at.strftime("%d %b %Y, %I:%M %p") : "—" %></span>
+                              </div>
+                              <div class="wa-timeline-item <%= 'done' if log.wl_delivered_at.present? %>">
+                                <span class="wa-dot"></span>
+                                <span class="wa-tl-label">Delivered</span>
+                                <span class="wa-tl-time"><%= log.wl_delivered_at ? log.wl_delivered_at.strftime("%d %b %Y, %I:%M %p") : "Not yet delivered" %></span>
+                              </div>
+                              <div class="wa-timeline-item <%= 'done blue' if log.wl_read_at.present? %>">
+                                <span class="wa-dot"></span>
+                                <span class="wa-tl-label">Read</span>
+                                <span class="wa-tl-time"><%= log.wl_read_at ? log.wl_read_at.strftime("%d %b %Y, %I:%M %p") : "Not read yet" %></span>
+                              </div>
+                              <% if log.wl_status.to_s.upcase == 'FAILED' %>
+                                <div class="wa-timeline-item failed done">
+                                  <span class="wa-dot"></span>
+                                  <span class="wa-tl-label">Failed</span>
+                                  <span class="wa-tl-time"><%= log.wl_failed_reason.presence || "Unknown reason" %></span>
+                                </div>
+                              <% end %>
+                            </div>
+
+                            <div class="wa-raw">
+                              <a class="wa-raw-toggle" data-bs-toggle="collapse" href="#wa-raw-<%= log.id %>">
+                                <i class="fa fa-code"></i> Technical details
+                              </a>
+                              <div class="collapse" id="wa-raw-<%= log.id %>">
+                                <table class="wa-raw-table">
+                                  <tr><td>Template</td><td><%= log.wl_template_name %></td></tr>
+                                  <tr><td>Message ID</td><td class="wa-mono"><%= log.wl_interakt_msg_id.presence || "—" %></td></tr>
+                                  <tr><td>Status</td><td><%= log.wl_status %></td></tr>
+                                </table>
+                                <% if log.wl_api_response.present? %>
+                                  <pre class="wa-api-response"><%= log.wl_api_response %></pre>
+                                <% end %>
+                              </div>
+                            </div>
+                          </div>
+                        <% end %>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+<!-- End page container -->
+</div>
+
+<%# ---------- Detail modal ---------- %>
+<div class="modal fade wa-modal" id="waDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header wa-modal-header">
+        <h5 class="modal-title"><i class="fa-brands fa-whatsapp"></i> Message Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="waModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ---- Summary cards ---- */
+  .wa-logs .wa-stats { margin-bottom: 6px; }
+  .wa-logs .wa-stat-card {
+    display: flex; align-items: center; gap: 12px;
+    background: #fff; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06); border-left: 4px solid #25d366;
+  }
+  .wa-logs .wa-stat-icon {
+    width: 44px; height: 44px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 20px; color: #fff; background: #25d366;
+  }
+  .wa-logs .wa-stat-value { font-size: 24px; font-weight: 700; line-height: 1; color: #1f2d3d; }
+  .wa-logs .wa-stat-value small { font-size: 13px; font-weight: 600; color: #53bdeb; }
+  .wa-logs .wa-stat-label { font-size: 12px; color: #8696a0; text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+  .wa-logs .wa-stat-delivered { border-left-color: #8696a0; } .wa-logs .wa-stat-delivered .wa-stat-icon { background: #8696a0; }
+  .wa-logs .wa-stat-read { border-left-color: #53bdeb; } .wa-logs .wa-stat-read .wa-stat-icon { background: #53bdeb; }
+  .wa-logs .wa-stat-pending { border-left-color: #f0a500; } .wa-logs .wa-stat-pending .wa-stat-icon { background: #f0a500; }
+  .wa-logs .wa-stat-failed { border-left-color: #e74c3c; } .wa-logs .wa-stat-failed .wa-stat-icon { background: #e74c3c; }
+
+  /* ---- Member cell ---- */
+  .wa-logs .wa-member-cell { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+  .wa-logs .wa-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex: 0 0 38px;
+    background: #128c7e; color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .wa-logs .wa-avatar-lg { width: 48px; height: 48px; flex: 0 0 48px; font-size: 18px; }
+  .wa-logs .wa-member-name { font-weight: 600; color: #1f2d3d; }
+  .wa-logs .wa-member-sub { font-size: 12px; color: #8696a0; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+  .wa-logs .wa-code { background: #eef2f5; border-radius: 4px; padding: 0 5px; color: #556; }
+
+  /* ---- Message preview ---- */
+  .wa-logs .wa-msg-cell { max-width: 340px; }
+  .wa-logs .wa-msg-preview {
+    background: #d9fdd3; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #111b21;
+    position: relative; display: inline-block; max-width: 320px; white-space: normal;
+  }
+
+  /* ---- Type badge ---- */
+  .wa-logs .wa-type-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .wa-logs .wa-tone-warning { background: #fff4e0; color: #b26a00; }
+  .wa-logs .wa-tone-danger  { background: #fde8e8; color: #c0392b; }
+  .wa-logs .wa-tone-info    { background: #e7f3fe; color: #1c6bb0; }
+
+  /* ---- Status badge + ticks ---- */
+  .wa-logs .wa-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .wa-logs .wa-badge-label { line-height: 1; }
+  .wa-logs .wa-read      { background: #e7f6fd; color: #2b8fb3; }
+  .wa-logs .wa-delivered { background: #eef2f5; color: #5b6b76; }
+  .wa-logs .wa-sent, .wa-logs .wa-queued { background: #f2f4f6; color: #8696a0; }
+  .wa-logs .wa-failed    { background: #fde8e8; color: #c0392b; }
+  .wa-logs .wa-tick i { font-size: 12px; }
+
+  /* ---- Time cells ---- */
+  .wa-logs .wa-time-cell { font-size: 12px; white-space: nowrap; }
+  .wa-logs .wa-date { display: block; color: #1f2d3d; font-weight: 500; }
+  .wa-logs .wa-clock { display: block; color: #8696a0; }
+  .wa-logs .wa-muted { color: #c3ccd2; }
+
+  /* ---- Modal ---- */
+  .wa-modal .wa-modal-header { background: #075e54; color: #fff; }
+  .wa-modal .wa-modal-header .modal-title { display: flex; align-items: center; gap: 8px; }
+  .wa-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+  .wa-modal .wa-detail-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; margin-bottom: 14px; }
+  .wa-modal .wa-chat { background: #efeae2; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .wa-modal .wa-bubble { background: #d9fdd3; border-radius: 10px; padding: 8px 12px 6px; max-width: 85%; margin-left: auto; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .wa-modal .wa-bubble-text { font-size: 14px; color: #111b21; }
+  .wa-modal .wa-bubble-text p { margin: 0 0 4px; }
+  .wa-modal .wa-bubble-meta { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 11px; color: #667781; margin-top: 2px; }
+
+  /* ---- Timeline ---- */
+  .wa-modal .wa-timeline { position: relative; margin: 0 0 16px 6px; padding-left: 18px; border-left: 2px solid #e3e8eb; }
+  .wa-modal .wa-timeline-item { position: relative; padding: 6px 0; }
+  .wa-modal .wa-dot { position: absolute; left: -25px; top: 9px; width: 12px; height: 12px; border-radius: 50%; background: #cfd8dc; border: 2px solid #fff; }
+  .wa-modal .wa-timeline-item.done .wa-dot { background: #8696a0; }
+  .wa-modal .wa-timeline-item.done.blue .wa-dot { background: #53bdeb; }
+  .wa-modal .wa-timeline-item.failed .wa-dot { background: #e74c3c; }
+  .wa-modal .wa-tl-label { font-weight: 600; color: #1f2d3d; margin-right: 8px; }
+  .wa-modal .wa-tl-time { font-size: 12px; color: #8696a0; }
+  .wa-modal .wa-timeline-item.failed .wa-tl-time { color: #c0392b; }
+
+  /* ---- Raw ---- */
+  .wa-modal .wa-raw-toggle { font-size: 12px; color: #8696a0; cursor: pointer; }
+  .wa-modal .wa-raw-table { width: 100%; font-size: 12px; margin-top: 8px; }
+  .wa-modal .wa-raw-table td { padding: 3px 6px; border-bottom: 1px solid #f0f0f0; }
+  .wa-modal .wa-raw-table td:first-child { color: #8696a0; width: 110px; }
+  .wa-modal .wa-mono, .wa-modal .wa-api-response { font-family: monospace; }
+  .wa-modal .wa-api-response { background: #f7f9fa; border-radius: 6px; padding: 10px; font-size: 11px; margin-top: 8px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow: auto; }
+</style>

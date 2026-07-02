@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
+ActiveRecord::Schema[7.1].define(version: 2026_07_02_120000) do
+  create_table "biometric_id_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "allocation_compcode", limit: 12, default: "", null: false
+    t.string "allocation_device_sn", limit: 50, default: "", null: false
+    t.integer "allocation_next_uid", null: false
+    t.integer "allocation_next_device_user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "mst_category_lists", charset: "latin1", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "cat_compcode", limit: 12, default: "", null: false
     t.string "cat_code", limit: 10, default: "", null: false
@@ -138,9 +147,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
   create_table "mst_membership_plans", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "plan_compcode", limit: 12, default: "", null: false
     t.string "plan_name", limit: 25, default: "", null: false
-    t.string "plan_duration_days", limit: 3, default: "", null: false
+    t.string "plan_duration_months", limit: 3, null: false
     t.string "plan_amount", limit: 8, default: "", null: false
     t.string "plan_description", limit: 50, default: "", null: false
+    t.string "plan_mrp_amount", limit: 9, default: "", null: false
+    t.string "plan_final_amount", limit: 9, default: "", null: false
+    t.integer "plan_is_open", limit: 1, default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -157,12 +169,49 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "mst_staff_lists", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "stf_compcode", limit: 12, default: "", null: false
+    t.string "stf_code", limit: 10, default: "", null: false
+    t.string "stf_name", limit: 250, default: "", null: false
+    t.string "stf_gender", limit: 6, default: "", null: false
+    t.date "stf_dob", null: false
+    t.string "stf_designation", limit: 100, default: "", null: false
+    t.date "stf_join_date"
+    t.date "stf_leave_date"
+    t.string "stf_contact", limit: 10, default: "", null: false
+    t.string "stf_email", limit: 150, default: "", null: false
+    t.string "stf_address1", default: "", null: false
+    t.string "stf_address2", default: "", null: false
+    t.string "stf_aadhaar", limit: 12, default: "", null: false
+    t.string "stf_status", limit: 20, default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "mst_stock_lists", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "sl_compcode", limit: 12, default: "", null: false
     t.string "sl_name", limit: 25, default: "", null: false
     t.string "sl_descp", limit: 75, default: "", null: false
+  end
+
+  create_table "mst_trainer_lists", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "trn_compcode", limit: 12, default: "", null: false
+    t.string "trn_code", limit: 10, default: "", null: false
+    t.string "trn_name", limit: 150, default: "", null: false
+    t.string "trn_gender", limit: 6, default: "", null: false
+    t.date "trn_dob", null: false
+    t.string "trn_speciality", limit: 200, default: "", null: false
+    t.string "trn_certification", limit: 200, default: "", null: false
+    t.string "trn_experience_years", limit: 3, default: "", null: false
+    t.string "trn_contact", limit: 10, default: "", null: false
+    t.string "trn_email", limit: 50, default: "", null: false
+    t.string "trn_salary_type", limit: 75, default: "", null: false
+    t.string "trn_salary_amount", limit: 8, default: "", null: false
+    t.string "trn_status", limit: 10, default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "sessions", charset: "latin1", force: :cascade do |t|
@@ -189,6 +238,27 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "trn_bridge_heartbeats", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "bh_compcode", limit: 12, default: "", null: false
+    t.string "bh_device_sn", limit: 50, default: "", null: false
+    t.datetime "bh_last_seen", precision: nil, null: false
+    t.string "bh_bridge_version", limit: 20, default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "trn_issue_amounts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "ia_compcode", limit: 12, default: "", null: false
+    t.string "ia_code", limit: 10, default: "", null: false
+    t.string "ia_staff_id", limit: 3, default: "", null: false
+    t.date "ia_date", null: false
+    t.string "ia_amount", limit: 10, default: "", null: false
+    t.string "ia_type", limit: 3, default: "", null: false
+    t.string "ia_remarks", limit: 50, default: "", null: false
+  end
+
   create_table "trn_login_data", charset: "latin1", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "ad_compcode", limit: 30, null: false
     t.string "ad_event", limit: 50, null: false
@@ -204,7 +274,71 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "trn_member_attendances", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "att_compcode", limit: 12, default: "", null: false
+    t.string "att_member_id", limit: 4, default: "", null: false
+    t.string "att_device_user_id", limit: 4, default: "", null: false
+    t.string "att_device_sn", limit: 50, default: "", null: false
+    t.datetime "att_punch_time", precision: nil, null: false
+    t.date "att_punch_date", null: false
+    t.string "att_status", limit: 25, default: "", null: false
+    t.string "att_reason", limit: 50, default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "trn_member_biometric_mappings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "mbm_compcode", limit: 12, default: "", null: false
+    t.string "mbm_member_id", limit: 4, default: "", null: false
+    t.string "mbm_device_user_id", limit: 4, default: "", null: false
+    t.string "mbm_device_sn", limit: 50, default: "", null: false
+    t.string "mbm_is_active", limit: 3, default: "", null: false
+    t.text "mbm_finger_template", size: :long
+    t.integer "mbm_uid"
+  end
+
   create_table "trn_member_subscriptions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "ms_compcode", limit: 12, default: "", null: false
+    t.string "ms_sbscrptn_no", limit: 8, default: "", null: false
+    t.string "ms_member_id", limit: 5, default: "", null: false
+    t.string "ms_plan_id", limit: 5, default: "", null: false
+    t.date "ms_start_date", null: false
+    t.date "ms_end_date", null: false
+    t.string "ms_amount_paid", limit: 10, default: "", null: false
+    t.string "ms_payment_mode", limit: 25, default: "", null: false
+    t.string "ms_status", limit: 10, default: "", null: false
+    t.string "ms_remarks", limit: 25, default: "", null: false
+    t.string "ms_plan_amount", limit: 9, default: "", null: false
+    t.string "ms_discount_amount", limit: 9, default: "", null: false
+    t.string "ms_final_amount", limit: 9, default: "", null: false
+    t.decimal "ms_open_amount", precision: 10, scale: 2
+    t.date "ms_open_end_date"
+    t.integer "ms_open_duration_days"
+    t.integer "ms_skip_due_check", limit: 1, default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "trn_payments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "pay_compcode", limit: 12, default: "", null: false
+    t.string "pay_no", limit: 10, default: "", null: false
+    t.string "pay_ref_type", limit: 20, default: "", null: false
+    t.string "pay_ref_id", limit: 5, default: "", null: false
+    t.date "pay_date", null: false
+    t.string "pay_amount", limit: 10, default: "", null: false
+    t.string "pay_mode", limit: 10, default: "", null: false
+    t.string "pay_remarks", limit: 50, default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "trn_reminder_logs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "rl_compcode", limit: 12, default: "", null: false
+    t.integer "rl_member_id", null: false
+    t.integer "rl_subscription_id", null: false
+    t.date "rl_date", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -240,6 +374,23 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_01_102313) do
     t.string "ur_rights", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+  end
+
+  create_table "trn_whatsapp_logs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "wl_compcode", limit: 12, default: "", null: false
+    t.string "wl_member_id", limit: 4
+    t.string "wl_subscription_id", limit: 4
+    t.string "wl_template_name", limit: 100
+    t.datetime "wl_sent_at", precision: nil
+    t.string "wl_status", limit: 20
+    t.text "wl_api_response"
+    t.string "wl_interakt_msg_id", limit: 128
+    t.datetime "wl_delivered_at", precision: nil
+    t.datetime "wl_read_at", precision: nil
+    t.string "wl_failed_reason", limit: 250
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "wl_message_body"
   end
 
   create_table "users", charset: "latin1", force: :cascade do |t|

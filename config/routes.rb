@@ -180,10 +180,21 @@ end
 Rails.application.routes.draw do
   get   'cron/send_expiry_whatsapp'=>'cron#send_expiry_whatsapp'
   post "/webhooks/interakt" => "webhooks/interakt#receive"
-  get 'cron/sync_subscription_status'  => 'cron#sync_subscription_status' 
+  get 'cron/sync_subscription_status'  => 'cron#sync_subscription_status'
   get  '/webhooks/meta' => 'webhooks/meta#verify'
   post '/webhooks/meta' => 'webhooks/meta#receive'
   resources :cron
+end
+
+Rails.application.routes.draw do
+  get   'whatsapp_logs/refresh' => 'whatsapp_logs#refresh'
+  get   'whatsapp_logs/index'   => 'whatsapp_logs#index'
+  post  'whatsapp_logs/index'   => 'whatsapp_logs#index'
+  get   'whatsapp_logs/search'  => 'whatsapp_logs#index'
+  post  'whatsapp_logs/search'  => 'whatsapp_logs#index'
+  get   'whatsapp_logs'         => 'whatsapp_logs#index'
+  post  'whatsapp_logs'         => 'whatsapp_logs#index'
+  resources :whatsapp_logs
 end
 
 Rails.application.routes.draw do
