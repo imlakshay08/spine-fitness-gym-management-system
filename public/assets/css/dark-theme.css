@@ -950,3 +950,100 @@ select.form-select:hover,
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+  /* ---- Summary cards ---- */
+  .wa-logs .wa-stats { margin-bottom: 6px; }
+  .wa-logs .wa-stat-card {
+    display: flex; align-items: center; gap: 12px;
+    background: #fff; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06); border-left: 4px solid #25d366;
+  }
+  .wa-logs .wa-stat-icon {
+    width: 44px; height: 44px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 20px; color: #fff; background: #25d366;
+  }
+  .wa-logs .wa-stat-value { font-size: 24px; font-weight: 700; line-height: 1; color: #1f2d3d; }
+  .wa-logs .wa-stat-value small { font-size: 13px; font-weight: 600; color: #53bdeb; }
+  .wa-logs .wa-stat-label { font-size: 12px; color: #8696a0; text-transform: uppercase; letter-spacing: .4px; margin-top: 4px; }
+  .wa-logs .wa-stat-delivered { border-left-color: #8696a0; } .wa-logs .wa-stat-delivered .wa-stat-icon { background: #8696a0; }
+  .wa-logs .wa-stat-read { border-left-color: #53bdeb; } .wa-logs .wa-stat-read .wa-stat-icon { background: #53bdeb; }
+  .wa-logs .wa-stat-pending { border-left-color: #f0a500; } .wa-logs .wa-stat-pending .wa-stat-icon { background: #f0a500; }
+  .wa-logs .wa-stat-failed { border-left-color: #e74c3c; } .wa-logs .wa-stat-failed .wa-stat-icon { background: #e74c3c; }
+
+  /* ---- Table cell alignment ---- */
+  .wa-logs .wa-table td { vertical-align: middle; }
+
+  /* ---- Shared components (used in BOTH the table and the modal) ----
+     Colours use `inherit` where they must sit on a dark table row *and* a
+     white modal, so the text stays readable in either theme. */
+  .wa-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex: 0 0 38px;
+    background: #128c7e; color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
+  .wa-avatar-lg { width: 48px; height: 48px; flex: 0 0 48px; font-size: 18px; }
+  .wa-member-name { font-weight: 600; color: inherit; }
+  .wa-member-sub { font-size: 12px; color: #8696a0; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+  .wa-code { background: #128c7e; color: #fff; border-radius: 4px; padding: 0 6px; font-size: 11px; }
+  .wa-phone { white-space: nowrap; }
+  .wa-tick i { font-size: 12px; }
+
+  /* ---- Member cell (table) ---- */
+  .wa-logs .wa-member-cell { display: flex; align-items: center; gap: 10px; min-width: 190px; }
+
+  /* ---- Message preview (table) ---- */
+  .wa-logs .wa-msg-cell { max-width: 340px; }
+  .wa-logs .wa-msg-preview {
+    background: #d9fdd3; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #111b21;
+    display: inline-block; max-width: 320px; white-space: normal;
+  }
+
+  /* ---- Type badge ---- */
+  .wa-type-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .wa-tone-warning { background: #fff4e0; color: #b26a00; }
+  .wa-tone-danger  { background: #fde8e8; color: #c0392b; }
+  .wa-tone-info    { background: #e7f3fe; color: #1c6bb0; }
+
+  /* ---- Status badge + ticks ---- */
+  .wa-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .wa-badge-label { line-height: 1; }
+  .wa-read      { background: #e7f6fd; color: #2b8fb3; }
+  .wa-delivered { background: #eef2f5; color: #5b6b76; }
+  .wa-sent, .wa-queued { background: #f2f4f6; color: #8696a0; }
+  .wa-failed    { background: #fde8e8; color: #c0392b; }
+
+  /* ---- Time cells (table) ---- */
+  .wa-logs .wa-time-cell { font-size: 12px; white-space: nowrap; }
+  .wa-logs .wa-date { display: block; color: inherit; font-weight: 500; }
+  .wa-logs .wa-clock { display: block; color: #8696a0; }
+  .wa-logs .wa-muted { color: #8696a0; }
+
+  /* ---- Modal ---- */
+  .wa-modal .wa-modal-header { background: #075e54; color: #fff; }
+  .wa-modal .wa-modal-header .modal-title { display: flex; align-items: center; gap: 8px; }
+  .wa-modal .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+  .wa-modal .wa-detail-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; margin-bottom: 14px; }
+  .wa-modal .wa-chat { background: #efeae2; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .wa-modal .wa-bubble { background: #d9fdd3; border-radius: 10px; padding: 8px 12px 6px; max-width: 85%; margin-left: auto; box-shadow: 0 1px 1px rgba(0,0,0,.08); }
+  .wa-modal .wa-bubble-text { font-size: 14px; color: #111b21; }
+  .wa-modal .wa-bubble-text p { margin: 0 0 4px; }
+  .wa-modal .wa-bubble-meta { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 11px; color: #667781; margin-top: 2px; }
+
+  /* ---- Timeline ---- */
+  .wa-modal .wa-timeline { position: relative; margin: 0 0 16px 6px; padding-left: 18px; border-left: 2px solid #e3e8eb; }
+  .wa-modal .wa-timeline-item { position: relative; padding: 6px 0; }
+  .wa-modal .wa-dot { position: absolute; left: -25px; top: 9px; width: 12px; height: 12px; border-radius: 50%; background: #cfd8dc; border: 2px solid #fff; }
+  .wa-modal .wa-timeline-item.done .wa-dot { background: #8696a0; }
+  .wa-modal .wa-timeline-item.done.blue .wa-dot { background: #53bdeb; }
+  .wa-modal .wa-timeline-item.failed .wa-dot { background: #e74c3c; }
+  .wa-modal .wa-tl-label { font-weight: 600; color: #1f2d3d; margin-right: 8px; }
+  .wa-modal .wa-tl-time { font-size: 12px; color: #8696a0; }
+  .wa-modal .wa-timeline-item.failed .wa-tl-time { color: #c0392b; }
+
+  /* ---- Raw ---- */
+  .wa-modal .wa-raw-toggle { font-size: 12px; color: #8696a0; cursor: pointer; }
+  .wa-modal .wa-raw-table { width: 100%; font-size: 12px; margin-top: 8px; }
+  .wa-modal .wa-raw-table td { padding: 3px 6px; border-bottom: 1px solid #f0f0f0; }
+  .wa-modal .wa-raw-table td:first-child { color: #8696a0; width: 110px; }
+  .wa-modal .wa-mono, .wa-modal .wa-api-response { font-family: monospace; }
+  .wa-modal .wa-api-response { background: #f7f9fa; border-radius: 6px; padding: 10px; font-size: 11px; margin-top: 8px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow: auto; }
