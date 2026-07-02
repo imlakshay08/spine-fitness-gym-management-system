@@ -295,15 +295,27 @@ class MemberListController < ApplicationController
     end
 
     def destroy
-        @compcodes      = session[:loggedUserCompCode] 
+        @compcodes      = session[:loggedUserCompCode]
         if params[:id].to_i >0
             @ListSate =  MstMembersList.where("mmbr_compcode=? AND id=?", @compcodes,params[:id].to_i).first
                if @ListSate
+                     # Guard against orphaning history: a member with subscriptions
+                     # (and the payments tied to those subscriptions) must not be
+                     # deleted, otherwise those rows point at a member that no
+                     # longer exists — exactly the "-" record you found in Payments.
+                     sub_count = TrnMemberSubscription.where("ms_compcode=? AND ms_member_id=?", @compcodes, @ListSate.id).count
+                     if sub_count > 0
+                         flash[:error] = "Cannot delete #{@ListSate.mmbr_name} — this member has #{sub_count} subscription#{'s' if sub_count > 1} (and possibly linked payments). Remove those first, or keep the member for records."
+                         session[:isErrorhandled] = 1
+                         redirect_to "#{root_url}member_list"
+                         return
+                     end
+
                      @ListSate.destroy
                          flash[:error] =  "Data deleted successfully."
                          isFlags       =  true
                          session[:isErrorhandled] = nil
-                 
+
                end
        end
        redirect_to "#{root_url}member_list"

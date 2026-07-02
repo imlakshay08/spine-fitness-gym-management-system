@@ -82,7 +82,11 @@
 	  <link href="<%=root_url%>assets/plugins/select2/css/select2.css" rel="stylesheet" type="text/css" />
   <link href="<%=root_url%>assets/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
   <!-- style -->
-  <link rel="stylesheet" href="<%=root_url%>assets/css/dark-theme.css">
+  <%# Cache-bust by file mtime: Cloudflare/browsers cache the file until it
+      actually changes, and a deploy that edits it produces a new ?v= so the
+      stale copy is bypassed automatically (no manual cache purge needed). %>
+  <% dark_css_v = (File.mtime(Rails.root.join('public/assets/css/dark-theme.css')).to_i rescue Time.now.to_i) %>
+  <link rel="stylesheet" href="<%=root_url%>assets/css/dark-theme.css?v=<%= dark_css_v %>">
 
   <%end%>
    <% if controller.controller_name =='dashboard'%> 
