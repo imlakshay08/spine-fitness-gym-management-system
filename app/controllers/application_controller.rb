@@ -46,11 +46,11 @@ class ApplicationController < ActionController::Base
          end
       end
    end
- INACTIVITY_TIMEOUT = 15.minutes
+ INACTIVITY_TIMEOUT = .minutes
 
  private
   def require_login
-      return if logged_out_for_inactivity?
+      #return if logged_out_for_inactivity?
       @securedlogged = false
       current_user
       menu_access_allowed();
