@@ -50,7 +50,7 @@ class ApplicationController < ActionController::Base
 
  private
   def require_login
-      return if logged_out_for_inactivity?
+     # return if logged_out_for_inactivity?
       @securedlogged = false
       current_user
       menu_access_allowed();
