@@ -356,6 +356,15 @@ class MemberSubscriptionsController < ApplicationController
                           pay_mode: params[:ms_payment_mode],
                           pay_remarks: 'Subscription payment'
                         )
+                           # Confirmation + receipt to the member. Queued, and
+                           # deliberately swallowed on failure: WhatsApp being
+                           # down must never cost the gym a saved subscription.
+                           begin
+                             SubscriptionReceiptWhatsappJob.perform_later(savegrp.id, @compcodes)
+                           rescue StandardError => e
+                             Rails.logger.error "[SubscriptionReceipt] could not queue for sub #{savegrp.id}: #{e.class}: #{e.message}"
+                           end
+
                            profileid    = savegrp.id.to_i
                            chkgrpobjx   = TrnMemberSubscription.where("ms_compcode=? AND id=?",@compcodes,profileid).first
                            message = "Data saved successfully"

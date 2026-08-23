@@ -27,6 +27,26 @@ module WhatsappTemplates
         "Your membership at Spine Fitness (ID: #{member_id}) expired on " \
         "#{expiry_date}. This is an automated notification."
       end
+    },
+    "subscription_receipt" => {
+      label:       "Subscription Receipt",
+      description: "Sent the moment a subscription is created or renewed",
+      icon:        "fa-solid fa-receipt",
+      tone:        "info",
+      # Order must match the {{1}}..{{7}} placeholders approved in Meta and the
+      # body_values array built by SubscriptionReceiptWhatsappJob.
+      body: ->(name, receipt_no, plan, amount, mode, start_date, end_date) do
+        <<~MSG.strip
+          Hi #{name}, your Spine Fitness membership is confirmed.
+
+          Receipt: #{receipt_no}
+          Plan: #{plan}
+          Amount Paid: Rs. #{amount} (#{mode})
+          Valid: #{start_date} to #{end_date}
+
+          Your receipt is attached. Thank you for choosing Spine Fitness!
+        MSG
+      end
     }
   }.freeze
 
@@ -48,10 +68,16 @@ module WhatsappTemplates
 
   # Rebuild the human-readable message body from the same parameters the job
   # sends to Meta. Returns nil for an unknown template so callers can fall back.
-  def self.render(name, member_id, expiry_date)
+  # Templates take different numbers of parameters, so callers pass whatever
+  # that template needs. A mismatched count returns nil rather than raising —
+  # the logs screen then falls back to the body snapshot stored at send time.
+  def self.render(name, *values)
     tmpl = TEMPLATES[name]
     return nil unless tmpl
 
-    tmpl[:body].call(member_id, expiry_date)
+    fn = tmpl[:body]
+    return nil unless fn.arity.negative? || fn.arity == values.size
+
+    fn.call(*values)
   end
 end
