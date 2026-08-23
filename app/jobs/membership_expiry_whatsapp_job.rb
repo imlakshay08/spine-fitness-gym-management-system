@@ -24,7 +24,8 @@ class MembershipExpiryWhatsappJob < ApplicationJob
 
       subscriptions.find_each do |sub|
       member = MstMembersList.find_by(id: sub.ms_member_id)
-      next if member.nil? || member.mmbr_contact.blank?
+      # Someone taken off the member list should stop hearing from us.
+      next if member.nil? || member.removed? || member.mmbr_contact.blank?
 
       has_renewed = TrnMemberSubscription.where(
         ms_compcode: compcode,

@@ -338,25 +338,93 @@ $(document).ready(function() {
   });
 });
 
+/* ---- Member list table: On Roll / Removed ----
+   Members are never deleted, only flagged, so the same table serves both the
+   working list and the archive of people taken off it. */
+var memberTable   = null;
+var memberView    = "active";
+var memberPending = null;   // { id: n, name: "..." } awaiting confirmation
+
 $(document).ready(function () {
   if (!$("#members_table").length) return;
   var rootPath = $("#rootXPath").val();
 
-  $("#members_table").DataTable({
+  if (window.location.search.indexOf("view=removed") !== -1) memberView = "removed";
+
+  memberTable = $("#members_table").DataTable({
     processing: true,
     serverSide: true,
     searchDelay: 350,
     order: [[2, "asc"]],            // default sort: Member Name
     ajax: {
       url: rootPath + "member_list/datatable",
-      type: "POST"
+      type: "POST",
+      data: function (d) { d.view = memberView; }
     },
     columnDefs: [
       { targets: 0, width: 10, orderable: false },  // S.No
       { targets: 9, orderable: false }              // Action
-    ]
+    ],
+    rowCallback: function (row) {
+      $(row).toggleClass("ml-row-removed", memberView === "removed");
+    }
+  });
+
+  paintMemberView();
+
+  $("#mlViewSwitch").on("click", ".ml-view-btn", function () {
+    var view = $(this).data("view");
+    if (view === memberView) return;
+    memberView = view;
+    paintMemberView();
+    memberTable.ajax.reload();
+  });
+
+  $("#mlRemoveConfirm").on("click", function () {
+    if (!memberPending) return;
+    var reason = $.trim($("#mlRemoveReason").val());
+    $(this).prop("disabled", true).text("Removing...");
+    postMemberAction(memberPending.id, "remove", reason);
   });
 });
+
+function paintMemberView() {
+  $("#mlViewSwitch .ml-view-btn").each(function () {
+    $(this).toggleClass("is-on", $(this).data("view") === memberView);
+  });
+  $("#mlArchiveNote").prop("hidden", memberView !== "removed");
+}
+
+/* Plain form POST: the page needs to reload anyway to pick up the flash
+   message and the refreshed counts. */
+function postMemberAction(id, action, reason) {
+  var rootPath = $("#rootXPath").val();
+  var $form = $("<form>", {
+    method: "post",
+    action: rootPath + "member_list/" + id + "/" + action
+  });
+  if (reason) $form.append($("<input>", { type: "hidden", name: "reason", value: reason }));
+  $form.appendTo("body").submit();
+}
+
+function removeMember(id, name) {
+  memberPending = { id: id, name: name };
+  $("#mlRemoveName").text(name);
+  $("#mlRemoveReason").val("");
+  $("#mlRemoveConfirm").prop("disabled", false)
+                       .html('<i class="fa fa-trash-o"></i> Remove');
+  $("#mlRemoveModal").addClass("is-open");
+}
+
+function closeRemoveMember() {
+  memberPending = null;
+  $("#mlRemoveModal").removeClass("is-open");
+}
+
+function restoreMember(id, name) {
+  if (!confirm("Put " + name + " back on the member list?\n\nTheir gym access will be re-enabled if they still have a valid subscription.")) return;
+  postMemberAction(id, "restore", null);
+}
 
 /* ---- Collect Payment modal (member profile) ---- */
 function openCollectPayment(){

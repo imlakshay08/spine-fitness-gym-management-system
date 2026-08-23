@@ -44,13 +44,32 @@
           <input type="hidden" name="server_request" id="server_request" value="Y"/>
 
             <div class="row m-b-10 align-items-center">
-              <div class="col-sm-12 col-md-12 d-flex justify-content-end align-items-center gap-2">
+              <div class="col-sm-12 col-md-12 d-flex justify-content-between align-items-center gap-2 flex-wrap">
+
+                <%# On Roll is the working list. Removed is the archive — members
+                    kept for their payment and subscription history. %>
+                <div class="ml-view-switch" id="mlViewSwitch">
+                  <button type="button" class="ml-view-btn is-on" data-view="active">
+                    <i class="fa fa-users"></i> On Roll
+                  </button>
+                  <button type="button" class="ml-view-btn" data-view="removed">
+                    <i class="fa fa-archive"></i> Removed
+                  </button>
+                </div>
+
                 <a href="<%=root_url%>member_list/add_member">
                   <button type="button" class="btn btn-circle btn-success">
                     <i class="fa fa-plus"></i> Add Member
                   </button>
                 </a>
               </div>
+            </div>
+
+            <div class="ml-archive-note" id="mlArchiveNote" hidden>
+              <i class="fa fa-info-circle"></i>
+              These members were removed from the list. Their subscriptions and
+              payments are still in the system — that is why the records never
+              show “Unknown member”. Use <i class="fa fa-undo"></i> to put someone back.
             </div>
           <% end %>
 										<div class="table-loading-wrapper" id="member-table-wrapper">
@@ -139,3 +158,32 @@
 	<!-- End page container -->
 </div>
 
+<%# ---------- Remove member dialog ---------- %>
+<div class="ml-modal" id="mlRemoveModal">
+  <div class="ml-modal-card">
+    <div class="ml-modal-head ml-modal-head-warn">
+      <i class="fa fa-user-times"></i>
+      <span>Remove member from list</span>
+    </div>
+    <div class="ml-modal-body">
+      <p class="ml-modal-lead">
+        Remove <strong id="mlRemoveName"></strong> from the member list?
+      </p>
+      <ul class="ml-modal-points">
+        <li><i class="fa fa-check"></i> Their subscriptions and payments stay in the system, so those records keep showing their name.</li>
+        <li><i class="fa fa-check"></i> They disappear from the member list and from new subscription dropdowns.</li>
+        <li><i class="fa fa-ban"></i> Gym access is revoked on the next device sync, even if their plan has days left.</li>
+        <li><i class="fa fa-undo"></i> You can put them back any time from the <strong>Removed</strong> tab.</li>
+      </ul>
+      <label class="ml-modal-label" for="mlRemoveReason">Reason <span>(optional)</span></label>
+      <input type="text" id="mlRemoveReason" class="form-control" maxlength="250"
+             placeholder="e.g. Left the gym, shifted city, duplicate entry">
+    </div>
+    <div class="ml-modal-foot">
+      <button type="button" class="btn btn-default" onclick="closeRemoveMember()">Cancel</button>
+      <button type="button" class="btn btn-danger" id="mlRemoveConfirm">
+        <i class="fa fa-trash-o"></i> Remove
+      </button>
+    </div>
+  </div>
+</div>

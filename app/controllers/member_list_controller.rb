@@ -42,8 +42,12 @@ class MemberListController < ApplicationController
     ord_dir = (params.dig(:order, "0", :dir) == "desc") ? :desc : :asc
 
     # --- same data loading as the page (3 queries total) ---
-    members    = MstMembersList.where("mmbr_compcode = ?", compcode)
-                               .order("mmbr_name ASC").to_a
+    # The default list is people on the roll; "removed" opens the archive so a
+    # member taken off the list by mistake can be put back.
+    archived   = params[:view].to_s == 'removed'
+    members    = (archived ? MstMembersList.removed : MstMembersList.on_roll)
+                   .where("mmbr_compcode = ?", compcode)
+                   .order("mmbr_name ASC").to_a
     member_ids = members.map(&:id)
 
     subs = TrnMemberSubscription
@@ -186,7 +190,12 @@ class MemberListController < ApplicationController
                   "mmbr_compcode = ? AND mmbr_contact = ? AND id != ?",
                   @compcodes, mobileno, params[:mid].to_i
                 ).first
-                if duplicate
+                if duplicate && duplicate.removed?
+                  # Without this the message names someone staff cannot see
+                  # anywhere in the list, which reads like a phantom record.
+                  message = "Contact #{mobileno} belongs to '#{duplicate.mmbr_name}' (#{duplicate.mmbr_code}), who was removed from the list. Open Member List → Removed and restore them instead of adding a duplicate."
+                  isFlags = false
+                elsif duplicate
                   message = "Contact #{mobileno} already exists for '#{duplicate.mmbr_name}' (#{duplicate.mmbr_code}). Cannot save duplicate."
                   isFlags = false
                 end
@@ -294,31 +303,90 @@ class MemberListController < ApplicationController
           end
     end
 
+    # "Remove", not "delete". The row stays so every subscription, payment and
+    # WhatsApp log that points at this member keeps resolving to a name; the
+    # member simply stops appearing in lists and pickers. Restorable below.
     def destroy
-        @compcodes      = session[:loggedUserCompCode]
-        if params[:id].to_i >0
-            @ListSate =  MstMembersList.where("mmbr_compcode=? AND id=?", @compcodes,params[:id].to_i).first
-               if @ListSate
-                     # Guard against orphaning history: a member with subscriptions
-                     # (and the payments tied to those subscriptions) must not be
-                     # deleted, otherwise those rows point at a member that no
-                     # longer exists — exactly the "-" record you found in Payments.
-                     sub_count = TrnMemberSubscription.where("ms_compcode=? AND ms_member_id=?", @compcodes, @ListSate.id).count
-                     if sub_count > 0
-                         flash[:error] = "Cannot delete #{@ListSate.mmbr_name} — this member has #{sub_count} subscription#{'s' if sub_count > 1} (and possibly linked payments). Remove those first, or keep the member for records."
-                         session[:isErrorhandled] = 1
-                         redirect_to "#{root_url}member_list"
-                         return
-                     end
+        @compcodes = session[:loggedUserCompCode]
+        member     = params[:id].to_i > 0 &&
+                     MstMembersList.where("mmbr_compcode=? AND id=?", @compcodes, params[:id].to_i).first
 
-                     @ListSate.destroy
-                         flash[:error] =  "Data deleted successfully."
-                         isFlags       =  true
-                         session[:isErrorhandled] = nil
+        if member.blank?
+            flash[:error] = "Member not found."
+            session[:isErrorhandled] = 1
+            redirect_to "#{root_url}member_list"
+            return
+        end
 
-               end
-       end
-       redirect_to "#{root_url}member_list"
+        if member.removed?
+            flash[:error] = "#{member.mmbr_name} is already removed."
+            session[:isErrorhandled] = 1
+            redirect_to "#{root_url}member_list?view=removed"
+            return
+        end
+
+        member.update_columns(
+            mmbr_status:        MstMembersList::STATUS_REMOVED,
+            mmbr_removed_at:    Time.current,
+            mmbr_removed_by:    session[:loggedUserName].presence || 'Staff',
+            mmbr_remove_reason: params[:reason].to_s.strip.presence,
+            updated_at:         Time.current
+        )
+
+        # A removed member must not walk back in on a fingerprint that is still
+        # enrolled, so their device mappings go inactive on the next sync.
+        revoked = TrnMemberBiometricMapping.where(
+            mbm_compcode:  @compcodes,
+            mbm_member_id: member.id.to_s,
+            mbm_is_active: 'Y'
+        ).update_all(mbm_is_active: 'N', updated_at: Time.current)
+
+        process_request_log_data("REMOVE", "Member List",
+            "Member removed: #{member.mmbr_code} - #{member.mmbr_name}#{" (reason: #{params[:reason]})" if params[:reason].present?}")
+
+        flash[:error] = "#{member.mmbr_name} removed from the list." \
+                        "#{' Gym access revoked.' if revoked > 0}" \
+                        " Their subscriptions and payments are untouched — see the Removed tab to restore."
+        session[:isErrorhandled] = nil
+        redirect_to "#{root_url}member_list"
+    end
+
+    # Puts a removed member back on the roll, fingerprints included.
+    def restore
+        @compcodes = session[:loggedUserCompCode]
+        member     = params[:id].to_i > 0 &&
+                     MstMembersList.where("mmbr_compcode=? AND id=?", @compcodes, params[:id].to_i).first
+
+        if member.blank?
+            flash[:error] = "Member not found."
+            session[:isErrorhandled] = 1
+            redirect_to "#{root_url}member_list?view=removed"
+            return
+        end
+
+        member.update_columns(
+            mmbr_status:        MstMembersList::STATUS_ON_ROLL,
+            mmbr_removed_at:    nil,
+            mmbr_removed_by:    nil,
+            mmbr_remove_reason: nil,
+            updated_at:         Time.current
+        )
+
+        # The stored fingerprint templates are still on the mapping rows, so
+        # re-activating them lets the bridge push the member back to the device.
+        restored = TrnMemberBiometricMapping.where(
+            mbm_compcode:  @compcodes,
+            mbm_member_id: member.id.to_s,
+            mbm_is_active: 'N'
+        ).update_all(mbm_is_active: 'Y', updated_at: Time.current)
+
+        process_request_log_data("RESTORE", "Member List",
+            "Member restored: #{member.mmbr_code} - #{member.mmbr_name}")
+
+        flash[:error] = "#{member.mmbr_name} restored to the member list." \
+                        "#{' Gym access re-enabled.' if restored > 0}"
+        session[:isErrorhandled] = nil
+        redirect_to "#{root_url}member_list"
     end
 
       def save_manual_mapping
@@ -424,6 +492,7 @@ class MemberListController < ApplicationController
 
   # Load ALL members alphabetically — 1 DB call
   stdob = MstMembersList
+    .on_roll
     .where("mmbr_compcode = ?", @compcodes)
     .order("mmbr_name ASC")
 
@@ -484,7 +553,13 @@ class MemberListController < ApplicationController
   end
 
   def status_cell_html(r)
-    if r[:latest].nil?
+    if r[:m].removed?
+      removed_on = r[:m].mmbr_removed_at ? r[:m].mmbr_removed_at.in_time_zone('Asia/Kolkata').strftime('%d-%b-%Y') : ''
+      title = ["Removed #{removed_on}".strip,
+               ("by #{r[:m].mmbr_removed_by}" if r[:m].mmbr_removed_by.present?),
+               ("— #{r[:m].mmbr_remove_reason}" if r[:m].mmbr_remove_reason.present?)].compact.join(' ')
+      "<span class=\"badge badge-default\" title=\"#{ERB::Util.html_escape(title)}\">Removed</span>"
+    elsif r[:latest].nil?
       "<span class=\"badge badge-default\">No Sub</span>"
     elsif r[:is_active]
       "<span class=\"badge badge-success\">Active</span>"
@@ -494,11 +569,21 @@ class MemberListController < ApplicationController
   end
 
   def action_cell_html(r)
-    m = r[:m]
+    m    = r[:m]
     html = +""
     html << "<a href=\"#{root_url}member_list/profile/#{m.id}\" title=\"View profile\"><i class=\"fa fa-eye\" style=\"color:#5b9bd5;font-size:16px;margin-right:6px;\"></i></a>"
+
+    if m.removed?
+      html << "<a class=\"tblRestoreBtn\" title=\"Put this member back on the list\" " \
+              "onclick=\"restoreMember(#{m.id}, '#{ERB::Util.html_escape(m.mmbr_name).gsub("'", "&#39;")}')\" " \
+              "style=\"margin-left:6px;cursor:pointer;\"><i class=\"fa fa-undo\" style=\"color:#22c55e;font-size:15px;\"></i></a>"
+      return html
+    end
+
     html << "<a href=\"#{root_url}member_list/add_member/#{m.id}\" class=\"tblEditBtn\" title=\"Edit member\"><i class=\"fa fa-pencil\"></i></a>"
-    html << "<a class=\"tblDelBtn\" title=\"Delete member\" onclick=\"alertChecked('#{root_url}member_list/#{m.id}/deletes')\" style=\"margin-left:6px;\"><i class=\"fa fa-trash-o\"></i></a>"
+    html << "<a class=\"tblDelBtn\" title=\"Remove from list\" " \
+            "onclick=\"removeMember(#{m.id}, '#{ERB::Util.html_escape(m.mmbr_name).gsub("'", "&#39;")}')\" " \
+            "style=\"margin-left:6px;cursor:pointer;\"><i class=\"fa fa-trash-o\"></i></a>"
     if r[:latest].nil? || r[:latest].ms_end_date < Date.today
       html << "<a href=\"#{root_url}member_subscriptions/add_member_subscriptions?renew=1&member_id=#{m.id}&from=member_list\" title=\"Renew subscription\" style=\"margin-left:6px;\"><i class=\"fa fa-refresh\" style=\"color:#f0a500;font-size:16px;\"></i></a>"
     end

@@ -13,6 +13,9 @@ class SubscriptionReminder
     expiring.each do |sub|
       member = MstMembersList.where(id: sub.ms_member_id).first
 
+      # Removed members stop getting reminders (and a missing member row would
+      # otherwise blow up on member.id below).
+      next if member.nil? || member.removed?
       next if already_sent?(member.id, sub.id)
 
       msg = "Dear #{member.mmbr_name}, your gym membership expires on #{sub.ms_end_date}. Please renew soon."

@@ -25,6 +25,12 @@ AND    COLUMN_NAME IN ('wi_direction', 'wi_status', 'wi_seen_at', 'wi_error');
 --    wi_seen_at    when staff opened the thread (drives the unread badge)
 --    wi_error      Meta's rejection reason on a failed send
 -- ---------------------------------------------------------------------------
+-- Safety net: this ALTER rebuilds the table and re-validates every row, so any
+-- legacy '0000-00-00' date would trip strict sql_mode. Relaxed for THIS session
+-- only; server config and existing values are untouched.
+SET SESSION sql_mode = REPLACE(REPLACE(REPLACE(@@SESSION.sql_mode,
+  'NO_ZERO_DATE', ''), 'NO_ZERO_IN_DATE', ''), 'STRICT_TRANS_TABLES', '');
+
 ALTER TABLE `trn_whatsapp_inbox`
   ADD COLUMN `wi_direction` varchar(3)   NOT NULL DEFAULT 'IN' AFTER `updated_at`,
   ADD COLUMN `wi_status`    varchar(20)  DEFAULT NULL          AFTER `wi_direction`,

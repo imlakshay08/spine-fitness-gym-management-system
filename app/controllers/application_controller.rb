@@ -17,7 +17,10 @@ class ApplicationController < ActionController::Base
        #originlpth = request.fullpath;
        originlpth = "#{request.scheme}://#{request.host}:#{request.port}#{request.fullpath}"
        ipaddress  = request.ip
-       deviceid   = request.user_agent
+       # ad_device_id is NOT NULL, and a request without a User-Agent header
+       # (API client, curl, some proxies) would otherwise fail the insert and
+       # 500 the action that had already succeeded.
+       deviceid   = request.user_agent.presence || 'Unknown'
        userid     = session[:autherizedUserId]
        cdate      = get_local_dated()
        ctime      = get_local_time() 
@@ -35,7 +38,10 @@ class ApplicationController < ActionController::Base
        #originlpth = request.fullpath;
        originlpth = "#{request.scheme}://#{request.host}:#{request.port}#{request.fullpath}"
        ipaddress  = request.ip
-       deviceid   = request.user_agent
+       # ad_device_id is NOT NULL, and a request without a User-Agent header
+       # (API client, curl, some proxies) would otherwise fail the insert and
+       # 500 the action that had already succeeded.
+       deviceid   = request.user_agent.presence || 'Unknown'
        userid     = session[:autherizedUserId]
        cdate      = get_local_dated()
        ctime      = get_local_time() 

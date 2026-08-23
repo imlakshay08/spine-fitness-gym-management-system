@@ -123,6 +123,8 @@ Rails.application.routes.draw do
   get   "member_list/:id"=>'member_list#index'
   get   "member_list/add_member/:id"=>'member_list#add_member'
   get   "member_list/:id/deletes"=>'member_list#destroy'
+  post  "member_list/:id/remove"=>'member_list#destroy'
+  post  "member_list/:id/restore"=>'member_list#restore'
   post  "member_list/faculty_ajax_img"=>"member_list#save_faculty_img"
   post  "member_list/ajax_process"=>"member_list#ajax_process" 
   post  "member_list/save_manual_mapping" => "member_list#save_manual_mapping"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_23_140000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_23_150000) do
   create_table "biometric_id_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "allocation_compcode", limit: 12, default: "", null: false
     t.string "allocation_device_sn", limit: 50, default: "", null: false
@@ -142,6 +142,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_23_140000) do
     t.date "mmbr_entry_date", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "mmbr_status", limit: 1, default: "A", null: false
+    t.datetime "mmbr_removed_at", precision: nil
+    t.string "mmbr_removed_by", limit: 50
+    t.string "mmbr_remove_reason", limit: 250
+    t.index ["mmbr_compcode", "mmbr_status"], name: "idx_members_compcode_status"
   end
 
   create_table "mst_membership_plans", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|

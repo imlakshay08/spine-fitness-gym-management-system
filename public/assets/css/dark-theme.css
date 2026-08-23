@@ -1448,3 +1448,102 @@ select.form-select:hover,
   .wai-bubble{max-width:86%}
   .wai-pane-ctx{width:100%}
 }
+
+/* ══════════════════════════════════════════════
+   MEMBER LIST — On Roll / Removed  (.ml-*)
+   Members are flagged, never deleted, so their
+   payments and subscriptions keep a name.
+   ══════════════════════════════════════════════ */
+.ml-view-switch{
+  display:inline-flex;gap:0;padding:3px;border-radius:10px;
+  background:var(--sp-surface);border:1px solid var(--sp-border);
+}
+.ml-view-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 15px;border:none;border-radius:8px;background:transparent;
+  color:var(--sp-muted);font-size:13px;font-weight:600;cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.ml-view-btn:hover{color:var(--sp-text)}
+.ml-view-btn.is-on{background:var(--sp-accent);color:#fff}
+.ml-view-btn i{font-size:13px}
+
+.ml-archive-note{
+  display:flex;align-items:flex-start;gap:10px;
+  margin:0 0 14px;padding:11px 15px;border-radius:9px;
+  background:var(--sp-yellow-bg);border:1px solid rgba(245,158,11,.28);
+  color:#f0cf9a;font-size:12.5px;line-height:1.6;
+}
+.ml-archive-note[hidden]{display:none}
+.ml-archive-note>i:first-child{margin-top:2px;color:var(--sp-yellow)}
+
+/* Archived rows read as inactive without becoming unreadable */
+table#members_table tr.ml-row-removed td{opacity:.62;font-style:italic}
+table#members_table tr.ml-row-removed:hover td{opacity:1}
+.tblRestoreBtn:hover i{color:#4ade80!important}
+
+/* ---- Remove confirmation dialog ---- */
+.ml-modal{
+  display:none;position:fixed;inset:0;z-index:1080;
+  align-items:center;justify-content:center;padding:20px;
+  background:rgba(0,0,0,.62);backdrop-filter:blur(3px);
+}
+.ml-modal.is-open{display:flex}
+.ml-modal-card{
+  width:100%;max-width:520px;border-radius:14px;overflow:hidden;
+  background:var(--sp-surface);border:1px solid var(--sp-border);
+  box-shadow:0 24px 60px rgba(0,0,0,.6);
+  animation:mlPop .16s ease-out;
+}
+@keyframes mlPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+
+.ml-modal-head{
+  display:flex;align-items:center;gap:10px;
+  padding:15px 20px;font-size:15px;font-weight:600;color:#fff;
+}
+.ml-modal-head-warn{background:linear-gradient(135deg,#b91c1c,#ef4444)}
+.ml-modal-head i{font-size:17px}
+
+.ml-modal-body{padding:18px 20px 6px}
+.ml-modal-lead{font-size:14.5px;color:var(--sp-text);margin:0 0 14px}
+.ml-modal-lead strong{color:var(--sp-accent)}
+
+.ml-modal-points{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:9px}
+.ml-modal-points li{
+  display:flex;align-items:flex-start;gap:9px;
+  font-size:12.5px;line-height:1.55;color:var(--sp-text-2);
+}
+.ml-modal-points li i{margin-top:2px;width:14px;flex-shrink:0;color:var(--sp-green)}
+.ml-modal-points li .fa-ban{color:var(--sp-red)}
+.ml-modal-points li .fa-undo{color:var(--sp-blue)}
+
+.ml-modal-label{
+  display:block;margin-bottom:6px;
+  font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--sp-muted);
+}
+.ml-modal-label span{font-weight:500;text-transform:none;letter-spacing:0}
+.ml-modal-body input.form-control{
+  background:var(--sp-bg-2)!important;border:1px solid var(--sp-border)!important;
+  color:var(--sp-text)!important;border-radius:8px;height:40px;
+}
+.ml-modal-body input.form-control:focus{
+  border-color:var(--sp-accent)!important;box-shadow:0 0 0 3px var(--sp-accent-glow)!important;
+}
+
+.ml-modal-foot{
+  display:flex;justify-content:flex-end;gap:10px;
+  padding:16px 20px;margin-top:12px;
+  border-top:1px solid var(--sp-border);background:var(--sp-bg-2);
+}
+.ml-modal-foot .btn{border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600}
+.ml-modal-foot .btn-default{
+  background:var(--sp-surface-2)!important;border:1px solid var(--sp-border)!important;
+  color:var(--sp-text-2)!important;
+}
+.ml-modal-foot .btn-default:hover{background:var(--sp-surface-3)!important;color:var(--sp-text)!important}
+
+@media (max-width:600px){
+  .ml-view-switch{width:100%}
+  .ml-view-btn{flex:1;justify-content:center}
+}

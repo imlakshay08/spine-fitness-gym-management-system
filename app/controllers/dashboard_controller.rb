@@ -144,7 +144,10 @@ class DashboardController < ApplicationController
   end
 
   def latest_subscriptions
+    # Removed members drop out of the dashboard counts; their old
+    # subscriptions stay in the subscription and payment histories.
     valid_member_ids = MstMembersList
+      .on_roll
       .where(mmbr_compcode: session[:loggedUserCompCode])
       .pluck(:id)
 

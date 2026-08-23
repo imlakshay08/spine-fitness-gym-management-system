@@ -47,7 +47,11 @@ def create
   # Subscription check
   subscription = latest_subscription(member.id, compcode)
 
-  if subscription && subscription.ms_end_date >= Date.today
+  if member.removed?
+    # Taken off the member list: no entry, whatever the subscription says.
+    att_status = "DENIED"
+    reason     = "Member removed"
+  elsif subscription && subscription.ms_end_date >= Date.today
     att_status = "ALLOWED"
     reason     = "Y"
   else

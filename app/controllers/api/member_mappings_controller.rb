@@ -75,14 +75,18 @@ class Api::MemberMappingsController < ApplicationController
       .index_by { |m| m.id.to_s }
 
     results = mappings.map do |m|
+      member = members_map[m.mbm_member_id.to_s]
+      # A member taken off the list loses access regardless of what they paid for.
+      allowed = active_member_ids.include?(m.mbm_member_id.to_s) && member.present? && member.on_roll?
+
       {
         mapping_id:        m.id,
         member_id:         m.mbm_member_id,
-        member_name:       members_map[m.mbm_member_id.to_s]&.mmbr_name || "Unknown",
+        member_name:       member&.mmbr_name || "Unknown",
         device_user_id:    m.mbm_device_user_id,
         uid:               m.mbm_uid,
         is_active_mapping: m.mbm_is_active == 'Y',
-        access:            active_member_ids.include?(m.mbm_member_id.to_s) ? "ALLOW" : "DENY",
+        access:            allowed ? "ALLOW" : "DENY",
         templates:         m.mbm_finger_template.present? ? JSON.parse(m.mbm_finger_template) : nil
       }
     end

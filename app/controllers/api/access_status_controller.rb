@@ -20,6 +20,11 @@ class Api::AccessStatusController < ApplicationController
 
       member = MstMembersList.find_by(id: m.mbm_member_id)
 
+      # Removing a member revokes gym access even if the subscription they paid
+      # for still has days left. Their mappings are deactivated at removal too;
+      # this is the backstop in case one is still marked active.
+      has_active = false if member.nil? || member.removed?
+
       {
         device_user_id: m.mbm_device_user_id,
         access: has_active ? "ALLOW" : "DENY",

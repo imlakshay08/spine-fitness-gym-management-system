@@ -67,8 +67,17 @@ class Api::AdmsController < ApplicationController
       .order(ms_end_date: :desc)
       .first
 
-    att_status = (subscription && subscription.ms_end_date >= Date.today) ? "ALLOWED" : "DENIED"
-    reason     = att_status == "ALLOWED" ? "Y" : "Subscription expired"
+    if member.removed?
+      # Taken off the member list: no entry, whatever the subscription says.
+      att_status = "DENIED"
+      reason     = "Member removed"
+    elsif subscription && subscription.ms_end_date >= Date.today
+      att_status = "ALLOWED"
+      reason     = "Y"
+    else
+      att_status = "DENIED"
+      reason     = "Subscription expired"
+    end
 
     TrnMemberAttendance.create!(
       att_compcode:       'SF',
