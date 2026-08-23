@@ -106,4 +106,18 @@ class Api::MemberMappingsController < ApplicationController
     max_user_id = TrnMemberBiometricMapping.where(mbm_compcode: params[:compcode], mbm_device_sn: params[:device_sn]).maximum("CAST(mbm_device_user_id AS UNSIGNED)").to_i
     render json: { status: true, max_uid: max_uid, max_device_user_id: max_user_id }
   end
+
+  def sync_needed
+  compcode = params[:compcode].to_s
+
+  # Check if any subscription was renewed/created in the last 2 minutes
+  # AND is currently active (end_date >= today)
+  recently_renewed = TrnMemberSubscription
+    .where(ms_compcode: compcode)
+    .where('ms_end_date >= ?', Date.today)
+    .where('updated_at >= ?', 2.minutes.ago)
+    .exists?
+
+  render json: { sync_needed: recently_renewed }
+end
 end

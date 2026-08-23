@@ -12,6 +12,7 @@ namespace :api do
   get 'device_audit', to: 'member_mappings#device_audit'
   get 'max_ids', to: 'member_mappings#max_ids'
   post 'bridge_heartbeat', to: 'bridge_heartbeats#create'
+  get 'sync_needed', to: 'member_mappings#sync_needed'
   resources :biometric_mappings, only: [:create]
 end
   get  '/iclock/cdata',      to: 'api/adms#handshake'
