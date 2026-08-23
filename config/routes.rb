@@ -20,6 +20,10 @@ end
   get  '/iclock/getrequest', to: 'api/adms#getrequest'
 end
 
+resources :whatsapp_inbox, only: [:index] do
+  post :reply, on: :member
+end
+
 Rails.application.routes.draw do  
   get   '/index.html.var'=>'login#index'
   root  'login#index'  

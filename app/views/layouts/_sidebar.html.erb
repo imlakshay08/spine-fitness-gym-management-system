@@ -47,6 +47,10 @@
               <a href="<%=root_url%>whatsapp_logs" class="nav-link "> <i class="fa-brands fa-whatsapp"></i><span class="title">WhatsApp Logs</span>
               </a>
             </li>
+            <li class="nav-item <% if controller.controller_name == 'whatsapp_inbox' %>menucolor<% end %>">
+              <a href="<%=root_url%>whatsapp_inbox" class="nav-link "> <i class="fa-brands fa-whatsapp"></i><span class="title">WhatsApp Inbox</span>
+              </a>
+            </li>
               <li class="nav-item <% if controller.controller_name == 'staff_list' %>menucolor<% end %>">
               <a href="<%=root_url%>staff_list" class="nav-link "> <i class="fa-solid fa-user-tie"></i><span class="title">Staff List</span>
               </a>
