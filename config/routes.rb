@@ -20,10 +20,6 @@ end
   get  '/iclock/getrequest', to: 'api/adms#getrequest'
 end
 
-resources :whatsapp_inbox, only: [:index] do
-  post :reply, on: :member
-end
-
 Rails.application.routes.draw do  
   get   '/index.html.var'=>'login#index'
   root  'login#index'  
@@ -183,6 +179,9 @@ Rails.application.routes.draw do
 end
 
 Rails.application.routes.draw do
+  resources :whatsapp_inbox, only: [:index] do
+  post :reply, on: :member
+ end
   get   'cron/send_expiry_whatsapp'=>'cron#send_expiry_whatsapp'
   post "/webhooks/interakt" => "webhooks/interakt#receive"
   get 'cron/sync_subscription_status'  => 'cron#sync_subscription_status'
