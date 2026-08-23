@@ -132,54 +132,20 @@
 					</div>
 					</div>
 					</div>
-						<div class="form-group row">
-				
-					<label class="col-md-3">Country
-					<span class="required"> * </span>
-					</label>
-					<div class="col-md-3">
-					<select class="form-select select-height" required tabindex="6" name="cmp_countrycode" id="cmp_countrycode" >
-                                           <option value="">-Select-</option>
-										   <% if @companyCountry.count >0
-										   @companyCountry.each do |mstcountry|
-										   %>
-										   <option value="<%=mstcountry.cid.to_i%>" <% if @companyItems!=nil &&@companyItems!='' && @companyItems.cmp_countrycode!=nil && @companyItems.cmp_countrycode!='' &&  mstcountry.cid.to_i ==@companyItems.cmp_countrycode.to_i %>selected="selected" <% elsif mstcountry.cid.to_i == 99 %> selected="selected" <% elsif session[:cmp_countrycode]!=nil && session[:cmp_countrycode].to_i == mstcountry.cid.to_i %> selected="selected" <% end %>><%=mstcountry.country_name%></option>
-										   <% end end %>
-					</select>
-					</div>
-						
-					<label class="col-md-3">Aadhar No.
-					</label>
+					<%# Country and State pickers removed: they read from tables that never
+					    existed in this app and nothing else uses cmp_countrycode /
+					    cmp_stateandcode, which are now stored as 0. %>
+					<div class="form-group row">
+					<label class="col-md-3">Aadhar No.</label>
 					<div class="col-md-3">
 					<input name="cmp_adharnumber" id="cmp_adharnumber" tabindex="11" type="text"  placeholder="Enter Aadhar No."
-					autocomplete="off" maxlength="12" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_adharnumber.length >1 %><%=@companyItems.cmp_adharnumber%><% elsif session[:cmp_adharnumber]!=nil %><%=session[:cmp_adharnumber]%><% end %>"/> 
+					autocomplete="off" maxlength="12" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_adharnumber.length >1 %><%=@companyItems.cmp_adharnumber%><% elsif session[:cmp_adharnumber]!=nil %><%=session[:cmp_adharnumber]%><% end %>"/>
 					</div>
-					</div>
-
-					
-					
-					<div class="form-group row">
-					<label class="col-md-3">State
-					<span class="required"> * </span>
-					</label>
-					<div class="col-md-3">
-					<select class="form-select select-height" tabindex="7" required name="cmp_stateandcode" id="cmp_stateandcode" >
-                  <option value="">-Select-</option>
-						<% if @companyState.count >0
-						 @companyState.each do | mstate |
-						%>
-						<option value="<%=mstate.scid%>" <% if @companyItems!=nil && @companyItems.cmp_stateandcode.to_i == mstate.scid.to_i %>selected="selected" <% elsif session[:cmp_stateandcode]!=nil && session[:cmp_stateandcode].to_i == mstate.scid.to_i %> selected="selected"<% end %>><%=mstate.state_name%></option>
-						<% end end%>
-					</select>
-					</div>
-					<label class="col-md-3">Pan No.
-					</label>
+					<label class="col-md-3">Pan No.</label>
 					<div class="col-md-3">
 					<input name="cmp_pannumber" id="cmp_pannumber" tabindex="12" type="text"  placeholder="Enter Pan No."
-					autocomplete="off" maxlength="10" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_pannumber.length >1 %><%=@companyItems.cmp_pannumber%><% elsif session[:cmp_pannumber]!=nil %><%=session[:cmp_pannumber]%><% end %>"/> 
-				</label>
-					</div>	
-
+					autocomplete="off" maxlength="10" class="form-control"  value="<% if @companyItems!=nil && @companyItems.cmp_pannumber.length >1 %><%=@companyItems.cmp_pannumber%><% elsif session[:cmp_pannumber]!=nil %><%=session[:cmp_pannumber]%><% end %>"/>
+					</div>
 					</div>
 
 					<div class="form-group row">

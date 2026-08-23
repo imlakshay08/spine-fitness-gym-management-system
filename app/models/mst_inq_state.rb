@@ -1,2 +1,0 @@
-class MstInqState < ApplicationRecord
-end

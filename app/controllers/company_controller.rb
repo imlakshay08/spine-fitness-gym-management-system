@@ -5,10 +5,12 @@ class CompanyController < ApplicationController
     def index
         @compcodes      =  session[:loggedUserCompCode]
         @logedId        =  session[:autherizedUserId]
-        cid             = '99'
-        @companyState   = MstInqState.where(["cid = ?", cid])
-        @companyCountry = MstInqCountry.where(["1"])
-        @companyItems   = MstCompany.where(["cmp_companycode = ?", @compcodes]).first    
+        # The country/state pickers came from the original template app and read
+        # from mst_inq_countries / mst_inq_states, which never existed here — the
+        # page raised "Table doesn't exist" on every load. A single-location gym
+        # has no use for them and nothing else reads cmp_countrycode /
+        # cmp_stateandcode, so both fields are gone and stored as 0.
+        @companyItems   = MstCompany.where(["cmp_companycode = ?", @compcodes]).first
         
     end
     def create
@@ -511,6 +513,12 @@ class CompanyController < ApplicationController
     def company_params
     @new_file_name_with_type  = nil
     @new_file_name_with_types = nil
+
+      # The country/state pickers are gone from the form, so these two columns
+      # (int NOT NULL) are always written as 0 rather than keeping whatever the
+      # old template app left behind.
+      params[:cmp_countrycode]  = 0
+      params[:cmp_stateandcode] = 0
     
       if params[:cmp_companyname]!='' || params[:cmp_companyname]!=nil
           params[:cmp_companyname] = params[:cmp_companyname].upcase
