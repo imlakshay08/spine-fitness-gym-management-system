@@ -1,0 +1,27 @@
+<a class="wai-conv <%= 'is-active' if conv[:number] == active_number %> <%= 'is-unread' if conv[:unread] > 0 %>"
+   href="<%= root_url %>whatsapp_inbox?number=<%= conv[:number] %>"
+   data-number="<%= conv[:number] %>"
+   data-search="<%= "#{conv[:name]} #{conv[:number]}".downcase %>"
+   data-unread="<%= conv[:unread] %>"
+   data-no-loader>
+
+  <span class="wai-avatar wai-tone-<%= wa_avatar_tone(conv[:name]) %>"><%= conv[:initial] %></span>
+
+  <span class="wai-conv-body">
+    <span class="wai-conv-line">
+      <span class="wai-conv-name"><%= conv[:name] %></span>
+      <span class="wai-conv-stamp"><%= wa_list_stamp(conv[:last_at]) %></span>
+    </span>
+    <span class="wai-conv-line">
+      <span class="wai-conv-preview">
+        <% if conv[:last_dir] == 'out' %>
+          <span class="wai-preview-tick <%= wa_status_class(conv[:last_status]) %>"><%= wa_ticks(conv[:last_status]) %></span>
+        <% end %>
+        <%= truncate(conv[:preview], length: 42) %>
+      </span>
+      <% if conv[:unread] > 0 %>
+        <span class="wai-unread"><%= conv[:unread] %></span>
+      <% end %>
+    </span>
+  </span>
+</a>

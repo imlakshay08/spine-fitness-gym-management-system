@@ -1,0 +1,46 @@
+<%# One message in the thread. Rendered on first paint, on thread switch and
+    on every poll, so the markup lives in exactly one place. %>
+<div class="wai-row wai-row-<%= item[:dir] %>"
+     data-key="<%= item[:key] %>"
+     data-epoch="<%= item[:at].to_i %>"
+     data-day="<%= wa_ist(item[:at]).to_date %>"
+     data-day-label="<%= wa_day_label(item[:at]) %>">
+
+  <div class="wai-bubble wai-bubble-<%= item[:kind] %> <%= 'wai-bubble-failed' if item[:status].to_s.upcase == 'FAILED' %>">
+
+    <% if item[:kind] == 'auto' %>
+      <span class="wai-tag wai-tag-auto" title="<%= item[:template] %>">
+        <i class="fa-solid fa-bolt"></i> Automated
+      </span>
+    <% elsif item[:kind] == 'staff' %>
+      <span class="wai-tag wai-tag-staff">
+        <i class="fa-solid fa-headset"></i> <%= item[:author].presence || 'Staff' %>
+      </span>
+    <% end %>
+
+    <% if item[:media].present? %>
+      <a class="wai-attachment" href="<%= item[:media] %>" target="_blank" rel="noopener">
+        <i class="fa-solid fa-paperclip"></i> <%= item[:msg_type].presence&.humanize || 'Attachment' %>
+      </a>
+    <% end %>
+
+    <% if item[:body].present? %>
+      <p class="wai-text"><%= item[:body] %></p>
+    <% elsif item[:media].blank? %>
+      <p class="wai-text wai-text-muted"><%= item[:msg_type].presence&.humanize || 'Unsupported' %> message</p>
+    <% end %>
+
+    <div class="wai-meta">
+      <span class="wai-time"><%= wa_clock(item[:at]) %></span>
+      <% if item[:dir] == 'out' %>
+        <span class="wai-tick-slot" title="<%= wa_status_label(item[:status]) %>"><%= wa_ticks(item[:status]) %></span>
+      <% end %>
+    </div>
+
+    <% if item[:error].present? %>
+      <div class="wai-error" title="<%= item[:error] %>">
+        <i class="fa-solid fa-triangle-exclamation"></i> <%= truncate(item[:error].to_s, length: 150) %>
+      </div>
+    <% end %>
+  </div>
+</div>

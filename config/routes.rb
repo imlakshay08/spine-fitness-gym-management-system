@@ -180,8 +180,12 @@ end
 
 Rails.application.routes.draw do
   resources :whatsapp_inbox, only: [:index] do
-  post :reply, on: :member
- end
+    collection do
+      get  :thread
+      get  :poll
+      post :reply
+    end
+  end
   get   'cron/send_expiry_whatsapp'=>'cron#send_expiry_whatsapp'
   post "/webhooks/interakt" => "webhooks/interakt#receive"
   get 'cron/sync_subscription_status'  => 'cron#sync_subscription_status'

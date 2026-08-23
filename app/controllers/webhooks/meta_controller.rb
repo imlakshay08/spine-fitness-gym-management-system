@@ -47,7 +47,7 @@ class Webhooks::MetaController < ApplicationController
     return unless %w[DELIVERED READ FAILED SENT].include?(status_val)
 
     log = TrnWhatsappLog.find_by(wl_interakt_msg_id: message_id)
-    return unless log
+    return update_inbox_status(message_id, status_val, status) if log.nil?
 
     case status_val
     when 'DELIVERED'
@@ -62,11 +62,25 @@ class Webhooks::MetaController < ApplicationController
     Rails.logger.info "[MetaWebhook] Updated log #{log.id} → #{status_val}"
   end
 
+  # Replies typed by staff in the inbox live in trn_whatsapp_inbox, not in the
+  # automation log, so their ticks are updated here.
+  def update_inbox_status(message_id, status_val, status)
+    message = TrnWhatsappInbox.outbound.find_by(wi_wamid: message_id)
+    return if message.nil?
+
+    attrs = { wi_status: status_val, updated_at: Time.current }
+    attrs[:wi_error] = status.dig('errors', 0, 'message') || 'Unknown error' if status_val == 'FAILED'
+    message.update_columns(attrs)
+
+    Rails.logger.info "[MetaWebhook] Updated inbox message #{message.id} → #{status_val}"
+  end
+
   def process_incoming(message)
     from    = message['from']
     wamid   = message['id']
     type    = message['type'] || 'text'
-    body    = message.dig('text', 'body')
+    # Non-text messages still carry a caption often enough to be worth showing.
+    body    = message.dig('text', 'body') || message.dig(type, 'caption')
     received_at = Time.at(message['timestamp'].to_i)
 
     # Skip if already saved
@@ -83,7 +97,8 @@ class Webhooks::MetaController < ApplicationController
       wi_message_type: type,
       wi_body:        body,
       wi_wamid:       wamid,
-      wi_received_at: received_at
+      wi_received_at: received_at,
+      wi_direction:   TrnWhatsappInbox::DIRECTION_IN
     )
 
     Rails.logger.info "[MetaWebhook] Incoming message from #{from}: #{body}"

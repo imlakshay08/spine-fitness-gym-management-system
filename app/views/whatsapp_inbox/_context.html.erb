@@ -1,0 +1,77 @@
+<%
+  chat         = context[:chat]
+  member       = context[:member]
+  subscription = context[:subscription]
+  plan         = context[:plan]
+  days_left    = context[:days_left]
+  expired      = days_left && days_left < 0
+%>
+
+<div class="wai-ctx-head">
+  <span class="wai-avatar wai-avatar-lg wai-tone-<%= wa_avatar_tone(chat[:name]) %>"><%= chat[:initial] %></span>
+  <div class="wai-ctx-name"><%= chat[:name] %></div>
+  <div class="wai-ctx-phone"><i class="fa-brands fa-whatsapp"></i> <%= chat[:number].to_s.length >= 12 ? "+#{chat[:number]}" : chat[:number] %></div>
+
+  <% if member %>
+    <div class="wai-ctx-code">Member ID <%= member.id %><%= " · #{member.mmbr_code}" if member.mmbr_code.present? %></div>
+  <% else %>
+    <span class="wai-pill wai-pill-grey">Not a registered member</span>
+  <% end %>
+</div>
+
+<% if member %>
+  <div class="wai-ctx-block">
+    <div class="wai-ctx-title">Membership</div>
+
+    <% if subscription %>
+      <span class="wai-pill <%= expired ? 'wai-pill-red' : 'wai-pill-green' %>">
+        <i class="fa-solid <%= expired ? 'fa-circle-xmark' : 'fa-circle-check' %>"></i>
+        <%= expired ? "Expired #{days_left.abs} #{'day'.pluralize(days_left.abs)} ago" : "Active · #{days_left} #{'day'.pluralize(days_left)} left" %>
+      </span>
+
+      <dl class="wai-ctx-facts">
+        <div><dt>Plan</dt><dd><%= plan&.plan_name.presence || "Plan ##{subscription.ms_plan_id}" %></dd></div>
+        <div><dt>Started</dt><dd><%= subscription.ms_start_date&.strftime('%d %b %Y') %></dd></div>
+        <div><dt>Expires</dt><dd><%= subscription.ms_end_date&.strftime('%d %b %Y') %></dd></div>
+        <div><dt>Paid</dt><dd>₹<%= subscription.ms_final_amount.presence || subscription.ms_amount_paid %></dd></div>
+      </dl>
+    <% else %>
+      <span class="wai-pill wai-pill-grey">No subscription on record</span>
+    <% end %>
+  </div>
+
+  <div class="wai-ctx-block">
+    <div class="wai-ctx-title">Activity</div>
+    <dl class="wai-ctx-facts">
+      <div>
+        <dt>Last visit</dt>
+        <dd><%= context[:last_visit] ? "#{wa_ist(context[:last_visit]).strftime('%d %b')} · #{wa_clock(context[:last_visit])}" : '—' %></dd>
+      </div>
+      <div><dt>Alerts sent</dt><dd><%= context[:alerts_sent] %></dd></div>
+      <div><dt>Joined</dt><dd><%= member.mmbr_join_date&.strftime('%d %b %Y') || '—' %></dd></div>
+      <% if member.mmbr_email.present? %>
+        <div><dt>Email</dt><dd class="wai-ctx-wrap"><%= member.mmbr_email %></dd></div>
+      <% end %>
+    </dl>
+  </div>
+
+  <div class="wai-ctx-actions">
+    <a class="wai-btn" href="<%= root_url %>member_list/profile/<%= member.id %>">
+      <i class="fa-solid fa-id-badge"></i> Member profile
+    </a>
+    <a class="wai-btn wai-btn-ghost" href="<%= root_url %>member_subscriptions?search=<%= member.mmbr_name %>">
+      <i class="fa-solid fa-file-signature"></i> Subscriptions
+    </a>
+    <a class="wai-btn wai-btn-ghost" href="<%= root_url %>whatsapp_logs">
+      <i class="fa-solid fa-list-check"></i> Delivery logs
+    </a>
+  </div>
+<% else %>
+  <div class="wai-ctx-block">
+    <p class="wai-ctx-hint">
+      This number is not linked to any member record. Add it under
+      <a href="<%= root_url %>member_list">Members List</a> to see membership
+      details here.
+    </p>
+  </div>
+<% end %>

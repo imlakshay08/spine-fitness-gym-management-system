@@ -1,0 +1,16 @@
+<% if conversations.blank? %>
+  <div class="wai-blank">
+    <i class="fa-regular fa-comments"></i>
+    <p>No conversations yet</p>
+    <span>Members who reply to an alert show up here automatically.</span>
+  </div>
+<% else %>
+  <%= render partial: 'whatsapp_inbox/conversation',
+             collection: conversations,
+             as: :conv,
+             locals: { active_number: active_number } %>
+  <div class="wai-blank wai-blank-search" hidden>
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <p>No match</p>
+  </div>
+<% end %>

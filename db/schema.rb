@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_07_02_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_23_140000) do
   create_table "biometric_id_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "allocation_compcode", limit: 12, default: "", null: false
     t.string "allocation_device_sn", limit: 50, default: "", null: false
@@ -238,7 +238,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_02_120000) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "trn_bridge_heartbeats", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+  create_table "trn_bridge_heartbeats", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "bh_compcode", limit: 12, default: "", null: false
     t.string "bh_device_sn", limit: 50, default: "", null: false
     t.datetime "bh_last_seen", precision: nil, null: false
@@ -343,6 +343,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_02_120000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "trn_renewal_requests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "rr_compcode", limit: 12, default: "", null: false
+    t.string "rr_member_id", limit: 5, null: false
+    t.string "rr_plan_id", limit: 5, null: false
+    t.string "rr_status", limit: 15, default: "PENDING", null: false
+    t.decimal "rr_amount", precision: 10, scale: 2
+    t.string "rr_channel", limit: 20, default: "MOBILE_APP", null: false
+    t.string "rr_payment_provider", limit: 20
+    t.string "rr_provider_order_id", limit: 64
+    t.string "rr_provider_payment_id", limit: 64
+    t.datetime "rr_requested_at", null: false
+    t.datetime "rr_resolved_at"
+    t.string "rr_resolved_by", limit: 10
+    t.string "rr_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["rr_compcode", "rr_member_id"], name: "index_trn_renewal_requests_on_rr_compcode_and_rr_member_id"
+    t.index ["rr_status"], name: "index_trn_renewal_requests_on_rr_status"
+  end
+
   create_table "trn_stock_inventories", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "si_compcode", limit: 12, default: "", null: false
     t.string "si_entry_no", limit: 8, default: "", null: false
@@ -374,6 +394,43 @@ ActiveRecord::Schema[7.1].define(version: 2026_07_02_120000) do
     t.string "ur_rights", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+  end
+
+  create_table "trn_verify_otps", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "vo_compcode", limit: 12, default: "", null: false
+    t.string "vo_phone", limit: 15, null: false
+    t.string "vo_code_digest", null: false
+    t.string "vo_purpose", limit: 20, default: "login", null: false
+    t.datetime "vo_expires_at", null: false
+    t.integer "vo_attempts", default: 0, null: false
+    t.datetime "vo_consumed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["vo_expires_at"], name: "index_trn_verify_otps_on_vo_expires_at"
+    t.index ["vo_phone", "vo_purpose"], name: "index_trn_verify_otps_on_vo_phone_and_vo_purpose"
+  end
+
+  create_table "trn_whatsapp_inbox", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
+    t.string "wi_compcode", limit: 12, default: "SF", null: false
+    t.string "wi_from_number", limit: 15, null: false
+    t.string "wi_member_name", limit: 100
+    t.string "wi_message_type", limit: 20, default: "text"
+    t.text "wi_body"
+    t.string "wi_media_url", limit: 500
+    t.string "wi_wamid", limit: 200
+    t.datetime "wi_received_at", precision: nil, null: false
+    t.integer "wi_replied", limit: 1, default: 0
+    t.datetime "wi_replied_at", precision: nil
+    t.string "wi_replied_by", limit: 50
+    t.text "wi_reply_text"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "wi_direction", limit: 3, default: "IN", null: false
+    t.string "wi_status", limit: 20
+    t.datetime "wi_seen_at", precision: nil
+    t.string "wi_error", limit: 250
+    t.index ["wi_from_number"], name: "idx_from_number"
+    t.index ["wi_received_at"], name: "idx_received_at"
   end
 
   create_table "trn_whatsapp_logs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
