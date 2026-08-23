@@ -26,6 +26,13 @@ class MembershipExpiryWhatsappJob < ApplicationJob
       member = MstMembersList.find_by(id: sub.ms_member_id)
       next if member.nil? || member.mmbr_contact.blank?
 
+      has_renewed = TrnMemberSubscription.where(
+        ms_compcode: compcode,
+        ms_member_id: sub.ms_member_id,
+        ms_status: 'ACTIVE'
+      ).where('ms_start_date > ?', sub.ms_start_date).exists?
+      next if has_renewed
+      
       template = case type
                   when :expiring then "membership_expiry_alert_new"
                   when :expired  then "membership_expired_alert_new"
