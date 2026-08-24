@@ -47,6 +47,27 @@ module WhatsappTemplates
           Your receipt is attached. Thank you for choosing Spine Fitness!
         MSG
       end
+    },
+    "gym_owner_report" => {
+      label:       "Owner Report",
+      description: "Daily and monthly business summary sent to the owner",
+      icon:        "fa-solid fa-chart-line",
+      tone:        "info",
+      # One template serves both reports — {{2}} carries "daily" or "monthly"
+      # and {{3}} the period, so only one Meta approval is needed.
+      body: ->(owner, kind, period, collected, subs, visits, turned_away, attention) do
+        <<~MSG.strip
+          Hi #{owner}, here is your Spine Fitness #{kind} report for #{period}.
+
+          Collected: Rs. #{collected}
+          New subscriptions: #{subs}
+          Member visits: #{visits}
+          Turned away (expired): #{turned_away}
+          Needs attention: #{attention}
+
+          The full report is attached.
+        MSG
+      end
     }
   }.freeze
 
