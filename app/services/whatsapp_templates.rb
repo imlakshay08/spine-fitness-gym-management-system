@@ -71,6 +71,19 @@ module WhatsappTemplates
     }
   }.freeze
 
+  # Templates that are not messages to a member. The WhatsApp Logs screen is a
+  # member communication history, so these are kept out of it (the rows are
+  # still written, for audit and debugging).
+  INTERNAL = %w[gym_owner_report].freeze
+
+  def self.internal?(name)
+    INTERNAL.include?(name.to_s)
+  end
+
+  def self.member_facing
+    TEMPLATES.reject { |name, _| INTERNAL.include?(name) }
+  end
+
   def self.known?(name)
     TEMPLATES.key?(name)
   end

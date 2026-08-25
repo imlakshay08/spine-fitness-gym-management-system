@@ -143,13 +143,14 @@
                         <% @logs.each_with_index do |log, idx| %>
                           <%
                             member  = @members_hash[log.wl_member_id.to_s]
-                            name    = member&.mmbr_name.presence || "Unknown member"
+                            orphan  = member.nil?
+                            name    = member&.mmbr_name.presence || "Deleted member"
                             contact = member&.mmbr_contact
                             code    = member&.mmbr_code
                             message = wa_message_body(log, @subs_hash)
                             info    = wa_status_info(log.wl_status)
                           %>
-                          <tr>
+                          <tr class="<%= 'wa-row-orphan' if orphan %>">
                             <td><%= idx + 1 %></td>
 
                             <td class="wa-member-cell">
@@ -188,6 +189,16 @@
                             </td>
                           </tr>
                         <% end %>
+                      <% else %>
+                        <tr>
+                          <td colspan="9">
+                            <div class="wa-empty-state">
+                              <i class="fa-regular fa-comment-dots"></i>
+                              <p>No messages match this view</p>
+                              <span>Try clearing the filters, or check back after the next automated send.</span>
+                            </div>
+                          </td>
+                        </tr>
                       <% end %>
                     </tbody>
                   </table>
@@ -201,7 +212,7 @@
                     <% @logs.each do |log| %>
                       <%
                         member  = @members_hash[log.wl_member_id.to_s]
-                        name    = member&.mmbr_name.presence || "Unknown member"
+                        name    = member&.mmbr_name.presence || "Deleted member"
                         contact = member&.mmbr_contact
                         code    = member&.mmbr_code
                         message = wa_message_body(log, @subs_hash)

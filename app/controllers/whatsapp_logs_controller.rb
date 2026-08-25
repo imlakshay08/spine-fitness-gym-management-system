@@ -22,7 +22,7 @@ class WhatsappLogsController < ApplicationController
                       .where("ms_compcode = ? AND id IN (?)", @compcodes, sub_ids.presence || [0])
                       .index_by { |s| s.id.to_s }
 
-    @templates = WhatsappTemplates::TEMPLATES
+    @templates = WhatsappTemplates.member_facing
     @stats     = build_stats
   end
 
@@ -48,7 +48,7 @@ class WhatsappLogsController < ApplicationController
   end
 
   def fetch_logs
-    scope = TrnWhatsappLog.where(wl_compcode: @compcodes)
+    scope = member_facing_logs
 
     scope = scope.where(wl_status: @status_filter)       if @status_filter.present?
     scope = scope.where(wl_template_name: @template_filter) if @template_filter.present?
@@ -71,6 +71,15 @@ class WhatsappLogsController < ApplicationController
     scope.order(Arel.sql("wl_sent_at DESC, id DESC"))
   end
 
+  # Owner reports go to the gym owner, not to a member, so they would show up
+  # here as "Unknown member" noise. Excluded from both the table and the totals
+  # so the two always agree.
+  def member_facing_logs
+    TrnWhatsappLog
+      .where(wl_compcode: @compcodes)
+      .where.not(wl_template_name: WhatsappTemplates::INTERNAL)
+  end
+
   def reset_filters
     session[:req_wl_status]   = nil
     session[:req_wl_template] = nil
@@ -80,7 +89,7 @@ class WhatsappLogsController < ApplicationController
   # Company-wide totals for the summary cards — always the full picture, not
   # the filtered subset, so staff see overall deliverability at a glance.
   def build_stats
-    base = TrnWhatsappLog.where(wl_compcode: @compcodes)
+    base = member_facing_logs
     counts = base.group(:wl_status).count   # { "READ" => 12, "DELIVERED" => 3, ... }
 
     total     = counts.values.sum
