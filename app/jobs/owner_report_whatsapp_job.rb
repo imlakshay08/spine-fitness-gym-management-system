@@ -15,18 +15,25 @@ class OwnerReportWhatsappJob < ApplicationJob
   DEFAULT_NUMBER = '9990899992'.freeze   # Poonam Tyagi
   DEFAULT_NAME   = 'Poonam'.freeze
 
+  # Returns a one-line summary so the cron endpoint can hand it straight back
+  # to whatever pinged it — a silent failure is what made this invisible once.
   def perform(kind = :daily, compcode = 'SF', on = nil)
     kind = kind.to_sym
+    log("starting #{kind} report (compcode=#{compcode}, on=#{on || 'default'})")
+
     data = build_report(kind, compcode, on)
-    return log('no report data') if data.blank?
+    return log_and_return('no report data could be built') if data.blank?
 
-    company   = MstCompany.find_by(cmp_companycode: compcode)
-    renderer  = Reports::GymReportPdf.new(data: data, company: company)
-    media_id  = upload(renderer)
+    company  = MstCompany.find_by(cmp_companycode: compcode)
+    renderer = Reports::GymReportPdf.new(data: data, company: company)
+    media_id = upload(renderer)
 
-    recipients.each do |number, name|
-      send_to(number, name, kind, data, renderer, media_id, compcode)
-    end
+    sent = recipients.map { |number, name| send_to(number, name, kind, data, renderer, media_id, compcode) }
+
+    pdf_note = media_id.present? ? 'with PDF' : 'WITHOUT PDF (upload failed)'
+    summary  = "#{kind} report for #{data[:period]}: #{sent.count(true)}/#{sent.size} sent #{pdf_note}"
+    log(summary)
+    summary
   ensure
     cleanup(@tempfile)
   end
@@ -91,6 +98,7 @@ class OwnerReportWhatsappJob < ApplicationJob
     )
 
     log("#{kind} report to #{number} pdf=#{media_id.present? ? 'attached' : 'MISSING'} sent=#{success}")
+    success
   end
 
   # Must match {{1}}..{{8}} in the approved template.
@@ -150,5 +158,11 @@ class OwnerReportWhatsappJob < ApplicationJob
 
   def log(message)
     Rails.logger.info "[OwnerReport] #{message}"
+    message
+  end
+
+  def log_and_return(message)
+    log(message)
+    message
   end
 end

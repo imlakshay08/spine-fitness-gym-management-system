@@ -14,9 +14,7 @@ class CronController < ApplicationController
     return head :unauthorized unless params[:token] == ENV['CRON_SECRET']
 
     on = params[:date].present? ? (Date.parse(params[:date]) rescue nil) : nil
-    OwnerReportWhatsappJob.perform_later(:daily, compcode_param, on)
-
-    render plain: "OK"
+    render plain: run_owner_report(:daily, on)
   end
 
   # Hit on the 1st of each month; reports on the month just finished.
@@ -24,9 +22,7 @@ class CronController < ApplicationController
     return head :unauthorized unless params[:token] == ENV['CRON_SECRET']
 
     month = params[:month].present? ? (Date.parse("#{params[:month]}-01") rescue nil) : nil
-    OwnerReportWhatsappJob.perform_later(:monthly, compcode_param, month)
-
-    render plain: "OK"
+    render plain: run_owner_report(:monthly, month)
   end
 
   def sync_subscription_status
@@ -45,5 +41,19 @@ class CronController < ApplicationController
 
   def compcode_param
     params[:compcode].presence || 'SF'
+  end
+
+  # Run inline rather than perform_later, and hand the outcome back in the
+  # response body. The cron service's own execution log then shows whether the
+  # report actually went out — the first run of this failed silently because
+  # nothing anywhere recorded that it had not been called at all.
+  def run_owner_report(kind, on)
+    summary = OwnerReportWhatsappJob.perform_now(kind, compcode_param, on)
+    "OK - #{summary}"
+  rescue StandardError => e
+    Rails.logger.error "[OwnerReport] #{kind} report failed: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace&.first(5)&.join("
+")
+    "ERROR - #{e.class}: #{e.message}"
   end
 end
