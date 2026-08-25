@@ -12,7 +12,7 @@ class OwnerReportWhatsappJob < ApplicationJob
   queue_as :default
 
   TEMPLATE       = 'gym_owner_report'.freeze
-  DEFAULT_NUMBER = '9871946454'.freeze   # Poonam Tyagi
+  DEFAULT_NUMBER = '9990899992'.freeze   # Poonam Tyagi
   DEFAULT_NAME   = 'Poonam'.freeze
 
   # Returns a one-line summary so the cron endpoint can hand it straight back
