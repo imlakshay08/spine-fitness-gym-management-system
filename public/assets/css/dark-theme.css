@@ -1311,6 +1311,20 @@ select.form-select:hover,
 .wai-ticks.is-delivered{color:rgba(255,255,255,.7)}
 .wai-ticks.is-read{color:var(--wai-blue)}
 .wai-ticks.is-failed{color:#ff8f8f}
+/* Reaction badge — sits on the bottom edge of the bubble like WhatsApp's */
+.wai-bubble{margin-bottom:6px}
+.wai-reactions{
+  position:absolute;bottom:-11px;
+  display:inline-flex;align-items:center;gap:2px;
+  padding:2px 7px;border-radius:12px;
+  background:var(--sp-surface-2);border:1px solid var(--sp-bg-0);
+  font-size:12px;line-height:1.35;white-space:nowrap;
+  box-shadow:0 1px 3px rgba(0,0,0,.4);cursor:default;
+}
+.wai-row-in  .wai-reactions{left:10px}
+.wai-row-out .wai-reactions{right:10px}
+.wai-row:has(.wai-reactions){margin-bottom:12px}
+
 .wai-error{
   margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.12);
   font-size:11.5px;color:#ffb4b4;display:flex;gap:6px;align-items:flex-start;

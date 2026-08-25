@@ -75,6 +75,51 @@ class Webhooks::MetaController < ApplicationController
     Rails.logger.info "[MetaWebhook] Updated inbox message #{message.id} → #{status_val}"
   end
 
+  # A reaction is an emoji on an existing message, not a message of its own.
+  # It is stored pointing at its target so the inbox can draw it on that
+  # bubble; removing a reaction arrives as the same payload with a blank emoji.
+  def process_reaction(message, from, wamid, received_at)
+    target = message.dig('reaction', 'message_id')
+    emoji  = message.dig('reaction', 'emoji').to_s
+
+    return Rails.logger.info("[MetaWebhook] Reaction with no target, ignored") if target.blank?
+
+    existing = TrnWhatsappInbox.where(wi_compcode: 'SF', wi_from_number: from,
+                                      wi_message_type: 'reaction', wi_reaction_to: target)
+
+    if emoji.blank?
+      removed = existing.delete_all
+      return Rails.logger.info("[MetaWebhook] Reaction removed from #{target} (#{removed} row)")
+    end
+
+    # One reaction per person per message — a changed emoji replaces the old.
+    if (row = existing.first)
+      row.update_columns(wi_body: emoji, wi_wamid: wamid,
+                         wi_received_at: received_at, updated_at: Time.current)
+      return Rails.logger.info("[MetaWebhook] Reaction updated on #{target}: #{emoji}")
+    end
+
+    return if TrnWhatsappInbox.exists?(wi_wamid: wamid)
+
+    member = MstMembersList.find_by(mmbr_contact: from.to_s.last(10))
+    TrnWhatsappInbox.create!(
+      wi_compcode:     'SF',
+      wi_from_number:  from,
+      wi_member_name:  member&.mmbr_name,
+      wi_message_type: 'reaction',
+      wi_body:         emoji,
+      wi_wamid:        wamid,
+      wi_reaction_to:  target,
+      wi_received_at:  received_at,
+      wi_direction:    TrnWhatsappInbox::DIRECTION_IN,
+      wi_seen_at:      nil
+    )
+
+    Rails.logger.info "[MetaWebhook] Reaction #{emoji} on #{target} from #{from}"
+  rescue StandardError => e
+    Rails.logger.error "[MetaWebhook] Reaction error: #{e.message}"
+  end
+
   def process_incoming(message)
     from    = message['from']
     wamid   = message['id']
@@ -82,6 +127,8 @@ class Webhooks::MetaController < ApplicationController
     # Non-text messages still carry a caption often enough to be worth showing.
     body    = message.dig('text', 'body') || message.dig(type, 'caption')
     received_at = Time.at(message['timestamp'].to_i)
+
+    return process_reaction(message, from, wamid, received_at) if type == 'reaction'
 
     # Skip if already saved
     return if TrnWhatsappInbox.exists?(wi_wamid: wamid)

@@ -19,6 +19,11 @@ class TrnWhatsappInbox < ApplicationRecord
     wi_direction.to_s.upcase != DIRECTION_OUT
   end
 
+  # An emoji stuck to another message rather than a message in its own right.
+  def reaction?
+    wi_message_type.to_s == 'reaction'
+  end
+
   def outbound?
     !inbound?
   end

@@ -37,6 +37,13 @@
       <% end %>
     </div>
 
+    <%# Reactions hang off the bottom edge of the bubble, as in WhatsApp. %>
+    <% if item[:reactions].present? %>
+      <span class="wai-reactions" title="<%= item[:reactions].join(' ') %>">
+        <%= item[:reactions].uniq.join %><%= item[:reactions].size if item[:reactions].size > 1 %>
+      </span>
+    <% end %>
+
     <% if item[:error].present? %>
       <div class="wai-error" title="<%= item[:error] %>">
         <i class="fa-solid fa-triangle-exclamation"></i> <%= truncate(item[:error].to_s, length: 150) %>

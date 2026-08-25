@@ -174,6 +174,7 @@ class WhatsappInboxController < ApplicationController
   end
 
   def preview_for(message)
+    return "Reacted #{message.wi_body}" if message.reaction?
     return message.wi_body.to_s.tr("\n", ' ') if message.wi_body.present?
 
     case message.wi_message_type.to_s
@@ -190,23 +191,29 @@ class WhatsappInboxController < ApplicationController
   # One list merging what the member sent, what staff replied and what the
   # automation fired — ordered by the clock, which is what a chat is.
   def build_timeline(number, after: nil)
-    items = []
+    items     = []
+    reactions = reactions_for(number)
 
     TrnWhatsappInbox
       .where(wi_compcode: compcode, wi_from_number: number)
       .order(:wi_received_at, :id)
       .each do |message|
+        # A reaction is drawn on the message it belongs to, never as a bubble
+        # of its own — that is what WhatsApp itself does.
+        next if message.reaction?
+
         if message.outbound?
-          items << outbound_item(message)
+          items << outbound_item(message, reactions)
         else
           items << {
-            key:      "in-#{message.id}",
-            dir:      'in',
-            kind:     'member',
-            body:     message.wi_body,
-            at:       message.wi_received_at,
-            media:    message.wi_media_url,
-            msg_type: message.wi_message_type
+            key:       "in-#{message.id}",
+            dir:       'in',
+            kind:      'member',
+            body:      message.wi_body,
+            at:        message.wi_received_at,
+            media:     message.wi_media_url,
+            msg_type:  message.wi_message_type,
+            reactions: reactions[message.wi_wamid.to_s]
           }
 
           # Replies written before outgoing messages had rows of their own.
@@ -232,10 +239,11 @@ class WhatsappInboxController < ApplicationController
         .order(:wl_sent_at, :id)
         .each do |log|
           items << {
-            key:      "log-#{log.id}",
-            dir:      'out',
-            kind:     'auto',
-            author:   'Automated',
+            key:       "log-#{log.id}",
+            dir:       'out',
+            kind:      'auto',
+            author:    'Automated',
+            reactions: reactions[log.wl_interakt_msg_id.to_s],
             body:     log.wl_message_body.presence || log.wl_template_name.to_s.humanize,
             at:       log.wl_sent_at,
             status:   log.wl_status,
@@ -252,19 +260,31 @@ class WhatsappInboxController < ApplicationController
     items
   end
 
-  def outbound_item(message)
+  def outbound_item(message, reactions = {})
     {
-      key:      "out-#{message.id}",
-      dir:      'out',
-      kind:     message.wi_replied_by.present? ? 'staff' : 'auto',
-      author:   message.wi_replied_by.presence || 'Automated',
-      body:     message.wi_body,
-      at:       message.wi_received_at,
-      status:   message.wi_status.presence || 'SENT',
-      error:    message.wi_error,
-      media:    message.wi_media_url,
-      msg_type: message.wi_message_type
+      key:       "out-#{message.id}",
+      dir:       'out',
+      kind:      message.wi_replied_by.present? ? 'staff' : 'auto',
+      author:    message.wi_replied_by.presence || 'Automated',
+      body:      message.wi_body,
+      at:        message.wi_received_at,
+      status:    message.wi_status.presence || 'SENT',
+      error:     message.wi_error,
+      media:     message.wi_media_url,
+      msg_type:  message.wi_message_type,
+      reactions: reactions[message.wi_wamid.to_s]
     }
+  end
+
+  # Emoji reactions keyed by the wamid of the message they belong to. Members
+  # most often react to an automated message, so logs are matched too.
+  def reactions_for(number)
+    TrnWhatsappInbox
+      .where(wi_compcode: compcode, wi_from_number: number, wi_message_type: 'reaction')
+      .where.not(wi_reaction_to: nil)
+      .order(:wi_received_at)
+      .group_by { |r| r.wi_reaction_to.to_s }
+      .transform_values { |rows| rows.map { |r| r.wi_body.to_s }.reject(&:blank?) }
   end
 
   # Ticks move after the bubble is already on screen, so the poll hands back
