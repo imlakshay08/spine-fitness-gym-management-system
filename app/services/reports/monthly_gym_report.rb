@@ -54,10 +54,14 @@ module Reports
       prev = payments_between(prev_month_range).sum { |p| p.pay_amount.to_f }
       change = pct_change(collected, prev)
       [
-        { label: 'Collected',       value: money(collected),           note: change ? "#{change.positive? ? '+' : ''}#{change}% vs #{first.prev_month.strftime('%b')}" : 'no prior month' },
-        { label: 'Subscriptions',   value: subscriptions.size.to_s,    note: "#{new_joiners.size} new, #{renewals.size} renewals" },
-        { label: 'Member visits',   value: total_visits.to_s,          note: "#{unique_visitors} members, #{avg_per_day} / day" },
-        { label: 'Active at close', value: active_member_ids.size.to_s, note: "#{expiring_next_month.size} expire next month" }
+        { label: 'Money received',      value: money(collected),
+          note: change ? "#{change.abs}% #{change.positive? ? 'more' : 'less'} than #{first.prev_month.strftime('%B')}" : "nothing last #{first.prev_month.strftime('%B')}" },
+        { label: 'Memberships taken',   value: subscriptions.size.to_s,
+          note: "#{new_joiners.size} new, #{renewals.size} renewed" },
+        { label: 'Members came',        value: total_visits.to_s,
+          note: "#{unique_visitors} different members" },
+        { label: 'Running memberships', value: active_member_ids.size.to_s,
+          note: "#{expiring_next_month.size} finish next month" }
       ]
     end
 

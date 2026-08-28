@@ -139,19 +139,21 @@ class OwnerReportWhatsappJob < ApplicationJob
     end
   end
 
+  # Poonam reads this line before she opens the PDF, so it stays in the same
+  # plain words the report itself uses.
   def daily_attention(data)
     bits = []
-    bits << "#{data[:attention][:expiring_7].size} expiring in 7 days" if data[:attention][:expiring_7].any?
-    bits << "#{data[:attention][:lapsed_45].size} lapsed"              if data[:attention][:lapsed_45].any?
-    bits << "#{data[:attention][:quiet_14].size} not turning up"       if data[:attention][:quiet_14].any?
-    bits.any? ? bits.join(', ') : 'nothing urgent'
+    bits << "#{data[:attention][:expiring_7].size} memberships finishing this week" if data[:attention][:expiring_7].any?
+    bits << "#{data[:attention][:lapsed_45].size} finished but not renewed"         if data[:attention][:lapsed_45].any?
+    bits << "#{data[:attention][:quiet_14].size} members not coming"                if data[:attention][:quiet_14].any?
+    bits.any? ? bits.join(', ') : 'nothing pending'
   end
 
   def monthly_attention(data)
     bits = []
-    bits << "#{data[:growth][:lost]} not renewed"                        if data[:growth][:lost].to_i.positive?
-    bits << "#{data[:outlook][:expiring_count]} expiring next month"     if data[:outlook][:expiring_count].to_i.positive?
-    bits.any? ? bits.join(', ') : 'nothing urgent'
+    bits << "#{data[:growth][:lost]} did not renew"                                    if data[:growth][:lost].to_i.positive?
+    bits << "#{data[:outlook][:expiring_count]} memberships finishing next month"      if data[:outlook][:expiring_count].to_i.positive?
+    bits.any? ? bits.join(', ') : 'nothing pending'
   end
 
   # The template already prints "Rs." before the variable.

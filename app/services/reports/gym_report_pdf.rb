@@ -214,102 +214,104 @@ module Reports
 
     def daily_body
       m = @d[:money]
-      section('Money in', "Recorded at the counter today · month to date #{m[:mtd]}")
-      change = m[:change_pct]
+      section('Money received today', "Total received so far this month: #{m[:mtd]}")
       stat_line([
-        ['Collected', m[:total_text]],
-        ['Payments',  m[:count].to_s],
-        ['Yesterday', m[:yesterday]],
-        ['Change',    change ? "#{change.positive? ? '+' : ''}#{change}%" : '—']
+        ['Received today',   m[:total_text]],
+        ['Number of payments', m[:count].to_s],
+        ['Yesterday',        m[:yesterday]],
+        ['Compared to yesterday', m[:vs_yesterday].to_s]
       ])
-      table(['Mode', 'Amount', 'Count'],
+      table(['Paid by', 'Amount', 'How many'],
             m[:by_mode].map { |x| [x[:mode], x[:amount_text], x[:count].to_s] },
             widths: [0.5, 0.3, 0.2], aligns: { 1 => :right, 2 => :right },
-            empty: 'No payments recorded today.')
+            empty: 'No money was received today.')
 
-      section('Subscriptions sold today')
-      table(['Member', 'Type', 'Plan', 'Amount', 'Mode', 'Valid until'],
-            @d[:sales].map { |s| [s[:member], s[:type], s[:plan], s[:amount_text], s[:mode],
-                                  s[:valid_to]&.strftime('%d %b %Y').to_s] },
-            widths: [0.26, 0.11, 0.16, 0.16, 0.11, 0.20],
+      section('Memberships taken today')
+      table(['Member', 'New or renewed', 'Plan', 'Amount', 'Paid by', 'Valid till'],
+            @d[:sales].map { |s| [s[:member], s[:type] == 'New' ? 'New member' : 'Renewed', s[:plan],
+                                  s[:amount_text], s[:mode], s[:valid_to]&.strftime('%d %b %Y').to_s] },
+            widths: [0.24, 0.15, 0.15, 0.15, 0.11, 0.20],
             aligns: { 3 => :right },
-            empty: 'No subscriptions sold today.')
+            empty: 'Nobody took or renewed a membership today.')
 
-      f = @d[:footfall]
-      section('Who trained today', f[:utilisation])
-      stat_line([
-        ['Members in', f[:unique].to_s],
-        ['Busiest',    f[:peak_label].to_s],
-        ['First in',   f[:first_label].to_s],
-        ['Last in',    f[:last_label].to_s]
-      ])
-      if f[:by_hour].present?
-        bars(f[:by_hour].sort_by { |h, _| h }.map { |h, n| [hour_text(h), n] })
-      end
-
-      turned_away
-      needs_a_call
+      who_came
+      could_not_enter
+      fees_due
       membership_footer
     end
 
-    def turned_away
+    def who_came
+      f = @d[:footfall]
+      section('Members who came today',
+              "#{f[:unique]} members came · busiest time #{f[:peak_label]} · "               "first at #{f[:first_label]}, last at #{f[:last_label]}")
+
+      table(['Time', 'Member', 'Phone'],
+            @d[:visitors].map { |v| [v[:at]&.strftime('%l:%M %p').to_s.strip, v[:name], phone_or_dash(v[:phone])] },
+            widths: [0.18, 0.47, 0.35],
+            empty: 'No member came to the gym today.')
+    end
+
+    def could_not_enter
       rows = @d[:turned_away]
-      section('Turned away at the door', 'Expired members who still showed up — the warmest leads you have', tone: RED)
+      section('Members who could not enter')
       if rows.blank?
-        callout('Nobody was turned away today.', tone: GREEN)
+        callout('Everybody who came was allowed in.', tone: GREEN)
       else
-        callout("#{rows.size} member#{'s' if rows.size != 1} came to train and could not. " \
-                'Each one wanted to be here today.', tone: RED)
-        table(['Member', 'Phone', 'Tried at', 'Attempts', 'Expired'],
+        callout("#{rows.size} member#{'s' if rows.size != 1} came to the gym, but the machine did not "                 'let them in because their membership had already finished.', tone: RED)
+        table(['Member', 'Phone', 'Came at', 'Membership finished'],
               rows.first(15).map { |r| [r[:name], phone_or_dash(r[:phone]),
                                         r[:at]&.strftime('%l:%M %p').to_s.strip,
-                                        r[:attempts].to_s,
-                                        r[:expired_on] ? "#{r[:days_ago]}d ago" : '—'] },
-              widths: [0.3, 0.2, 0.16, 0.14, 0.2], aligns: { 3 => :right })
+                                        r[:expired_on] ? "#{r[:expired_on].strftime('%d %b %Y')} (#{r[:days_ago]} days ago)" : '—'] },
+              widths: [0.28, 0.20, 0.16, 0.36])
       end
     end
 
-    def needs_a_call
+    def fees_due
       a = @d[:attention]
 
-      section('Expiring within 7 days', 'Call before they lapse — renewals are cheaper than new members')
-      table(['Member', 'Phone', 'Expires', 'Days left'],
+      section('Memberships finishing in the next 7 days')
+      table(['Member', 'Phone', 'Finishes on', 'Days left'],
             a[:expiring_7].first(15).map { |r| [r[:name], phone_or_dash(r[:phone]),
                                                 r[:end_date]&.strftime('%d %b %Y').to_s,
-                                                r[:days_left].to_s] },
+                                                r[:days_left].zero? ? 'today' : r[:days_left].to_s] },
             widths: [0.36, 0.24, 0.24, 0.16], aligns: { 3 => :right },
-            empty: 'Nobody expires in the next 7 days.')
+            empty: 'No membership finishes in the next 7 days.')
+      more_note(a[:expiring_7], 15)
 
-      section('Lapsed in the last 45 days', 'Recently expired and not renewed — still winnable')
-      table(['Member', 'Phone', 'Expired on', 'Days ago'],
+      section('Memberships that finished recently and were not renewed')
+      table(['Member', 'Phone', 'Finished on', 'How long ago'],
             a[:lapsed_45].first(15).map { |r| [r[:name], phone_or_dash(r[:phone]),
                                                r[:end_date]&.strftime('%d %b %Y').to_s,
-                                               r[:days_ago].to_s] },
+                                               "#{r[:days_ago]} days"] },
             widths: [0.36, 0.24, 0.24, 0.16], aligns: { 3 => :right },
-            empty: 'Nobody lapsed in the last 45 days.')
-      if a[:lapsed_45].size > 15
-        pdf.fill_color MUTED
-        pdf.text "Showing 15 of #{a[:lapsed_45].size}. Full list in Member Subscriptions.", size: 7.5, style: :italic
-        pdf.fill_color INK
-        pdf.move_down 10
-      end
+            empty: 'No membership finished in the last 45 days.')
+      more_note(a[:lapsed_45], 15)
 
-      section('Paid but not turning up', 'Active members not seen for 14 days — churn starts here')
-      table(['Member', 'Phone', 'Last seen'],
+      section('Members who have not come for 2 weeks')
+      table(['Member', 'Phone', 'Last came'],
             a[:quiet_14].first(12).map { |r| [r[:name], phone_or_dash(r[:phone]),
                                               r[:last_seen] ? r[:last_seen].strftime('%d %b %Y') : 'never'] },
             widths: [0.42, 0.28, 0.30],
-            empty: 'Every active member has trained in the last 14 days.')
+            empty: 'Every member has come in the last 2 weeks.')
+      more_note(a[:quiet_14], 12)
+    end
+
+    def more_note(list, shown)
+      return if list.size <= shown
+      pdf.fill_color MUTED
+      pdf.text "#{list.size} in total, first #{shown} shown here.", size: 7.5, style: :italic
+      pdf.fill_color INK
+      pdf.move_down 10
     end
 
     def membership_footer
       m = @d[:membership]
-      section('Membership at a glance')
+      section('Total members')
       stat_line([
-        ['Active',       m[:active].to_s],
-        ['On roll',      m[:on_roll].to_s],
-        ['Joined today', m[:joined_today].to_s],
-        ['Expiring 7d',  m[:expiring_7].to_s]
+        ['Running memberships', m[:active].to_s],
+        ['Members in the list', m[:on_roll].to_s],
+        ['Joined today',        m[:joined_today].to_s],
+        ['Finishing in 7 days', m[:expiring_7].to_s]
       ])
     end
 
@@ -323,82 +325,83 @@ module Reports
 
     def monthly_body
       m = @d[:money]
-      section('Revenue', "Best day #{m[:best_day]&.strftime('%d %b')} with #{m[:best_day_amount]}")
+      section('Money received this month',
+              m[:best_day] ? "Best day was #{m[:best_day].strftime('%d %b')} with #{m[:best_day_amount]}" : nil)
       change = m[:change_pct]
       stat_line([
-        ['Collected',     m[:total_text]],
-        ['Payments',      m[:count].to_s],
-        ['Average sale',  m[:average]],
-        ['vs last month', change ? "#{change.positive? ? '+' : ''}#{change}%" : '—']
+        ['Received this month', m[:total_text]],
+        ['Number of payments',  m[:count].to_s],
+        ['Average payment',     m[:average]],
+        ['Last month',          m[:previous]]
       ])
-      table(['Mode', 'Amount', 'Count'],
+      if change
+        callout("This month is #{change.abs}% #{change.positive? ? 'more' : 'less'} than last month "                 "(last month: #{m[:previous]}).", tone: change.positive? ? GREEN : RED)
+      end
+      table(['Paid by', 'Amount', 'How many'],
             m[:by_mode].map { |x| [x[:mode], x[:amount_text], x[:count].to_s] },
             widths: [0.5, 0.3, 0.2], aligns: { 1 => :right, 2 => :right },
-            empty: 'No payments this month.')
+            empty: 'No money was received this month.')
 
-      section('What sold', 'Revenue share by plan')
-      table(['Plan', 'Sold', 'Revenue', 'Share'],
+      section('Which plans members took')
+      table(['Plan', 'How many took it', 'Money from this plan', 'Share'],
             @d[:plans].map { |p| [p[:plan], p[:count].to_s, p[:revenue_text], "#{p[:share]}%"] },
-            widths: [0.4, 0.15, 0.28, 0.17], aligns: { 1 => :right, 2 => :right, 3 => :right },
-            empty: 'No subscriptions sold this month.')
-      bars(@d[:plans].map { |p| [p[:plan], p[:count]] })
+            widths: [0.34, 0.20, 0.28, 0.18], aligns: { 1 => :right, 2 => :right, 3 => :right },
+            empty: 'Nobody took a membership this month.')
 
       g = @d[:growth]
-      section('Growth and retention',
-              g[:retention_pct] ? "#{g[:retention_pct]}% of memberships due to expire were renewed" : nil)
+      section('New and renewed members')
       stat_line([
-        ['New members', "#{g[:new_members]}"],
-        ['Renewals',    "#{g[:renewals]}"],
-        ['Not renewed', "#{g[:lost]}"],
-        ['Retention',   g[:retention_pct] ? "#{g[:retention_pct]}%" : '—']
+        ['New members',      g[:new_members].to_s],
+        ['Renewed',          g[:renewals].to_s],
+        ['Money from new',   g[:new_revenue]],
+        ['Money from renewals', g[:renewal_revenue]]
       ])
-      callout("New members brought #{g[:new_revenue]}; renewals brought #{g[:renewal_revenue]}.", tone: BLUE)
+      if g[:due_to_expire].to_i.positive?
+        callout("#{g[:due_to_expire]} memberships finished this month. "                 "#{g[:retained]} of them were renewed, #{g[:lost]} were not.",
+                tone: g[:lost].to_i > g[:retained].to_i ? RED : GREEN)
+      end
 
-      section('Members lost this month', 'Expired during the month and not renewed — worth one call each')
+      section('Members whose membership finished and was not renewed')
       table(['Member', 'Phone'],
             g[:lost_members].map { |r| [r[:name], phone_or_dash(r[:phone])] },
             widths: [0.6, 0.4],
-            empty: 'Nobody was lost this month.')
+            empty: 'Everyone whose membership finished this month renewed it.')
 
       f = @d[:footfall]
-      section('Footfall')
+      section('How many members came')
       stat_line([
-        ['Total visits', f[:visits].to_s],
-        ['Members',      f[:unique].to_s],
-        ['Average / day', f[:avg_per_day].to_s],
-        ['Busiest hour', f[:busiest_hour].to_s]
+        ['Total visits',       f[:visits].to_s],
+        ['Different members',  f[:unique].to_s],
+        ['Average per day',    f[:avg_per_day].to_s],
+        ['Busiest time',       f[:busiest_hour].to_s]
       ])
       stat_line([
-        ['Busiest day',     f[:busiest_day]&.strftime('%d %b').to_s],
-        ['On that day',     f[:busiest_day_count].to_s],
-        ['Best weekday',    f[:busiest_weekday].to_s],
-        ['Turned away',     "#{f[:denied]} (#{f[:denied_members]} members)"]
+        ['Busiest day',   f[:busiest_day]&.strftime('%d %b').to_s],
+        ['That day',      "#{f[:busiest_day_count]} members"],
+        ['Busiest weekday', f[:busiest_weekday].to_s],
+        ['Could not enter', "#{f[:denied]} times"]
       ])
 
-      section('Most regular members', 'Worth a word of appreciation at the desk')
-      table(['Member', 'Phone', 'Visits'],
+      section('Members who came most often')
+      table(['Member', 'Phone', 'Times they came'],
             @d[:regulars].map { |r| [r[:name], phone_or_dash(r[:phone]), r[:visits].to_s] },
             widths: [0.5, 0.3, 0.2], aligns: { 2 => :right },
-            empty: 'No attendance recorded this month.')
+            empty: 'Nobody came to the gym this month.')
 
       o = @d[:outlook]
-      section('Next month', 'What is already on the books')
+      section('Memberships finishing next month')
       stat_line([
-        ['Expiring',       o[:expiring_count].to_s],
-        ['Revenue at risk', o[:at_risk]],
-        ['Active now',     o[:active].to_s],
-        ['Lapsed (45d)',   o[:lapsed_45].to_s]
+        ['Finishing next month', o[:expiring_count].to_s],
+        ['Their total fees',     o[:at_risk]],
+        ['Running memberships',  o[:active].to_s],
+        ['Finished, not renewed', o[:lapsed_45].to_s]
       ])
-      table(['Member', 'Phone', 'Expires'],
+      table(['Member', 'Phone', 'Finishes on'],
             o[:expiring].first(20).map { |r| [r[:name], phone_or_dash(r[:phone]),
                                               r[:end_date]&.strftime('%d %b %Y').to_s] },
             widths: [0.42, 0.28, 0.30],
-            empty: 'Nothing expires next month.')
-      if o[:expiring].size > 20
-        pdf.fill_color MUTED
-        pdf.text "Showing 20 of #{o[:expiring].size}.", size: 7.5, style: :italic
-        pdf.fill_color INK
-      end
+            empty: 'No membership finishes next month.')
+      more_note(o[:expiring], 20)
     end
   end
 end

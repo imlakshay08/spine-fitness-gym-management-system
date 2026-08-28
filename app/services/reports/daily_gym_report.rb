@@ -20,6 +20,7 @@ module Reports
         money:       money_section,
         sales:       sales_section,
         footfall:    footfall_section,
+        visitors:    visitors,
         turned_away: turned_away_section,
         attention:   attention_section,
         membership:  membership_section
@@ -46,10 +47,12 @@ module Reports
 
     def kpis
       [
-        { label: 'Collected today', value: money(collected),                  note: "#{todays_payments.size} payment#{'s' if todays_payments.size != 1}" },
-        { label: 'New subscriptions', value: todays_subscriptions.size.to_s,  note: sales_split_note },
-        { label: 'Member visits',   value: footfall[:unique].to_s,            note: utilisation_note },
-        { label: 'Turned away',     value: denied_members.size.to_s,          note: denied_members.any? ? 'expired — call them' : 'none' }
+        { label: 'Money received today', value: money(collected),
+          note: "from #{todays_payments.size} payment#{'s' if todays_payments.size != 1}" },
+        { label: 'Memberships taken',    value: todays_subscriptions.size.to_s, note: sales_split_note },
+        { label: 'Members who came',     value: footfall[:unique].to_s,         note: utilisation_note },
+        { label: 'Could not enter',      value: denied_members.size.to_s,
+          note: denied_members.any? ? 'membership finished' : 'nobody' }
       ]
     end
 
@@ -70,8 +73,19 @@ module Reports
         by_mode:    by_mode.map { |mode, amount, n| { mode: mode, amount: amount, amount_text: money(amount), count: n } },
         yesterday:  money(yesterday),
         change_pct: pct_change(collected, yesterday),
+        vs_yesterday: plain_difference(collected, yesterday),
         mtd:        money(mtd)
       }
+    end
+
+    # "Rs 11,299 more than yesterday" reads better than "+105%".
+    def plain_difference(today_total, yesterday_total)
+      diff = today_total.to_f - yesterday_total.to_f
+      return 'Same as yesterday' if diff.zero?
+
+      # Kept short: this sits in a narrow box on the report and wrapped onto a
+      # second line when it read "... more than yesterday".
+      "#{money(diff.abs)} #{diff.positive? ? 'more' : 'less'}"
     end
 
     # ── sales ───────────────────────────────────────────────────────────────
@@ -110,7 +124,7 @@ module Reports
     def sales_split_note
       return 'none today' if todays_subscriptions.empty?
       new_count = sales_section.count { |s| s[:type] == 'New' }
-      "#{new_count} new, #{todays_subscriptions.size - new_count} renewal#{'s' if (todays_subscriptions.size - new_count) != 1}"
+      "#{new_count} new, #{todays_subscriptions.size - new_count} renewed"
     end
 
     # ── footfall ────────────────────────────────────────────────────────────
@@ -135,10 +149,26 @@ module Reports
       end
     end
 
+    # Who actually walked in, by name and entry time. The owner asked for
+    # this rather than "10 people came at 5:30" — a member can punch more than
+    # once in a day, so the earliest punch is the one shown as their entry.
+    def visitors
+      @visitors ||= allowed_punches
+                      .group_by(&:att_member_id)
+                      .map do |mid, punches|
+                        first = punches.min_by(&:att_punch_time)
+                        { name:  member_name(mid),
+                          phone: member_phone(mid),
+                          at:    in_ist(first.att_punch_time),
+                          times: punches.size }
+                      end
+                      .sort_by { |v| v[:at] }
+    end
+
     def utilisation_note
       total = active_member_ids.size
-      return 'no active members' if total.zero?
-      "#{((footfall[:unique].to_f / total) * 100).round}% of #{total} active"
+      return 'no running memberships' if total.zero?
+      "out of #{total} members"
     end
 
     def footfall_section
