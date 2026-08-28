@@ -52,10 +52,21 @@ class OwnerReportWhatsappJob < ApplicationJob
     nil
   end
 
+  # OWNER_WHATSAPP_NUMBERS accepts "number:Name" pairs so each recipient is
+  # greeted properly:
+  #   9990899992:Poonam,9871946454:Lakshay
+  # A bare comma separated list of numbers still works; anyone without a name
+  # falls back to a neutral greeting.
   def recipients
-    raw = ENV['OWNER_WHATSAPP_NUMBERS'].to_s.strip
-    list = raw.present? ? raw.split(',').map(&:strip).reject(&:blank?) : [DEFAULT_NUMBER]
-    list.map { |number| [number, number == DEFAULT_NUMBER ? DEFAULT_NAME : 'there'] }
+    raw     = ENV['OWNER_WHATSAPP_NUMBERS'].to_s.strip
+    entries = raw.present? ? raw.split(',') : ["#{DEFAULT_NUMBER}:#{DEFAULT_NAME}"]
+
+    entries.filter_map do |entry|
+      number, name = entry.to_s.split(':', 2).map { |part| part.to_s.strip }
+      next if number.blank?
+
+      [number, name.presence || (number == DEFAULT_NUMBER ? DEFAULT_NAME : 'there')]
+    end
   end
 
   def upload(renderer)
