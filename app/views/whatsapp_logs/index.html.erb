@@ -233,7 +233,7 @@
                           <div class="wa-bubble">
                             <div class="wa-bubble-text"><%= simple_format(message) %></div>
                             <div class="wa-bubble-meta">
-                              <span><%= log.wl_sent_at&.strftime("%I:%M %p") %></span>
+                              <span><%= wa_ist(log.wl_sent_at)&.strftime("%I:%M %p") %></span>
                               <%= wa_ticks_html(log.wl_status) %>
                             </div>
                           </div>
@@ -243,17 +243,17 @@
                           <div class="wa-timeline-item done">
                             <span class="wa-dot"></span>
                             <span class="wa-tl-label">Sent</span>
-                            <span class="wa-tl-time"><%= log.wl_sent_at ? log.wl_sent_at.strftime("%d %b %Y, %I:%M %p") : "—" %></span>
+                            <span class="wa-tl-time"><%= log.wl_sent_at ? wa_ist(log.wl_sent_at).strftime("%d %b %Y, %I:%M %p") : "—" %></span>
                           </div>
                           <div class="wa-timeline-item <%= 'done' if log.wl_delivered_at.present? %>">
                             <span class="wa-dot"></span>
                             <span class="wa-tl-label">Delivered</span>
-                            <span class="wa-tl-time"><%= log.wl_delivered_at ? log.wl_delivered_at.strftime("%d %b %Y, %I:%M %p") : "Not yet delivered" %></span>
+                            <span class="wa-tl-time"><%= log.wl_delivered_at ? wa_ist(log.wl_delivered_at).strftime("%d %b %Y, %I:%M %p") : "Not yet delivered" %></span>
                           </div>
                           <div class="wa-timeline-item <%= 'done blue' if log.wl_read_at.present? %>">
                             <span class="wa-dot"></span>
                             <span class="wa-tl-label">Read</span>
-                            <span class="wa-tl-time"><%= log.wl_read_at ? log.wl_read_at.strftime("%d %b %Y, %I:%M %p") : "Not read yet" %></span>
+                            <span class="wa-tl-time"><%= log.wl_read_at ? wa_ist(log.wl_read_at).strftime("%d %b %Y, %I:%M %p") : "Not read yet" %></span>
                           </div>
                           <% if log.wl_status.to_s.upcase == 'FAILED' %>
                             <div class="wa-timeline-item failed done">

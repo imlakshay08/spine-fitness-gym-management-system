@@ -47,8 +47,9 @@ def create
             if @Item.id.to_i >0
               @userUpdateDates = User.where("usercompcode=? and id=?",@compcodes,@Item.id)
               if @userUpdateDates
-                Time.zone = "Kolkata"
-                usrudate  = Time.zone.now               
+                # Same leak as ApplicationController had: assigning Time.zone
+                # here poisoned every later request served by this thread.
+                usrudate  = Time.current.in_time_zone(IST_ZONE)
                 dates4    = usrudate.strftime("%Y-%m-%d %I:%M:%S")
                 #@userUpdateDates.update(:updated_at=>dates4)
               end

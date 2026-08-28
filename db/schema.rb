@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_25_100000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_25_140000) do
   create_table "biometric_id_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "allocation_compcode", limit: 12, default: "", null: false
     t.string "allocation_device_sn", limit: 50, default: "", null: false

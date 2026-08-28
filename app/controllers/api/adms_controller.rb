@@ -1,4 +1,5 @@
 class Api::AdmsController < ApplicationController
+  DEVICE_ZONE = ActiveSupport::TimeZone['Asia/Kolkata'].freeze
   skip_before_action :verify_authenticity_token
 
   def getrequest
@@ -31,7 +32,8 @@ class Api::AdmsController < ApplicationController
       # Skip non-data lines (letters only = header/command, not a punch)
       next unless device_user_id.match?(/\A\d+\z/)
 
-      punch_time = Time.zone.parse(timestamp) rescue nil
+      # Device clock is IST; never rely on the ambient Time.zone here.
+      punch_time = DEVICE_ZONE.parse(timestamp) rescue nil
       next unless punch_time
       next if punch_time.to_date < Date.today
 

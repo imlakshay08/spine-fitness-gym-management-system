@@ -49,9 +49,19 @@ module WhatsappLogsHelper
     end
   end
 
+  # Timestamps are stored UTC; the gym reads IST. Without this a 10:00 AM send
+  # displayed as 04:30 AM.
+  IST = 'Asia/Kolkata'.freeze
+
+  def wa_ist(dt)
+    dt && dt.in_time_zone(IST)
+  end
+
   def wa_time(dt)
     return content_tag(:span, "—", class: "wa-muted") if dt.blank?
-    content_tag(:span, dt.strftime("%d %b %Y"), class: "wa-date") +
-      content_tag(:span, dt.strftime("%I:%M %p"), class: "wa-clock")
+
+    local = dt.in_time_zone(IST)
+    content_tag(:span, local.strftime("%d %b %Y"), class: "wa-date") +
+      content_tag(:span, local.strftime("%I:%M %p"), class: "wa-clock")
   end
 end

@@ -1,4 +1,5 @@
 class Api::BiometricAttendancesController < ApplicationController
+  DEVICE_ZONE = ActiveSupport::TimeZone['Asia/Kolkata'].freeze
   skip_before_action :verify_authenticity_token
   #before_action :authenticate_bridge!
 
@@ -6,7 +7,11 @@ def create
   compcode       = params[:compcode].to_s
   device_user_id = params[:user_id].to_s.strip
   device_sn      = params[:device_sn].to_s
-  punch_time     = Time.zone.parse(params[:timestamp]) rescue Time.current
+  # The scanner sits in the gym and reports its own wall clock, which is IST.
+  # Parsing with the ambient Time.zone was a coin flip: ApplicationController
+  # mutates Time.zone to Kolkata in a few helpers, and Puma reuses threads, so
+  # the same device produced rows 5h30m apart depending on what ran before it.
+  punch_time     = (DEVICE_ZONE.parse(params[:timestamp]) rescue nil) || Time.current
 
   # Reject old punches
   if punch_time.to_date < Date.today

@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+   IST_ZONE = 'Asia/Kolkata'.freeze
    protect_from_forgery with: :exception
    rescue_from ActiveRecord::RecordNotFound, :with => :render_404
    include ErpModule::Common
@@ -145,16 +146,15 @@ class ApplicationController < ActionController::Base
    end
 
   private
+  # Reads the IST clock WITHOUT assigning Time.zone. `Time.zone=` sets a
+  # thread-local that outlives the request, and Puma reuses threads — that leak
+  # is what made the biometric device's timestamps land 5h30m out at random.
   def get_local_dated()
-     Time.zone        = "Kolkata"
-     lcdate           = Time.zone.now.strftime('%Y-%m-%d')
-     return lcdate     
+     return Time.current.in_time_zone(IST_ZONE).strftime('%Y-%m-%d')
   end
   private
   def get_local_time()
-     Time.zone        = "Kolkata"
-     lctime           = Time.zone.now.strftime('%I:%M%p')
-     return lctime     
+     return Time.current.in_time_zone(IST_ZONE).strftime('%I:%M%p')
   end
   def get_user_list(regid)
     userobj = User.where("id=?",regid).first
@@ -392,8 +392,8 @@ def check_global_date_difference(start_date, end_date,lwm=0,status="")
      return mystring
  end
  def get_directory_monthyear
-     Time.zone = "Kolkata"
-      dirc     = Time.zone.now.strftime("%b").to_s+"-"+Time.zone.now.strftime("%Y").to_s    
+      now  = Time.current.in_time_zone(IST_ZONE)
+      dirc = now.strftime("%b").to_s+"-"+now.strftime("%Y").to_s
      return dirc
  end
  
