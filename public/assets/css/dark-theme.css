@@ -1449,6 +1449,46 @@ select.form-select:hover,
 .wai-ticks.is-delivered{color:rgba(255,255,255,.7)}
 .wai-ticks.is-read{color:var(--wai-blue)}
 .wai-ticks.is-failed{color:#ff8f8f}
+/* Attachments: photos, video, voice notes, documents and stickers */
+.wai-photo{
+  display:block;max-width:260px;max-height:320px;width:auto;height:auto;
+  border-radius:9px;margin-bottom:5px;background:var(--sp-bg-0);
+}
+.wai-media-link{display:block;text-decoration:none!important}
+.wai-media-link:hover .wai-photo{opacity:.9}
+.wai-video{max-width:280px;border-radius:9px;margin-bottom:5px;background:#000;display:block}
+.wai-audio{width:250px;margin-bottom:5px;display:block}
+
+/* A sticker sits bare, with no bubble around it — as WhatsApp shows it */
+.wai-bubble-sticker{
+  background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;
+}
+.wai-sticker{display:block;width:130px;height:auto;margin-bottom:2px}
+.wai-bubble-sticker .wai-meta{justify-content:flex-start;padding-left:2px}
+.wai-bubble-sticker .wai-time{color:var(--sp-muted)}
+
+.wai-file{
+  display:flex;align-items:center;gap:10px;margin-bottom:5px;
+  padding:9px 11px;border-radius:9px;
+  background:rgba(255,255,255,.07);color:inherit!important;text-decoration:none!important;
+}
+.wai-file:hover{background:rgba(255,255,255,.13)}
+.wai-file-icon{
+  width:34px;height:34px;flex:0 0 34px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.12);font-size:15px;
+}
+.wai-file-body{min-width:0;display:flex;flex-direction:column}
+.wai-file-name{font-size:13px;font-weight:600;word-break:break-word}
+.wai-file-meta{font-size:10.5px;opacity:.7;margin-top:1px}
+
+.wai-media-save{
+  display:inline-flex;align-items:center;gap:5px;margin-bottom:4px;
+  font-size:10.5px;font-weight:600;opacity:.75;
+  color:inherit!important;text-decoration:none!important;
+}
+.wai-media-save:hover{opacity:1;text-decoration:underline!important}
+
 /* Reaction badge — sits on the bottom edge of the bubble like WhatsApp's */
 .wai-bubble{margin-bottom:6px}
 .wai-reactions{

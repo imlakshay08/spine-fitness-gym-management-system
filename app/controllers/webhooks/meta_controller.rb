@@ -137,6 +137,11 @@ class Webhooks::MetaController < ApplicationController
     phone = from.to_s.last(10)
     member = MstMembersList.find_by(mmbr_contact: phone)
 
+    # Photos, videos, documents, stickers and voice notes all arrive as a media
+    # id that has to be exchanged for a signed URL later. Keep the id, the mime
+    # type and (for documents) the original file name.
+    media = message[type].is_a?(Hash) ? message[type] : {}
+
     TrnWhatsappInbox.create!(
       wi_compcode:    'SF',
       wi_from_number: from,
@@ -145,7 +150,10 @@ class Webhooks::MetaController < ApplicationController
       wi_body:        body,
       wi_wamid:       wamid,
       wi_received_at: received_at,
-      wi_direction:   TrnWhatsappInbox::DIRECTION_IN
+      wi_direction:   TrnWhatsappInbox::DIRECTION_IN,
+      wi_media_id:    media['id'],
+      wi_media_mime:  media['mime_type'],
+      wi_media_name:  media['filename']
     )
 
     Rails.logger.info "[MetaWebhook] Incoming message from #{from}: #{body}"

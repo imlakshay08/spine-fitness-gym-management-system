@@ -82,6 +82,41 @@ module Meta
       file.close if defined?(file) && file.respond_to?(:close) && !file.closed?
     end
 
+    # Incoming media is never sent as a file: the webhook gives a media id, that
+    # id is exchanged for a short-lived signed URL, and the URL itself only
+    # serves bytes when called with the access token. Both hops happen here.
+    #
+    # Meta keeps uploaded media for about 30 days, after which the id stops
+    # resolving — old attachments will report as unavailable.
+    def self.download_media(media_id)
+      return nil if media_id.blank?
+
+      lookup = Net::HTTP.get_response(
+        URI("#{API_URL}/#{media_id}"),
+        'Authorization' => "Bearer #{ENV['WHATSAPP_TOKEN']}"
+      )
+      return nil unless lookup.is_a?(Net::HTTPSuccess)
+
+      meta = JSON.parse(lookup.body) rescue {}
+      url  = meta['url']
+      return nil if url.blank?
+
+      uri  = URI(url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      request = Net::HTTP::Get.new(uri)
+      request['Authorization'] = "Bearer #{ENV['WHATSAPP_TOKEN']}"
+      response = http.request(request)
+      return nil unless response.is_a?(Net::HTTPSuccess)
+
+      { data: response.body,
+        mime: meta['mime_type'].presence || response['content-type'].presence || 'application/octet-stream',
+        size: meta['file_size'] }
+    rescue StandardError => e
+      Rails.logger.error "[Meta] media #{media_id} download failed: #{e.class}: #{e.message}"
+      nil
+    end
+
     def self.send_text(phone:, message:)
       phone = phone.to_s.gsub(/\D/, "").last(10)
       return { http_code: 0, body: {}, raw: "Invalid phone" } unless phone.length == 10

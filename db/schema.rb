@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_25_140000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_28_120000) do
   create_table "biometric_id_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "allocation_compcode", limit: 12, default: "", null: false
     t.string "allocation_device_sn", limit: 50, default: "", null: false
@@ -435,6 +435,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_25_140000) do
     t.datetime "wi_seen_at", precision: nil
     t.string "wi_error", limit: 250
     t.string "wi_reaction_to", limit: 200
+    t.string "wi_media_id", limit: 200
+    t.string "wi_media_mime", limit: 100
+    t.string "wi_media_name"
     t.index ["wi_from_number"], name: "idx_from_number"
     t.index ["wi_reaction_to"], name: "idx_wa_inbox_reaction_to"
     t.index ["wi_received_at"], name: "idx_received_at"

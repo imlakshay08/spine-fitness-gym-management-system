@@ -6,28 +6,63 @@
      data-day="<%= wa_ist(item[:at]).to_date %>"
      data-day-label="<%= wa_day_label(item[:at]) %>">
 
-  <div class="wai-bubble wai-bubble-<%= item[:kind] %> <%= 'wai-bubble-failed' if item[:status].to_s.upcase == 'FAILED' %>">
+  <%
+    media    = item[:media]
+    kind     = item[:msg_type].to_s
+    is_sticker = kind == 'sticker'
+  %>
 
-    <% if item[:kind] == 'auto' %>
+  <div class="wai-bubble wai-bubble-<%= item[:kind] %>
+              <%= 'wai-bubble-failed' if item[:status].to_s.upcase == 'FAILED' %>
+              <%= 'wai-bubble-sticker' if is_sticker %>">
+
+    <% if item[:kind] == 'auto' && !is_sticker %>
       <span class="wai-tag wai-tag-auto" title="<%= item[:template] %>">
         <i class="fa-solid fa-bolt"></i> Automated
       </span>
-    <% elsif item[:kind] == 'staff' %>
+    <% elsif item[:kind] == 'staff' && !is_sticker %>
       <span class="wai-tag wai-tag-staff">
         <i class="fa-solid fa-headset"></i> <%= item[:author].presence || 'Staff' %>
       </span>
     <% end %>
 
-    <% if item[:media].present? %>
-      <a class="wai-attachment" href="<%= item[:media] %>" target="_blank" rel="noopener">
-        <i class="fa-solid fa-paperclip"></i> <%= item[:msg_type].presence&.humanize || 'Attachment' %>
-      </a>
+    <% if media.present? %>
+      <% case kind %>
+      <% when 'sticker' %>
+        <img class="wai-sticker" src="<%= media[:url] %>" alt="Sticker" loading="lazy">
+
+      <% when 'image' %>
+        <a class="wai-media-link" href="<%= media[:url] %>" target="_blank" rel="noopener" title="Open full size">
+          <img class="wai-photo" src="<%= media[:url] %>" alt="Photo" loading="lazy">
+        </a>
+
+      <% when 'video' %>
+        <video class="wai-video" controls preload="metadata" src="<%= media[:url] %>"></video>
+
+      <% when 'audio', 'voice' %>
+        <audio class="wai-audio" controls preload="none" src="<%= media[:url] %>"></audio>
+
+      <% else %>
+        <a class="wai-file" href="<%= media[:download] %>">
+          <span class="wai-file-icon"><i class="fa-solid fa-file-lines"></i></span>
+          <span class="wai-file-body">
+            <span class="wai-file-name"><%= media[:name].presence || kind.humanize %></span>
+            <span class="wai-file-meta"><%= media[:mime].presence || 'File' %> · tap to download</span>
+          </span>
+        </a>
+      <% end %>
+
+      <% if %w[image video sticker].include?(kind) %>
+        <a class="wai-media-save" href="<%= media[:download] %>">
+          <i class="fa-solid fa-download"></i> Save
+        </a>
+      <% end %>
     <% end %>
 
     <% if item[:body].present? %>
       <p class="wai-text"><%= item[:body] %></p>
-    <% elsif item[:media].blank? %>
-      <p class="wai-text wai-text-muted"><%= item[:msg_type].presence&.humanize || 'Unsupported' %> message</p>
+    <% elsif media.blank? && !is_sticker %>
+      <p class="wai-text wai-text-muted"><%= kind.presence&.humanize || 'Unsupported' %> message</p>
     <% end %>
 
     <div class="wai-meta">

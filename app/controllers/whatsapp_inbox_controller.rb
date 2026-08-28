@@ -132,7 +132,31 @@ class WhatsappInboxController < ApplicationController
     }
   end
 
+  # Streams an attachment from Meta on demand. The row id is the handle rather
+  # than Meta's media id, so the lookup is scoped to this company and no media
+  # id is exposed in the page. `disposition=attachment` forces a download.
+  def media
+    message = TrnWhatsappInbox.find_by(id: params[:id], wi_compcode: compcode)
+    return head(:not_found) if message.nil? || message.wi_media_id.blank?
+
+    file = Meta::SendWhatsapp.download_media(message.wi_media_id)
+    if file.nil?
+      # Meta only keeps media for about 30 days.
+      return render plain: 'This attachment is no longer available from WhatsApp.', status: :gone
+    end
+
+    send_data file[:data],
+              type:        message.wi_media_mime.presence || file[:mime],
+              filename:    message.wi_media_name.presence || default_media_name(message, file[:mime]),
+              disposition: params[:download].present? ? 'attachment' : 'inline'
+  end
+
   private
+
+  def default_media_name(message, mime)
+    ext = Rack::Mime::MIME_TYPES.key(mime.to_s.split(';').first).to_s.presence || ''
+    "whatsapp-#{message.id}#{ext}"
+  end
 
   def compcode
     session[:loggedUserCompCode].presence || 'SF'
@@ -178,6 +202,7 @@ class WhatsappInboxController < ApplicationController
     return message.wi_body.to_s.tr("\n", ' ') if message.wi_body.present?
 
     case message.wi_message_type.to_s
+    when 'sticker'        then '🩷 Sticker'
     when 'image'          then '📷 Photo'
     when 'video'          then '🎥 Video'
     when 'audio', 'voice' then '🎤 Voice message'
@@ -211,7 +236,7 @@ class WhatsappInboxController < ApplicationController
             kind:      'member',
             body:      message.wi_body,
             at:        message.wi_received_at,
-            media:     message.wi_media_url,
+            media:     media_for(message),
             msg_type:  message.wi_message_type,
             reactions: reactions[message.wi_wamid.to_s]
           }
@@ -270,10 +295,22 @@ class WhatsappInboxController < ApplicationController
       at:        message.wi_received_at,
       status:    message.wi_status.presence || 'SENT',
       error:     message.wi_error,
-      media:     message.wi_media_url,
+      media:     media_for(message),
       msg_type:  message.wi_message_type,
       reactions: reactions[message.wi_wamid.to_s]
     }
+  end
+
+  # Everything the bubble needs to show an attachment. nil when the message
+  # carries no media.
+  def media_for(message)
+    return nil if message.wi_media_id.blank?
+
+    { url:      "#{root_url}whatsapp_inbox/media/#{message.id}",
+      download: "#{root_url}whatsapp_inbox/media/#{message.id}?download=1",
+      mime:     message.wi_media_mime.to_s,
+      name:     message.wi_media_name.presence,
+      kind:     message.wi_message_type.to_s }
   end
 
   # Emoji reactions keyed by the wamid of the message they belong to. Members

@@ -187,6 +187,7 @@ Rails.application.routes.draw do
       get  :poll
       post :reply
     end
+    get 'media/:id', action: :media, on: :collection, as: :media
   end
   get   'cron/send_expiry_whatsapp'=>'cron#send_expiry_whatsapp'
   post "/webhooks/interakt" => "webhooks/interakt#receive"
