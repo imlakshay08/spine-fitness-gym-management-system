@@ -436,6 +436,25 @@
     el.input.style.height = Math.min(el.input.scrollHeight, 132) + 'px';
   }
 
+  /* An attachment older than ~30 days no longer resolves at Meta, which would
+     otherwise leave a broken-image icon in the thread. Image errors do not
+     bubble, so this listens in the capture phase. */
+  document.addEventListener('error', function (e) {
+    var img = e.target;
+    if (!img || !img.classList) return;
+    if (!img.classList.contains('wai-photo') && !img.classList.contains('wai-sticker')) return;
+
+    var note = document.createElement('p');
+    note.className = 'wai-text wai-text-muted';
+    note.textContent = img.classList.contains('wai-sticker')
+      ? 'Sticker no longer available'
+      : 'Photo no longer available';
+
+    var bubble = img.closest('.wai-bubble');
+    if (bubble) bubble.classList.remove('wai-bubble-sticker');
+    (img.closest('.wai-media-link') || img).replaceWith(note);
+  }, true);
+
   /* ── wiring ─────────────────────────────────────────────────────── */
 
   el.convList.addEventListener('click', function (e) {

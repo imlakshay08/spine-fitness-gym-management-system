@@ -9,18 +9,21 @@
   <%
     media    = item[:media]
     kind     = item[:msg_type].to_s
-    is_sticker = kind == 'sticker'
+    # Only strip the bubble when there is actually a sticker image to show.
+    # A sticker with no media (received before media was stored, or expired at
+    # Meta) still needs a normal bubble, or it renders as an empty black box.
+    sticker_image = kind == 'sticker' && media.present?
   %>
 
   <div class="wai-bubble wai-bubble-<%= item[:kind] %>
               <%= 'wai-bubble-failed' if item[:status].to_s.upcase == 'FAILED' %>
-              <%= 'wai-bubble-sticker' if is_sticker %>">
+              <%= 'wai-bubble-sticker' if sticker_image %>">
 
-    <% if item[:kind] == 'auto' && !is_sticker %>
+    <% if item[:kind] == 'auto' && !sticker_image %>
       <span class="wai-tag wai-tag-auto" title="<%= item[:template] %>">
         <i class="fa-solid fa-bolt"></i> Automated
       </span>
-    <% elsif item[:kind] == 'staff' && !is_sticker %>
+    <% elsif item[:kind] == 'staff' && !sticker_image %>
       <span class="wai-tag wai-tag-staff">
         <i class="fa-solid fa-headset"></i> <%= item[:author].presence || 'Staff' %>
       </span>
@@ -61,8 +64,10 @@
 
     <% if item[:body].present? %>
       <p class="wai-text"><%= item[:body] %></p>
-    <% elsif media.blank? && !is_sticker %>
-      <p class="wai-text wai-text-muted"><%= kind.presence&.humanize || 'Unsupported' %> message</p>
+    <% elsif media.blank? %>
+      <p class="wai-text wai-text-muted">
+        <%= kind == 'sticker' ? 'Sticker — not saved' : "#{kind.presence&.humanize || 'Unsupported'} message" %>
+      </p>
     <% end %>
 
     <div class="wai-meta">
