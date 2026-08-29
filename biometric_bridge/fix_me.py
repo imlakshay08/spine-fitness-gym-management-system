@@ -15,7 +15,7 @@ try:
     templates = conn.get_templates()
     my_template = None
     for t in templates:
-        if t.uid == '' and t.fid == 6:
+        if t.uid == 73 and t.fid == 6:
             my_template = t
             break
 
@@ -25,9 +25,9 @@ try:
         print(f"Found template: uid={my_template.uid} fid={my_template.fid} size={len(my_template.template)}")
         
         # Re-save with fid=0 (correct slot)
-        new_finger = Finger(uid='', fid=0, valid=1, template=my_template.template)
-        user_obj = User(uid='', name='', privilege=0, password='',
-                       group_id='', user_id='', card=0)
+        new_finger = Finger(uid=73, fid=0, valid=1, template=my_template.template)
+        user_obj = User(uid=73, name='Lakshay', privilege=0, password='',
+                       group_id='', user_id='71', card=0)
         conn.save_user_template(user=user_obj, fingers=[new_finger])
         print("Fixed! Try scanning now.")
 

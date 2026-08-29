@@ -3,8 +3,8 @@ from zk import ZK
 import requests
 from config import *
 
-RAILS_API_BASE = ""
-DEVICE_SN = ""
+RAILS_API_BASE = "https://spine-fitness.com"
+DEVICE_SN = "NFZ8253402448"
 
 # Get all ACTIVE mappings from DB (uid only)
 response = requests.get(

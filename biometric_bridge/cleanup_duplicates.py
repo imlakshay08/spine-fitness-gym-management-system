@@ -3,8 +3,8 @@ import requests
 from zk import ZK
 from config import *
 
-RAILS_API_BASE = ""
-DEVICE_SN = ""
+RAILS_API_BASE = "https://spine-fitness.com"
+DEVICE_SN = "NFZ8253402448"
 
 # Step 1: Get all active mappings from Rails
 response = requests.get(

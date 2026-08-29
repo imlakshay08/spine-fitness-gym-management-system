@@ -1,7 +1,7 @@
 # test_access.py
 from zk import ZK
 
-zk = ZK('', port=4370, timeout=5)
+zk = ZK('192.168.31.151', port=4370, timeout=5)
 conn = zk.connect()
 conn.disable_device()
 
