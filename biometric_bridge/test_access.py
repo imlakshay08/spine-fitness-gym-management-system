@@ -1,13 +1,10 @@
-# test_access.py
 from zk import ZK
+from config import *
 
-zk = ZK('192.168.31.151', port=4370, timeout=5)
+zk = ZK(DEVICE_IP, port=DEVICE_PORT, timeout=DEVICE_TIMEOUT)
 conn = zk.connect()
-conn.disable_device()
-
-users = conn.get_users()
-for u in users[:10]:  # just first 10
-    print(f"uid={u.uid} user_id={u.user_id} name={u.name} privilege={u.privilege} group_id={getattr(u, 'group_id', 'N/A')}")
-
-conn.enable_device()
-conn.disconnect()
+try:
+    for user in conn.get_users():
+        print(user.uid, user.user_id, user.name, user.privilege)
+finally:
+    conn.disconnect()

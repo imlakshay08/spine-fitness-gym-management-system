@@ -24,25 +24,6 @@ def _send_otp_on_mail_(email, subject, message, attachment_path = nil, attachmen
     end
   end
 end 
-def send_common_message(mobiles,messages,template_id)
-  api_key  = @api_key
-  routeid  = @routeid
-  senders  = @senders
-  contacts = mobiles;
-  sms_text = messages;
-  template = template_id
-  
-  sendURL = "https://api.oot.bz/api/v1/send?username=itcotp.trans&password=k7gx6&unicode=false&from=MEDEMP&to="+contacts+"&text="+sms_text+"&dltContentId=1107164438484105820"
-  ### sendURL  = "https://kutility.org/app/smsapi/index.php?key="+api_key+"&campaign=10728"+"&routeid="+routeid+"&type=text&contacts="+contacts+"&senderid="+senders+"&msg="+sms_text+"&template_id="+template;
-  begin
-  RestClient.get sendURL,:body=>''
-  rescue Exception => exc  
-    ### EXECUTE ERROR MESSAGE
-  end  
-
-end
-
-
 def _send_mail_attachment_(email,subject,bodys,printnames,pdfa,arg={})
      ###SET COMPANY WISE EMAIL:: IF BLANK THEN IT WILL SEND FROM DEFAULT SETTING####
      myfrommailed = nil

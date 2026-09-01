@@ -1,12 +1,12 @@
 class Webhooks::MetaController < ApplicationController
   skip_before_action :verify_authenticity_token
+  before_action :verify_meta_signature, only: :receive
 
   def verify
     mode      = params['hub.mode']
-    token     = params['hub.verify_token']
     challenge = params['hub.challenge']
 
-    if mode == 'subscribe' && token == ENV['WHATSAPP_WEBHOOK_TOKEN']
+    if mode == 'subscribe' && constant_time_equal?(params['hub.verify_token'], ENV['WHATSAPP_WEBHOOK_TOKEN'])
       render plain: challenge, status: :ok
     else
       head :forbidden
@@ -14,7 +14,7 @@ class Webhooks::MetaController < ApplicationController
   end
 
   def receive
-    body = JSON.parse(request.body.read)
+    body = JSON.parse(request.raw_post)
 
     entries = body.dig('entry') || []
     entries.each do |entry|
@@ -39,6 +39,40 @@ class Webhooks::MetaController < ApplicationController
   end
 
   private
+
+  # Meta signs every webhook delivery with the app secret. Without this check
+  # anyone who learns the URL can POST fake delivery receipts and fake inbound
+  # messages straight into the inbox.
+  #
+  # Rolls out the same way as the bridge token: with WHATSAPP_APP_SECRET unset
+  # nothing changes, unsigned calls are only logged. Set the secret (from
+  # Meta App Dashboard > Settings > Basic > App Secret) and mismatches are
+  # rejected. Grep the log for "[MetaWebhook] UNSIGNED" first — a correctly
+  # configured Meta app always signs.
+  def verify_meta_signature
+    secret = ENV['WHATSAPP_APP_SECRET'].to_s
+    return true if secret.empty?
+
+    header = request.headers['X-Hub-Signature-256'].to_s
+    expected = 'sha256=' + OpenSSL::HMAC.hexdigest('SHA256', secret, request.raw_post)
+
+    return true if constant_time_equal?(header, expected)
+
+    Rails.logger.warn "[MetaWebhook] UNSIGNED/INVALID signature from #{request.remote_ip}"
+    head :forbidden
+    false
+  end
+
+  def constant_time_equal?(given, expected)
+    given    = given.to_s
+    expected = expected.to_s
+    return false if given.empty? || expected.empty?
+
+    ActiveSupport::SecurityUtils.secure_compare(
+      ::Digest::SHA256.hexdigest(given),
+      ::Digest::SHA256.hexdigest(expected)
+    )
+  end
 
   def process_status(status)
     message_id = status['id']

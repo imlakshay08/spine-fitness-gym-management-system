@@ -3,7 +3,7 @@ include GlobalCodeGenerator
 class MemberListController < ApplicationController
     before_action :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token
+    include SoftCsrfProtection
     helper_method :currency_formatted,:year_month_days_formatted,:formatted_date,:format_oblig_date,:get_dob_calculate
     def index
         @compcodes      = session[:loggedUserCompCode] 
@@ -410,7 +410,7 @@ class MemberListController < ApplicationController
         mbm_compcode:       compcode,
         mbm_member_id:      member_id,
         mbm_device_user_id: device_user_id,
-        mbm_device_sn:      'NFZ8253402448',
+        mbm_device_sn:      primary_device_sn(compcode),
         mbm_is_active:      'Y'
       )
     end

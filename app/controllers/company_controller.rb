@@ -1,7 +1,7 @@
 class CompanyController < ApplicationController
     before_action :require_login  
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token
+    include SoftCsrfProtection
     def index
         @compcodes      =  session[:loggedUserCompCode]
         @logedId        =  session[:autherizedUserId]
@@ -466,21 +466,21 @@ class CompanyController < ApplicationController
             passd       = passds.to_s.delete(' ')
             @isPassword = passd
             @isUserId   = user
-            xpassword   = Digest::MD5.hexdigest(passd)
+            pwd_attrs   = User.password_attributes(passd)
             @LogUser    = User.where("username=? ",user)
             @receiver   = params[:cmp_companyname].to_s
             emailId     = params[:cmp_email].to_s
             mobileNumb  = params[:cmp_cell_number].to_s
             bodys       = mailFormats
             if @LogUser.count >0
-                    @LogUser.update(:usercompcode=>compcode,:username=>user,:userpassword=>xpassword,:userpermission=>permsiions,:phonenumber=>mobileNumb,:email=>emailId,:spspermission=>'',:product_prefix=>'',:product_length=>0,:usertype=>'adm')
+                    @LogUser.update({:usercompcode=>compcode,:username=>user,:userpermission=>permsiions,:phonenumber=>mobileNumb,:email=>emailId,:spspermission=>'',:product_prefix=>'',:product_length=>0,:usertype=>'adm'}.merge(pwd_attrs))
                     isUserFlg = true
                     UserMailMailer.generatelogin_confrimation(passd,user,emails,bodys).deliver
                     if ismobiles!=nil
                      UserMailMailer.send_sms_to_users(ismobiles,user,passd).deliver
                     end
             else
-                    @User = User.new(:usercompcode=>compcode,:username=>user,:userpassword=>xpassword,:userpermission=>permsiions,:phonenumber=>mobileNumb,:email=>emailId,:spspermission=>'',:product_prefix=>'',:product_length=>0,:usertype=>'adm')
+                    @User = User.new({:usercompcode=>compcode,:username=>user,:userpermission=>permsiions,:phonenumber=>mobileNumb,:email=>emailId,:spspermission=>'',:product_prefix=>'',:product_length=>0,:usertype=>'adm'}.merge(pwd_attrs))
                     if @User.save
                        isUserFlg = true
                        create_configuration_sale_type('S',compcode)

@@ -7,6 +7,7 @@
 	<meta name="description" content="Spine Fitness" />
 	<meta name="author" content="Lakshay Tyagi" />
 	<title>Spine Fitness</title>
+<%= csrf_meta_tags %>
 <script>
   (function(){
     var hidden = false;
@@ -136,6 +137,8 @@
     <% if controller.controller_name !='login' %> 
       <!-- start js include path -->
       <script src="<%=root_url%>assets/plugins/jquery/jquery.min.js"></script>
+      <!-- sends the CSRF token on every same-origin $.ajax call -->
+      <script src="<%=root_url%>assets/js/csrf.js"></script>
       <script src="<%=root_url%>assets/plugins/popper/popper.js"></script>
       <script src="<%=root_url%>assets/plugins/jquery-blockui/jquery.blockui.min.js"></script>
       <script src="<%=root_url%>assets/plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
@@ -186,6 +189,8 @@
 <% if controller.controller_name =='login' %>
 <!-- start js include path -->
 	<script src="<%=root_url%>assets/plugins/jquery/jquery.min.js"></script>
+      <!-- sends the CSRF token on every same-origin $.ajax call -->
+      <script src="<%=root_url%>assets/js/csrf.js"></script>
 	<!-- bootstrap -->
 	<script src="<%=root_url%>assets/plugins/bootstrap/js/bootstrap.min.js"></script>
 	<!-- material -->

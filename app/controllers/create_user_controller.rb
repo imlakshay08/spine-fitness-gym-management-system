@@ -1,7 +1,7 @@
 class CreateUserController < ApplicationController
     before_action :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token, only: [:index,:ajax_process,:search,:create_user,:user_list]
+    include SoftCsrfProtection
     include ErpModule::Common
     helper_method :currency_formatted,:formatted_date,:year_month_days_formatted,:get_user_global_access_list
  def index
@@ -222,8 +222,10 @@ class CreateUserController < ApplicationController
     else
        formnames  = formname
     end
-    iswhere    = "ua_compcode='#{compCodes}' AND ua_userid='#{userid}' AND UPPER(ua_subheading)=UPPER('#{subheading}') AND UPPER(ua_formname)=UPPER('#{formnames}') AND UPPER(ua_heading)=UPPER('#{headername}')"
-    accesobj   = TrnUserAccess.where(iswhere)
+    accesobj   = TrnUserAccess.where(
+      "ua_compcode = ? AND ua_userid = ? AND UPPER(ua_subheading) = UPPER(?) AND UPPER(ua_formname) = UPPER(?) AND UPPER(ua_heading) = UPPER(?)",
+      compCodes, userid, subheading, formnames, headername
+    )
     if accesobj.present?
       if myactions.present?
         accesobj.update_all(:ua_action => myactions)
@@ -281,14 +283,14 @@ end
  end
  def user_list
     @compCodes    = session[:loggedUserCompCode]
-     iswhere       = "username <>'' "
+     relation      = User.where("username <>'' ")
      if params[:requestserver] !=nil && params[:requestserver] !=''
        session[:req_search_username] = nil
      end
      search_username   = params[:search_username] !=nil && params[:search_username] !='' ? params[:search_username] : session[:req_search_username]
     
      if search_username !=nil && search_username !=''
-        iswhere       += " AND username LIKE '%#{search_username}%'"
+        relation      = relation.where("username LIKE ?", "%#{search_username}%")
         session[:req_search_username] = search_username
         @search_username = search_username
      end
@@ -297,7 +299,7 @@ end
         else
         pages = 1
         end
-       @AllUsers    = User.where(iswhere).paginate(:page =>pages,:per_page => 10).order("id asc")
+       @AllUsers    = relation.paginate(:page =>pages,:per_page => 10).order("id asc")
 end
 
 private
@@ -339,8 +341,7 @@ def reset_user_password
 
   if @isUserdetail
     if new_pass 
-      newpassword = Digest::MD5.hexdigest(new_pass)
-      @isUserdetail.update(userpassword: newpassword)
+      @isUserdetail.set_password(new_pass)
       isFlags = true
       message = "Password changed successfully."
       # modulename = "Admin Tools"
@@ -373,10 +374,9 @@ def user_params
     params[:product_prefix] = ''
     params[:product_length] = 0
 
-      xpassword = nil
       if userpassword !='' && userpassword !=nil
-        xpassword = Digest::MD5.hexdigest(userpassword)
-        params[:userpassword] = xpassword
+        # New accounts are bcrypt from the start; the legacy column is blanked.
+        User.password_attributes(userpassword).each { |k, v| params[k] = v }
       end
       if mid.to_i >0
         assignedmodule = user_detail(mid)
@@ -393,13 +393,13 @@ def user_params
     end
        if mid.to_i >0
             if xpassword != nil && xpassword != ''
-               params.permit(:usercompcode,:userlocation,:username,:firstname,:userpassword,:usertype,:userimage,:phonenumber,:userdate,:faculty,:listmodule)
+               params.permit(:usercompcode,:userlocation,:username,:firstname,:userpassword,:password_digest,:using_bcrypt,:usertype,:userimage,:phonenumber,:userdate,:faculty,:listmodule)
             else
               params.permit(:usercompcode,:userlocation,:username,:firstname,:usertype,:userimage,:phonenumber,:userdate,:faculty,:listmodule)
             end
 
        else
-             params.permit(:usercompcode,:userlocation,:username,:firstname,:userpassword,:usertype,:userimage,:phonenumber,:userdate,:faculty,:listmodule)
+             params.permit(:usercompcode,:userlocation,:username,:firstname,:userpassword,:password_digest,:using_bcrypt,:usertype,:userimage,:phonenumber,:userdate,:faculty,:listmodule)
        end
 
  end
@@ -411,8 +411,10 @@ def get_user_global_access_list(userid,formname,headname="",actionname="",subhea
     else
        formnames  = formname
     end       
-  iswhere    = "ua_compcode='#{compCodes}' AND ua_userid='#{userid}' AND UPPER(ua_formname)=UPPER('#{formnames}') AND UPPER(ua_heading)=UPPER('#{headname}') AND UPPER(ua_subheading)=UPPER('#{subheading}')"
-  accesobj   = TrnUserAccess.where(iswhere).first
+  accesobj   = TrnUserAccess.where(
+    "ua_compcode = ? AND ua_userid = ? AND UPPER(ua_formname) = UPPER(?) AND UPPER(ua_heading) = UPPER(?) AND UPPER(ua_subheading) = UPPER(?)",
+    compCodes, userid, formnames, headname, subheading
+  ).first
   return accesobj
 end
  private

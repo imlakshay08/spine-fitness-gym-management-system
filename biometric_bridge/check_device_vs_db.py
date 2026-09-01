@@ -3,12 +3,10 @@ from zk import ZK
 import requests
 from config import *
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
-
 # Get all ACTIVE mappings from DB (uid only)
 response = requests.get(
     f"{RAILS_API_BASE}/api/all_mappings",
+    headers=API_HEADERS,
     params={"compcode": COMP_CODE, "device_sn": DEVICE_SN},
     timeout=60
 )

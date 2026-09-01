@@ -1,6 +1,7 @@
 # app/controllers/webhooks/interakt_controller.rb
 class Webhooks::InteraktController < ApplicationController
   skip_before_action :verify_authenticity_token
+  before_action :ensure_enabled
 
   def receive
     payload = JSON.parse(request.body.read)
@@ -35,5 +36,20 @@ class Webhooks::InteraktController < ApplicationController
     end
 
     head :ok
+  end
+
+  private
+
+  # Interakt was replaced by the Meta Cloud API and this endpoint is no longer
+  # called, but it was still open to the internet and could rewrite delivery
+  # status on any message whose id an attacker could guess. It now answers 404
+  # unless INTERAKT_WEBHOOK_ENABLED=true, so it can be turned back on without a
+  # deploy if the legacy provider is ever needed again.
+  def ensure_enabled
+    return true if ENV['INTERAKT_WEBHOOK_ENABLED'].to_s.downcase == 'true'
+
+    Rails.logger.warn "[InteraktWebhook] call to disabled endpoint from #{request.remote_ip}"
+    head :not_found
+    false
   end
 end

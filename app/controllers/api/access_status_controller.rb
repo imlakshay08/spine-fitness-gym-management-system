@@ -1,5 +1,6 @@
 class Api::AccessStatusController < ApplicationController
   skip_before_action :verify_authenticity_token
+  include BridgeAuthentication
 
   def index
     compcode = params[:compcode]

@@ -1,7 +1,7 @@
 class StockListController < ApplicationController
     before_action      :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token,:only=>[:index,:ajax_process]
+    include SoftCsrfProtection
     helper_method :check_existing_uses
     def index
         @compcodes      = session[:loggedUserCompCode] 
@@ -159,26 +159,28 @@ class StockListController < ApplicationController
             #  session[:req_category_list] = nil
           # end
           filter_search = params[:stock_list] !=nil && params[:stock_list] != '' ? params[:stock_list].to_s.strip : session[:req_stock_list].to_s.strip       
-          iswhere       = "sl_compcode ='#{@compcodes}'"
+          relation      = MstStockList.where(sl_compcode: @compcodes)
           if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( sl_name LIKE '%#{filter_search}%' OR sl_descp LIKE '%#{filter_search}%')"
+            like = "%#{filter_search}%"
+            relation = relation.where("sl_name LIKE ? OR sl_descp LIKE ?", like, like)
             @stock_list_search       = filter_search
             session[:req_stock_list] = filter_search
           end     
         
-          stdob =  MstStockList.where(iswhere).order("sl_name ASC")
+          stdob =  relation.order("sl_name ASC")
           return stdob
 
     end
 
     def print_stock_list
         @compcodes      = session[:loggedUserCompCode] 
-        iswhere         = "sl_compcode ='#{@compcodes}'"
+        relation        = MstStockList.where(sl_compcode: @compcodes)
         filter_search   = session[:req_stock_list]   
         if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( sl_name LIKE '%#{filter_search}%' OR sl_descp LIKE '%#{filter_search}%')"
+            like = "%#{filter_search}%"
+            relation = relation.where("sl_name LIKE ? OR sl_descp LIKE ?", like, like)
           end    
-        stdob =  MstStockList.where(iswhere).order("sl_name ASC")
+        stdob =  relation.order("sl_name ASC")
         return stdob
     end
 

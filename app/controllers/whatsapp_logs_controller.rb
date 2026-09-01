@@ -1,7 +1,7 @@
 class WhatsappLogsController < ApplicationController
   before_action :require_login
   before_action :get_user_access_permissions
-  skip_before_action :verify_authenticity_token, only: [:index]
+  include SoftCsrfProtection
 
   def index
     @compcodes = session[:loggedUserCompCode]

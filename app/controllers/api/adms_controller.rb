@@ -1,6 +1,8 @@
 class Api::AdmsController < ApplicationController
   DEVICE_ZONE = ActiveSupport::TimeZone['Asia/Kolkata'].freeze
   skip_before_action :verify_authenticity_token
+  before_action :verify_known_device
+
 
   def getrequest
    render plain: "OK"
@@ -16,7 +18,7 @@ class Api::AdmsController < ApplicationController
 
     # Extract device SN from header line
     sn_match = body.match(/SN=([^\s&\r\n]+)/i)
-    device_sn = sn_match ? sn_match[1] : 'NFZ8253402448'
+    device_sn = sn_match ? sn_match[1] : ENV['DEVICE_SERIAL'].to_s
 
     body.each_line do |line|
       line = line.strip
@@ -44,6 +46,29 @@ class Api::AdmsController < ApplicationController
   end
 
   private
+  # The ZKTeco push protocol has no way to send a bearer token, so the serial
+  # the device reports is the only thing available to check. Set DEVICE_SERIALS
+  # (comma separated) to restrict these endpoints to your own hardware; leave
+  # it unset and every call is allowed but logged, exactly as before.
+  #
+  # If attendance only ever arrives through the Python bridge, this path is
+  # unused: set DEVICE_SERIALS to a value no device reports, or drop the
+  # /iclock routes, to close it entirely.
+  def verify_known_device
+    allowed = ENV['DEVICE_SERIALS'].to_s.split(',').map(&:strip).reject(&:empty?)
+    return true if allowed.empty?
+
+    reported = request.query_parameters['SN'].presence ||
+               request.raw_post.to_s[/SN=([^\s&
+]+)/i, 1]
+
+    return true if reported.present? && allowed.include?(reported)
+
+    Rails.logger.warn "[ADMS] REJECTED #{request.path} from #{request.remote_ip} (SN=#{reported.inspect})"
+    head :unauthorized
+    false
+  end
+
   def process_attendance(device_user_id, punch_time, device_sn)
     mapping = TrnMemberBiometricMapping.find_by(
       mbm_compcode:       'SF',

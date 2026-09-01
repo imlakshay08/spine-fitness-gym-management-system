@@ -44,16 +44,20 @@ Rails.application.configure do
 
   # Suppress logger output for asset requests.
   config.assets.quiet = true
-  config.action_mailer.delivery_method = :smtp
- # SMTP settings for gmail
- config.action_mailer.smtp_settings = {
-  :address              => "smtp.sendgrid.net",
-  :port                 => 587,
-  :user_name            => 'apikey',
-  :password             => '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',
-  :authentication       => "plain",
-  :enable_starttls_auto => true
- }
+  # The gym product sends no email; the only outbound channel is WhatsApp via
+  # Meta Cloud API. SMTP is configured only when the environment supplies
+  # credentials, so no key is carried in source.
+  if ENV['SMTP_ADDRESS'].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      :address              => ENV['SMTP_ADDRESS'],
+      :port                 => ENV.fetch('SMTP_PORT', 587).to_i,
+      :user_name            => ENV['SMTP_USERNAME'],
+      :password             => ENV['SMTP_PASSWORD'],
+      :authentication       => "plain",
+      :enable_starttls_auto => true
+    }
+  end
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
   # config.file_watcher = ActiveSupport::EventedFileUpdateChecker

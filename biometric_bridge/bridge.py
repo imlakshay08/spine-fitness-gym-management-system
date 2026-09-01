@@ -7,12 +7,11 @@ from datetime import datetime, date
 from config import *
 from sync_access import sync_device_access
 
-RAILS_API_BASE = "https://spine-fitness.com"
-
 def send_to_rails(payload):
     try:
         response = requests.post(
             RAILS_API_URL,
+            headers=API_HEADERS,
             json=payload,
             timeout=15
         )
@@ -36,8 +35,9 @@ def heartbeat_scheduler():
         try:
             requests.post(
                 f"{RAILS_API_BASE}/api/bridge_heartbeat",
+                headers=API_HEADERS,
                 json={
-                    "device_sn": "NFZ8253402448",
+                    "device_sn": DEVICE_SN,
                     "compcode": COMP_CODE,
                     "timestamp": datetime.now().isoformat(),
                     "bridge_version": "2.0"
@@ -59,6 +59,7 @@ def instant_sync_watcher():
         try:
             resp = requests.get(
                 f"{RAILS_API_BASE}/api/sync_needed",
+                headers=API_HEADERS,
                 params={"compcode": COMP_CODE},
                 timeout=10
             ).json()
@@ -80,6 +81,8 @@ def sync_device_time(conn):
         print(f"Could not sync device time: {e}")
 
 def main():
+    require_settings()
+
     # Start sync scheduler in background thread
     sync_thread = threading.Thread(target=sync_scheduler, daemon=True)
     sync_thread.start()

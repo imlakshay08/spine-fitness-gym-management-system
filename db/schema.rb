@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_28_120000) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_30_120000) do
   create_table "biometric_id_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", options: "ENGINE=MyISAM", force: :cascade do |t|
     t.string "allocation_compcode", limit: 12, default: "", null: false
     t.string "allocation_device_sn", limit: 50, default: "", null: false
@@ -503,6 +503,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_28_120000) do
     t.string "usercategory", default: "", null: false
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
+    t.string "password_digest", limit: 100
+    t.boolean "using_bcrypt", default: false, null: false
   end
 
 end

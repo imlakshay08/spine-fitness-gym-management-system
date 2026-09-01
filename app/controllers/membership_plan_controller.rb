@@ -1,7 +1,7 @@
 class MembershipPlanController < ApplicationController
     before_action      :require_login
     before_action      :get_user_access_permissions
-    skip_before_action :verify_authenticity_token,:only=>[:index,:ajax_process]
+    include SoftCsrfProtection
 
     def index
         @compcodes      = session[:loggedUserCompCode] 
@@ -171,14 +171,14 @@ class MembershipPlanController < ApplicationController
           # end
         filter_search = params[:membership_plan] !=nil && params[:membership_plan] != '' ? params[:membership_plan].to_s.strip : session[:req_membership_plan].to_s.strip       
 
-          iswhere       = "plan_compcode ='#{@compcodes}'"
+          relation      = MstMembershipPlan.where(plan_compcode: @compcodes)
           if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( plan_name LIKE '%#{filter_search}%')"
+            relation = relation.where("plan_name LIKE ?", "%#{filter_search}%")
             @membership_plan_search       = filter_search
             session[:req_membership_plan] = filter_search
           end     
         
-          stdob =  MstMembershipPlan.where(iswhere).order("plan_name ASC")
+          stdob =  relation.order("plan_name ASC")
           return stdob
 
     end

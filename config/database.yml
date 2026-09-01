@@ -5,7 +5,11 @@
 #   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
 default: &default
   adapter: mysql2
-  encoding: utf8
+  # utf8mb4, not utf8: MySQL maps "utf8" to utf8mb3, which cannot hold 4-byte
+  # characters. Every table here is already utf8mb4, so a utf8mb3 connection
+  # silently rejected emoji (👍 🙏 🔥) coming in from WhatsApp. Production
+  # already sets utf8mb4 below.
+  encoding: utf8mb4
   pool: 5
   username: root
   password:
@@ -14,14 +18,14 @@ default: &default
 
 development:
   <<: *default
-  database: spinefitness_bckup2
+  database: spinefitness_bckup5
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: spinefitness_bckup2
+  database: spinefitness_bckup5
 
 production:
   adapter: mysql2

@@ -22,13 +22,20 @@ class ApplicationController < ActionController::Base
        # (API client, curl, some proxies) would otherwise fail the insert and
        # 500 the action that had already succeeded.
        deviceid   = request.user_agent.presence || 'Unknown'
-       userid     = session[:autherizedUserId]
+       # NOT NULL, and there is no logged-in user on a failed login.
+       userid     = session[:autherizedUserId].presence || 'anonymous'
        cdate      = get_local_dated()
        ctime      = get_local_time() 
        if event !=nil && event!='' && description!=nil && description!='' && modulename!=nil && modulename!=''
+         # ad_compcode is NOT NULL. A failed login has no company in session
+         # yet, so fall back rather than raising — and never let an audit
+         # write fail the request it is recording.
+         compcodes = compcodes.presence || 'UNKNOWN'
          trnsobj  = TrnAuditTrial.new(:ad_compcode=>compcodes,:ad_event=>event,:ad_module=>modulename,:ad_description=>description,:ad_date=>cdate,:ad_time=>ctime,:ad_user=>userid,:ad_ip=>ipaddress,:ad_device_id=>deviceid,:ad_path=>originlpth)
-         if trnsobj.save
-           ###########
+         begin
+           trnsobj.save
+         rescue StandardError => e
+           Rails.logger.error "[Audit] could not write TrnAuditTrial: #{e.class}: #{e.message}"
          end
       end
    end
@@ -43,13 +50,20 @@ class ApplicationController < ActionController::Base
        # (API client, curl, some proxies) would otherwise fail the insert and
        # 500 the action that had already succeeded.
        deviceid   = request.user_agent.presence || 'Unknown'
-       userid     = session[:autherizedUserId]
+       # NOT NULL, and there is no logged-in user on a failed login.
+       userid     = session[:autherizedUserId].presence || 'anonymous'
        cdate      = get_local_dated()
        ctime      = get_local_time() 
        if event !=nil && event!='' && description!=nil && description!='' && modulename!=nil && modulename!=''
+         # ad_compcode is NOT NULL. A failed login has no company in session
+         # yet, so fall back rather than raising — and never let an audit
+         # write fail the request it is recording.
+         compcodes = compcodes.presence || 'UNKNOWN'
          trnsobj  = TrnLoginDatum.new(:ad_compcode=>compcodes,:ad_event=>event,:ad_module=>modulename,:ad_description=>description,:ad_date=>cdate,:ad_time=>ctime,:ad_user=>userid,:ad_ip=>ipaddress,:ad_device_id=>deviceid,:ad_path=>originlpth)
-         if trnsobj.save
-           ###########
+         begin
+           trnsobj.save
+         rescue StandardError => e
+           Rails.logger.error "[Audit] could not write TrnLoginDatum: #{e.class}: #{e.message}"
          end
       end
    end
@@ -348,29 +362,19 @@ def check_global_date_difference(start_date, end_date,lwm=0,status="")
    global_user_access_list();
  end
  
- def global_email_configs_mail
-      @globalEmail = {
-  :host   => "smtp.gmail.com",
-  :port      => 587,
-  :username => "info.inquisitorinfosoft@gmail.com",
-  :password  => "fsbxrkspkyexgrnu",
-  :domain    => "gmail.com"
-}
-     
- end
   def current_user
    compcode =  session[:loggedUserCompCode]
    secured_login_passd = session[:SECURED_LOGIN_CHK]!=nil && session[:SECURED_LOGIN_CHK]!='' ? session[:SECURED_LOGIN_CHK] : nil
    isloggeduserid      = session[:logedUserId]!=nil && session[:logedUserId]!='' ? session[:logedUserId] : 0
    
-   global_email_configs_mail()
-
    @ListGlobalModule    = MstListModule.where("lm_compcode = ? AND lm_status='Y'",compcode).order("lm_modules ASC")
    get_user_access_permissions()
    if isloggeduserid
        curr_user  = User.where("id=?",isloggeduserid)
        if curr_user.length >0
-           dbpassword =   curr_user[0].userpassword
+           # Whichever column actually holds the password now — this keeps
+           # working across the MD5 -> bcrypt upgrade without logging anyone out.
+           dbpassword =   curr_user[0].secured_login_check_value
             if secured_login_passd!=nil && secured_login_passd!='' && dbpassword !=nil && dbpassword!='' && dbpassword == secured_login_passd
               @securedlogged = true
             end
@@ -619,6 +623,27 @@ end
   end
 
   private
+  # The serial of the biometric device this company uses.
+  #
+  # It used to be a string literal in three controllers, which put the gym's
+  # hardware id in a public repository. DEVICE_SERIAL overrides it; with
+  # nothing set it falls back to whatever serial the bridge last reported, so
+  # removing the literal did not require a deploy-time env var to be in place.
+  def primary_device_sn(compcode = nil)
+    compcode ||= session[:loggedUserCompCode]
+    @primary_device_sn ||= begin
+      ENV['DEVICE_SERIAL'].presence ||
+        TrnBridgeHeartbeat.where(bh_compcode: compcode)
+                          .order(bh_last_seen: :desc).limit(1)
+                          .pluck(:bh_device_sn).first.presence ||
+        TrnMemberBiometricMapping.where(mbm_compcode: compcode)
+                                 .where.not(mbm_device_sn: [nil, ''])
+                                 .order(id: :desc).limit(1)
+                                 .pluck(:mbm_device_sn).first.to_s
+    end
+  end
+
+  private
   def process_unlinks_the_files(path_to_file)
       File.delete(path_to_file) if File.exist?(path_to_file)
   end
@@ -657,103 +682,6 @@ end
   end
 
 
-  private
-    def process_files_pos(attfile, currfile, cdirect)
-      compcodex     = session[:loggedUserCompCode].to_s.present? ? session[:loggedUserCompCode] : "IHM"
-      new_file_name = nil    
-     if attfile.present?
-     #if params[:mid].to_i > 0 && currfile.to_s.present?
-            #Delete the existing file before processing the new one
-             #storage_path = "#{compcodex}/#{cdirect}"
-            #bunny_delete_storage_file(currfile, storage_path)
-           #end
-
-          if attfile.start_with?("data:image/")
-               
-               # Handle Base64 encoded image
-               base64_image = attfile.split(",").last
-               image_data   = Base64.decode64(base64_image)
-               file_type    = attfile.match(/data:image\/(.*?);/)[1]
-               new_file_name = "#{Time.now.to_i}.#{file_type}"
-               storage_path  = "#{compcodex}/#{cdirect}"
-               begin
-                    # Code that might raise an error
-                    responses = process_storage_to_bunny(new_file_name, image_data, storage_path) 
-                    if responses
-                         
-                         return new_file_name                                              
-                    end  
-                    rescue => e
-                         new_file_name =  "Error: #{e.message}"
-                         # # Handling the error
-                         # new_file_name =  "Error: #{e.message}"
-                         # return new_file_name
-
-                    end
-                 
-              
-          end
-     end
-    
-
-    end
-
-
-    private
-    def process_without_base64_files(attfile, currfile, cdirect)
-      compcodex     = session[:loggedUserCompCode].to_s.present? ? session[:loggedUserCompCode] : "IHM"
-      new_file_name = ''
-     if attfile.present?
-     
-               file_name     =  attfile.original_filename  if  ( attfile !='')
-               files          =  attfile.read
-               file_type     =  file_name.split('.').last
-               ext_file      =  Time.now.to_i    
-               new_file_name =  "#{ext_file}." + file_type                           
-               storagepath  = "#{compcodex}/#{cdirect}"
-               
-               # Upload to Bunny.net                                 
-               responses = process_storage_to_bunny(new_file_name, files, storagepath) 
-               if responses && responses["HttpCode"] == 201
-                    return new_file_name   
-               end             
-                         
-                    
-     end
-     return new_file_name
-    end
-
-    
-    ########BUNY CONNECTION FILE ##########
-
-  def process_storage_to_bunny(file_name, file_content,storage_zone)
-     base_uri     = 'storage.bunnycdn.com'
-     access_key   = '52525a0c-43cc-4681-bed88fbebfa6-34f3-462d'
-     url          = "#{base_uri}/ihm-inqerp/#{storage_zone}/#{file_name}"
-     headers = {
-       'AccessKey' => access_key,
-       'Accept' => 'application/json',
-       'Content-Type' => 'application/octet-stream'
-     }
-     responses =  RestClient.put(url, file_content, headers)
-     return responses
-       
-   end
-   def bunny_delete_storage_file(file_name,storage_zone)
-      base_uri     = 'storage.bunnycdn.com'
-      access_key   = '52525a0c-43cc-4681-bed88fbebfa6-34f3-462d'
-      url          = "#{base_uri}/ihm-inqerp/#{storage_zone}/#{file_name}"
-     headers = {
-       'AccessKey' => access_key,
-       'Accept' => 'application/json',
-       'Content-Type' => 'application/octet-stream'
-     }
-     responses =  RestClient.delete(url,headers)
-     return responses
-       
-   end
-  
-  ########## END BUNY CONNECTION FILE #########
 
    ######## START USER ACCESS MODULE DATA ###########
    #### USE for inside of contoller ###########
@@ -769,7 +697,7 @@ end
      acionnameselected   = self.action_name
      isloggeduserid   = session[:logedUserId]!=nil && session[:logedUserId]!='' ? session[:logedUserId] : 0
      compCodes        = session[:loggedUserCompCode]
-     tnsbs            = TrnUserAccess.where("ua_compcode =? AND ua_userid =? AND ua_formname ='#{controllername}'",compCodes,isloggeduserid).first
+     tnsbs            = TrnUserAccess.where("ua_compcode =? AND ua_userid =? AND ua_formname =?",compCodes,isloggeduserid,controllername).first
      if tnsbs.present?
                if tnsbs.ua_action!=nil && tnsbs.ua_action !=''
                    newrights = tnsbs.ua_action.to_s.split(",")

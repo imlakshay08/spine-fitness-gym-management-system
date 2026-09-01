@@ -60,6 +60,10 @@ if session[:logedUserId].present? then
     session[:facultyId]                  = nil
       session[:sess_search_login] = nil
  end
+# Clearing keys one by one left the session record itself alive, so anyone
+# holding the old session id (a shared machine, a copied cookie) kept a usable
+# handle. reset_session throws the whole session away and issues a new id.
+reset_session
 redirect_to useurl
 end
 end

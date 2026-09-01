@@ -5,8 +5,6 @@ from zk.finger import Finger
 import requests
 from config import *
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
 MY_DEVICE_USER_ID = "71"  # your device user id
 
 def block_me():
@@ -47,6 +45,7 @@ def block_me():
         ]
         response = requests.post(
             f"{RAILS_API_BASE}/api/biometric_mappings/save_template",
+            headers=API_HEADERS,
             json={
                 "compcode": "SF",
                 "device_user_id": MY_DEVICE_USER_ID,

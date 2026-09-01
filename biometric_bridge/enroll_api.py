@@ -11,9 +11,6 @@ from sync_access import sync_device_access
 app = Flask(__name__)
 CORS(app)  # allow browser requests from any origin
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
-
 # Single global lock — only one enrollment at a time, gym-wide
 enrollment_lock = threading.Lock()
 
@@ -32,6 +29,7 @@ def get_next_uid_and_user_id(conn, compcode):
     try:
         resp = req.get(
             f"{RAILS_API_BASE}/api/max_ids",
+            headers=API_HEADERS,
             params={"compcode": compcode, "device_sn": DEVICE_SN},
             timeout=15
         ).json()
@@ -52,6 +50,7 @@ def get_next_uid_and_user_id(conn, compcode):
 def allocate_next_ids(compcode):
     resp = req.post(
         f"{RAILS_API_BASE}/api/biometric_mappings/allocate_ids",
+        headers=API_HEADERS,
         json={"compcode": compcode, "device_sn": DEVICE_SN},
         timeout=15
     ).json()
@@ -80,6 +79,7 @@ def enroll():
         # Step 1: Find all existing mappings for this member and delete from device
         existing_mappings = req.get(
             f"{RAILS_API_BASE}/api/member_mappings",
+            headers=API_HEADERS,
             params={"compcode": compcode, "member_id": member_id},
             timeout=30
         ).json().get("mappings", [])
@@ -96,6 +96,7 @@ def enroll():
         # Step 2: Deactivate all old mappings in Rails
         deact_resp = req.post(
             f"{RAILS_API_BASE}/api/member_mappings/deactivate_all",
+            headers=API_HEADERS,
             json={"compcode": compcode, "member_id": str(member_id)},
             timeout=30
         )
@@ -114,6 +115,7 @@ def enroll():
         # Step 4: Save new mapping to Rails
         req.post(
             f"{RAILS_API_BASE}/api/biometric_mappings",
+            headers=API_HEADERS,
             json={
                 'compcode': compcode, 'member_id': str(member_id),
                 'device_user_id': new_device_user_id,

@@ -3,7 +3,7 @@ include GlobalCodeGenerator
 class IssueAmountController < ApplicationController
     before_action      :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token,:only=>[:index,:ajax_process]
+    include SoftCsrfProtection
     helper_method :get_course_detail,:get_latest_subscription, :check_active_subscription, :calculate_end_date, :subscription_status
 
     def index
@@ -211,14 +211,14 @@ class IssueAmountController < ApplicationController
             #  session[:req_faculty_list] = nil
           # end
           filter_search = params[:issue_amount] !=nil && params[:issue_amount] != '' ? params[:issue_amount].to_s.strip : session[:req_issue_amount].to_s.strip       
-          iswhere       = "ia_compcode ='#{@compcodes}'"
+          relation      = TrnIssueAmount.where(ia_compcode: @compcodes)
           if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( ia_code LIKE '%#{filter_search}%' )"
+            relation = relation.where("ia_code LIKE ?", "%#{filter_search}%")
             @issue_amount_search       = filter_search
             session[:req_issue_amount] = filter_search
           end    
           
-        stdob =  TrnIssueAmount.where(iswhere)
+        stdob =  relation
         return stdob
     end
 

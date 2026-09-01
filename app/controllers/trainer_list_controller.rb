@@ -3,7 +3,7 @@ include GlobalCodeGenerator
 class TrainerListController < ApplicationController
     before_action :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token
+    include SoftCsrfProtection
     helper_method :currency_formatted,:year_month_days_formatted,:formatted_date,:format_oblig_date,:get_dob_calculate
     def index
         @compcodes      = session[:loggedUserCompCode] 
@@ -233,14 +233,15 @@ class TrainerListController < ApplicationController
             #  session[:req_faculty_list] = nil
           # end
           filter_search = params[:trainer_list] !=nil && params[:trainer_list] != '' ? params[:trainer_list].to_s.strip : session[:req_trainer_list].to_s.strip       
-          iswhere       = "trn_compcode ='#{@compcodes}'"
+          relation      = MstTrainerList.where(trn_compcode: @compcodes)
           if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( trn_code LIKE '%#{filter_search}%' OR trn_name LIKE '%#{filter_search}%')"
+            like = "%#{filter_search}%"
+            relation = relation.where("trn_code LIKE ? OR trn_name LIKE ?", like, like)
             @member_list_search       = filter_search
             session[:req_trainer_list] = filter_search
           end    
           
-        stdob =  MstTrainerList.where(iswhere).order("trn_code ASC")
+        stdob =  relation.order("trn_code ASC")
         return stdob
     end
 

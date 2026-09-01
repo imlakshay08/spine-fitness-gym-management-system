@@ -3,7 +3,7 @@ include GlobalCodeGenerator
 class StockInventoryController < ApplicationController
     before_action      :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token,:only=>[:index,:ajax_process]
+    include SoftCsrfProtection
     helper_method :get_course_detail
     def index
         @compcodes      = session[:loggedUserCompCode] 
@@ -184,20 +184,20 @@ class StockInventoryController < ApplicationController
         filter_search = params[:stock_inventory] !=nil && params[:stock_inventory] != '' ? params[:stock_inventory].to_s.strip : session[:req_stock_inventory].to_s.strip       
         stock_search = params[:stock_search] !=nil && params[:stock_search] != '' ? params[:stock_search].to_s.strip : session[:req_stock_search].to_s.strip
 
-          iswhere       = "si_compcode ='#{@compcodes}'"
+          relation      = TrnStockInventory.where(si_compcode: @compcodes)
           if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( si_entry_no LIKE '%#{filter_search}%')"
+            relation = relation.where("si_entry_no LIKE ?", "%#{filter_search}%")
             @stock_inventory_search       = filter_search
             session[:req_stock_inventory] = filter_search
           end    
           
           if stock_search !=nil && stock_search !=''
-            iswhere +=" AND ( si_stock_id LIKE '%#{stock_search}%' )"
+            relation = relation.where("si_stock_id LIKE ?", "%#{stock_search}%")
             @stock_search       = stock_search
             session[:req_stock_search] = stock_search
           end    
         
-          stdob =  TrnStockInventory.where(iswhere).order("si_entry_no ASC")
+          stdob =  relation.order("si_entry_no ASC")
           return stdob
 
     end

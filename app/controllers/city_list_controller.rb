@@ -116,14 +116,14 @@ class CityListController < ApplicationController
            session[:req_City] = nil
         # end
         filter_search     = params[:City] !=nil && params[:City] != '' ? params[:City].to_s.strip : session[:req_City].to_s.strip       
-        iswhere           = "id>0"
+        relation          = MstCity.where("id>0")
         if filter_search !=nil && filter_search !=''
-          iswhere +=" AND  City LIKE '%#{filter_search}%' "
+          relation = relation.where("City LIKE ?", "%#{filter_search}%")
           @city_list_search       = filter_search
           session[:req_City] = filter_search
         end     
       
-        stdobj =  MstCity.where(iswhere).paginate(:page =>pages,:per_page => 10).order("Id ASC")
+        stdobj =  relation.paginate(:page =>pages,:per_page => 10).order("Id ASC")
         return stdobj
     end
 

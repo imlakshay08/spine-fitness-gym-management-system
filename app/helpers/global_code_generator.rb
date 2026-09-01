@@ -3,6 +3,12 @@ module GlobalCodeGenerator
     # Find the compcode column name for this table
     compcode_column = table.column_names.find { |c| c.end_with?('_compcode') }
 
+    # `column` and `prefix` are spliced into raw SQL below. Every caller passes
+    # a literal today, but validating here means a future caller cannot turn
+    # this into an injection point by passing something from params.
+    raise ArgumentError, "unknown column #{column}" unless table.column_names.include?(column.to_s)
+    raise ArgumentError, "invalid prefix #{prefix}"  unless prefix.to_s.match?(/\A[A-Za-z0-9_-]+\z/)
+
     last_record = table
       .where("#{compcode_column} = ?", compcode)
       .where("#{column} LIKE ?", "#{prefix}%")

@@ -26,3 +26,17 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Biometric bridge: real device IP / serial / API token live here, never in git.
+/biometric_bridge/config_local.py
+
+# Locally generated development signing key.
+/tmp/local_secret.txt
+
+# Unpublished blog draft — not for the public repo.
+/blog3.md
+
+# Operational security runbook. Kept out of the public repo while the staged
+# controls are still in their permissive mode — it names which protections are
+# not yet enforcing. Publish it, or delete this line, once the switches are on.
+/SECURITY_FIXES.md

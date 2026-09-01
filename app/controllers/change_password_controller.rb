@@ -35,14 +35,18 @@ class ChangePasswordController < ApplicationController
     else
         @isUserdetail =  User.where("usercompcode = ? AND id=?",@companyCode,isuserid).first
         if @isUserdetail
-            noldpassword  = Digest::MD5.hexdigest(oldPassword)
-            dbpassword    = @isUserdetail.userpassword
-                if noldpassword != dbpassword
+                if !@isUserdetail.authenticate_password(oldPassword)
                     isFlags = false
                     flash[:error] =  "Old password is mismatched."      
                 else
-                     newpassword =  Digest::MD5.hexdigest(isPassword) 
-                     @isUserdetail.update(:userpassword=>newpassword)
+                     # Always re-stored as bcrypt, whatever it was before.
+                     @isUserdetail.set_password(isPassword)
+                     # The session carries a copy of the stored digest and is
+                     # re-checked on every request, so refresh it here or the
+                     # user is bounced to the login screen mid-session.
+                     if session[:logedUserId].to_i == @isUserdetail.id.to_i
+                       session[:SECURED_LOGIN_CHK] = @isUserdetail.reload.secured_login_check_value
+                     end
                      isFlags       =  true
                      flash[:error] =  "Password changed successfully." 
                 end

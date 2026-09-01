@@ -47,7 +47,7 @@ Rails.application.routes.draw do
  get   'create_user/user_list'=>"create_user#user_list"
  get   'create_user/user_list/search'=>"create_user#user_list"
  post  'create_user/user_list/search'=>"create_user#user_list"
- get   'create_user/:id/deletes'=>"create_user#destroy"
+ delete   'create_user/:id/deletes'=>"create_user#destroy"
  get   'create_user/:id'=>"create_user#index"
  post  'create_user/ajax_process'=>'create_user#ajax_process'
  resources :create_user
@@ -63,7 +63,7 @@ Rails.application.routes.draw do
   post  'category_list/add_category'=>'category_list#add_category'
   get   "category_list/:id"=>'category_list#index'
   get   "category_list/add_category/:id"=>'category_list#add_category'
-  get   "category_list/:id/deletes"=>'category_list#destroy'
+  delete   "category_list/:id/deletes"=>'category_list#destroy'
   resources :category_list
 end
 
@@ -77,7 +77,7 @@ Rails.application.routes.draw do
   post  'stock_list/add_stock'=>'stock_list#add_stock'
   get   "stock_list/:id"=>'stock_list#index'
   get   "stock_list/add_stock/:id"=>'stock_list#add_stock'
-  get   "stock_list/:id/deletes"=>'stock_list#destroy'
+  delete   "stock_list/:id/deletes"=>'stock_list#destroy'
   resources :stock_list
 end
 
@@ -91,7 +91,7 @@ Rails.application.routes.draw do
   post  'stock_inventory/add_stock_inventory'=>'stock_inventory#add_stock_inventory'
   get   "stock_inventory/:id"=>'stock_inventory#index'
   get   "stock_inventory/add_stock_inventory/:id"=>'stock_inventory#add_stock_inventory'
-  get   "stock_inventory/:id/deletes"=>'stock_inventory#destroy'
+  delete   "stock_inventory/:id/deletes"=>'stock_inventory#destroy'
   resources :stock_inventory
 end
 
@@ -106,7 +106,7 @@ Rails.application.routes.draw do
   post  'membership_plan/add_membership_plan'=>'membership_plan#add_membership_plan'
   get   "membership_plan/:id"=>'membership_plan#index'
   get   "membership_plan/add_membership_plan/:id"=>'membership_plan#add_membership_plan'
-  get   "membership_plan/:id/deletes"=>'membership_plan#destroy'
+  delete   "membership_plan/:id/deletes"=>'membership_plan#destroy'
   resources :membership_plan
 end
 
@@ -122,7 +122,7 @@ Rails.application.routes.draw do
   post  'member_list/add_member'=>'member_list#add_member'
   get   "member_list/:id"=>'member_list#index'
   get   "member_list/add_member/:id"=>'member_list#add_member'
-  get   "member_list/:id/deletes"=>'member_list#destroy'
+  delete   "member_list/:id/deletes"=>'member_list#destroy'
   post  "member_list/:id/remove"=>'member_list#destroy'
   post  "member_list/:id/restore"=>'member_list#restore'
   post  "member_list/faculty_ajax_img"=>"member_list#save_faculty_img"
@@ -143,7 +143,7 @@ Rails.application.routes.draw do
   post  'staff_list/add_staff'=>'staff_list#add_staff'
   get   "staff_list/:id"=>'staff_list#index'
   get   "staff_list/add_staff/:id"=>'staff_list#add_staff'
-  get   "staff_list/:id/deletes"=>'staff_list#destroy'
+  delete   "staff_list/:id/deletes"=>'staff_list#destroy'
   post  "staff_list/faculty_ajax_img"=>"staff_list#save_faculty_img"
   post  "staff_list/ajax_process"=>"staff_list#ajax_process" 
   resources :staff_list
@@ -159,7 +159,7 @@ Rails.application.routes.draw do
   post  'trainer_list/add_trainer'=>'trainer_list#add_trainer'
   get   "trainer_list/:id"=>'trainer_list#index'
   get   "trainer_list/add_trainer/:id"=>'trainer_list#add_trainer'
-  get   "trainer_list/:id/deletes"=>'trainer_list#destroy'
+  delete   "trainer_list/:id/deletes"=>'trainer_list#destroy'
   post  "trainer_list/faculty_ajax_img"=>"trainer_list#save_faculty_img"
   post  "trainer_list/ajax_process"=>"trainer_list#ajax_process" 
   resources :trainer_list
@@ -175,7 +175,7 @@ Rails.application.routes.draw do
   post  'member_subscriptions/add_member_subscriptions'=>'member_subscriptions#add_member_subscriptions'
   get   "member_subscriptions/:id"=>'member_subscriptions#index'
   get   "member_subscriptions/add_member_subscriptions/:id"=>'member_subscriptions#add_member_subscriptions'
-  get   "member_subscriptions/:id/deletes"=>'member_subscriptions#destroy'
+  delete   "member_subscriptions/:id/deletes"=>'member_subscriptions#destroy'
   post  "member_subscriptions/ajax_process"=>"member_subscriptions#ajax_process" 
   resources :member_subscriptions
 end
@@ -222,7 +222,7 @@ Rails.application.routes.draw do
   post  "issue_amount/staff_balance"=>'issue_amount#staff_balance'
   get   "issue_amount/:id"=>'issue_amount#index'
   get   "issue_amount/add_issue_amount/:id"=>'issue_amount#add_issue_amount'
-  get   "issue_amount/:id/deletes"=>'issue_amount#destroy'
+  delete   "issue_amount/:id/deletes"=>'issue_amount#destroy'
   post  "issue_amount/faculty_ajax_img"=>"issue_amount#save_faculty_img"
   post  "issue_amount/ajax_process"=>"issue_amount#ajax_process" 
   resources :issue_amount
@@ -248,7 +248,7 @@ Rails.application.routes.draw do
   post  'house_list/add_house'=>'house_list#add_house'
   get   "house_list/:id"=>'house_list#index'
   get   "house_list/add_house/:id"=>'house_list#add_house'
-  get   "house_list/:id/deletes"=>'house_list#destroy'
+  delete   "house_list/:id/deletes"=>'house_list#destroy'
   resources :house_list
 end
 
@@ -258,7 +258,7 @@ Rails.application.routes.draw do
   post  'log_audit/index'=>'log_audit#index'
   get   'log_audit/search'=>"log_audit#index"
   post  'log_audit/search'=>"log_audit#index"
-  get   'log_audit/:id/deletes'=>"log_audit#destroy"
+  delete   'log_audit/:id/deletes'=>"log_audit#destroy"
   get   'log_audit/:id'=>"log_audit#index"
   get   '/404.shtml'=>"invoice#show"
   get   "/404" ,:to =>"erros#not_found"
@@ -285,7 +285,7 @@ Rails.application.routes.draw do
   post  'holiday/add_holiday'=>'holiday#add_holiday'
   get   "holiday/:id"=>'holiday#index'
   get   "holiday/add_holiday/:id"=>'holiday#add_holiday'
-  get   "holiday/:id/deletes"=>'holiday#destroy'
+  delete   "holiday/:id/deletes"=>'holiday#destroy'
   resources :holiday
 end
 

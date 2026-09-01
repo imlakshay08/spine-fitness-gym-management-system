@@ -5,18 +5,15 @@ from zk.finger import Finger
 import requests
 from config import *
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
-
-
 def get_device_audit():
     try:
-        requests.get(RAILS_API_BASE, timeout=30)  # wake server
+        requests.get(RAILS_API_BASE, headers=API_HEADERS, timeout=30)  # wake server
     except:
         pass
     try:
         response = requests.get(
             f"{RAILS_API_BASE}/api/device_audit",
+            headers=API_HEADERS,
             params={"compcode": COMP_CODE, "device_sn": DEVICE_SN},
             timeout=60
         )
@@ -34,6 +31,7 @@ def save_template_to_rails(device_user_id, uid, templates):
         ]
         response = requests.post(
             f"{RAILS_API_BASE}/api/biometric_mappings/save_template",
+            headers=API_HEADERS,
             json={
                 "compcode": COMP_CODE,
                 "device_user_id": device_user_id,

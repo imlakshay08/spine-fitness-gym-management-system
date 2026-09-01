@@ -50,12 +50,32 @@ Rails.application.configure do
   # config.action_cable.url = 'wss://example.com/cable'
   # config.action_cable.allowed_request_origins = [ 'http://example.com', /http:\/\/example.*/ ]
 
-  # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # config.force_ssl = true
+  # Redirect http:// to https://, and send HSTS so the browser refuses to
+  # speak plain http to this host again.
+  #
+  # OFF by default, and deliberately so. Rails decides whether a request
+  # arrived over https by reading X-Forwarded-Proto. Cloudflare sits in front
+  # of this app, and if its SSL/TLS mode is "Flexible" it talks plain http to
+  # the origin and sends X-Forwarded-Proto: http — Rails would then redirect
+  # to https, Cloudflare would forward that as http again, and the app would
+  # be stuck in a redirect loop for everyone.
+  #
+  # So: confirm Cloudflare SSL/TLS is "Full" or "Full (strict)" first, then
+  # set FORCE_SSL=true. See SECURITY_FIXES.md.
+  config.force_ssl = ENV['FORCE_SSL'].to_s.downcase == 'true'
+  #
+  # HSTS is a one-way door: once a browser sees it, it refuses plain http to
+  # this host for the whole max-age and there is no way to call that back from
+  # the server. subdomains is left OFF so it only ever covers the exact host
+  # this app serves — turning it on would commit every future subdomain to
+  # https too, for a year, whether or not it can do https.
+  config.ssl_options = { hsts: { subdomains: false, preload: false, expires: 1.year } }
 
-  # Use the lowest log level to ensure availability of diagnostic information
-  # when problems arise.
-  config.log_level = :debug
+  # :debug logs every SQL statement with its bound values, so member names,
+  # phone numbers and Aadhaar values were being written to the production log
+  # on every page view. :info keeps request lines and app logging without the
+  # data. LOG_LEVEL=debug when actually debugging something.
+  config.log_level = ENV.fetch('LOG_LEVEL', 'info').to_sym
 
   # Prepend all log lines with the following tags.
   config.log_tags = [ :request_id ]
@@ -91,16 +111,19 @@ Rails.application.configure do
     logger.formatter = config.log_formatter
     config.logger    = ActiveSupport::TaggedLogging.new(logger)
   end
-   config.action_mailer.delivery_method = :smtp
-    # SMTP settings for gmail
-  config.action_mailer.smtp_settings = {
-   :address              => "smtp.sendgrid.net",
-   :port                 => 587,
-   :user_name            => 'weddingdoers.com',
-   :password             => 'india@123',
-   :authentication       => "plain",
-  :enable_starttls_auto => true
-  }
+  # See the note in development.rb: no email is sent by this app. SMTP is only
+  # configured if the environment supplies credentials.
+  if ENV['SMTP_ADDRESS'].present?
+    config.action_mailer.delivery_method = :smtp
+    config.action_mailer.smtp_settings = {
+      :address              => ENV['SMTP_ADDRESS'],
+      :port                 => ENV.fetch('SMTP_PORT', 587).to_i,
+      :user_name            => ENV['SMTP_USERNAME'],
+      :password             => ENV['SMTP_PASSWORD'],
+      :authentication       => "plain",
+      :enable_starttls_auto => true
+    }
+  end
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 end

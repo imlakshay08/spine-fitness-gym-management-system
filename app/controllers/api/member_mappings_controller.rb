@@ -1,6 +1,6 @@
 class Api::MemberMappingsController < ApplicationController
   skip_before_action :verify_authenticity_token
-  #before_action :authenticate_bridge!
+  include BridgeAuthentication
 
   # GET /api/member_mappings — fetch all active mappings for a member
     def index

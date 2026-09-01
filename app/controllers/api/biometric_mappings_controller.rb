@@ -1,5 +1,6 @@
 class Api::BiometricMappingsController < ApplicationController
   skip_before_action :verify_authenticity_token
+  include BridgeAuthentication
 
   def allocate_ids
     compcode  = params[:compcode]

@@ -1,7 +1,7 @@
 class DashboardController < ApplicationController
   before_action :require_login
   before_action :get_user_access_permissions
-  skip_before_action :verify_authenticity_token
+  include SoftCsrfProtection
   include ErpModule::Common
 
   helper_method :currency_formatted, :year_month_days_formatted,
@@ -39,7 +39,7 @@ class DashboardController < ApplicationController
     # Bridge heartbeat status
     heartbeat = TrnBridgeHeartbeat.find_by(
       bh_compcode:  @compcode,
-      bh_device_sn: 'NFZ8253402448'
+      bh_device_sn: primary_device_sn(@compcode)
     )
     @bridge_status = if heartbeat.nil?
       { status: 'offline', label: 'Never connected' }
@@ -212,7 +212,7 @@ class DashboardController < ApplicationController
   def get_bridge_status
     heartbeat = TrnBridgeHeartbeat.find_by(
       bh_compcode:  @compcode,
-      bh_device_sn: 'NFZ8253402448'
+      bh_device_sn: primary_device_sn(@compcode)
     )
     result = if heartbeat.nil?
       { status: 'offline', label: 'Never connected' }

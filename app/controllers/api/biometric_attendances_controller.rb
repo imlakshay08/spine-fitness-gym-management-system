@@ -1,7 +1,7 @@
 class Api::BiometricAttendancesController < ApplicationController
   DEVICE_ZONE = ActiveSupport::TimeZone['Asia/Kolkata'].freeze
   skip_before_action :verify_authenticity_token
-  #before_action :authenticate_bridge!
+  include BridgeAuthentication
 
 def create
   compcode       = params[:compcode].to_s
@@ -80,11 +80,6 @@ def create
 end
 
   private
-
-#   def authenticate_bridge!
-#     token = request.headers["Authorization"]&.split(" ")&.last
-#     head :unauthorized unless token == ENV["BIOMETRIC_API_TOKEN"]
-#   end
 
   def duplicate_punch?(member_id, time)
     TrnMemberAttendance.where(

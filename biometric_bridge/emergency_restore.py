@@ -5,9 +5,6 @@ from zk.finger import Finger
 import requests
 from config import *
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
-
 zk = ZK(DEVICE_IP, port=DEVICE_PORT, timeout=DEVICE_TIMEOUT,
         password=0, force_udp=False, ommit_ping=False)
 
@@ -17,6 +14,7 @@ try:
 
     response = requests.get(
         f"{RAILS_API_BASE}/api/access_status",
+        headers=API_HEADERS,
         params={"compcode": "SF", "device_sn": DEVICE_SN},
         timeout=60
     )

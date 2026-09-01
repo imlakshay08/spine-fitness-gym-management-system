@@ -1,5 +1,6 @@
 class Api::BridgeHeartbeatsController < ApplicationController
   skip_before_action :verify_authenticity_token
+  include BridgeAuthentication
 
   def create
     heartbeat = TrnBridgeHeartbeat.find_or_initialize_by(

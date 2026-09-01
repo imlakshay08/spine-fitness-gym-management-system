@@ -3,12 +3,10 @@ import requests
 from zk import ZK
 from config import *
 
-RAILS_API_BASE = "https://spine-fitness.com"
-DEVICE_SN = "NFZ8253402448"
-
 # Step 1: Get all active mappings from Rails
 response = requests.get(
     f"{RAILS_API_BASE}/api/access_status",
+    headers=API_HEADERS,
     params={"compcode": COMP_CODE, "device_sn": DEVICE_SN},
     timeout=60
 )
@@ -17,6 +15,7 @@ users = response.json().get("users", [])
 # Step 2: Find all mappings from DB grouped by member
 response2 = requests.get(
     f"{RAILS_API_BASE}/api/all_mappings",
+    headers=API_HEADERS,
     params={"compcode": COMP_CODE, "device_sn": DEVICE_SN},
     timeout=60
 )
@@ -78,6 +77,7 @@ try:
             try:
                 requests.post(
                     f"{RAILS_API_BASE}/api/member_mappings/deactivate",
+                    headers=API_HEADERS,
                     json={"mapping_id": mapping_id},
                     timeout=30
                 )

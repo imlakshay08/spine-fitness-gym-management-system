@@ -74,7 +74,7 @@ Ruby on Rails Application (Render)
                          ┌─────────────────────┐
                          │  ZKTeco Fingerprint  │
                          │  Biometric Device    │
-                         │  (192.168.1.201)     │
+                         │  (LAN address)       │
                          │  Door relay control  │
                          └─────────────────────┘
 ```

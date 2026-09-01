@@ -3,7 +3,7 @@ include GlobalCodeGenerator
 class MemberSubscriptionsController < ApplicationController
     before_action      :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token,:only=>[:index,:ajax_process]
+    include SoftCsrfProtection
     helper_method :get_course_detail,:get_latest_subscription, :check_active_subscription, :calculate_end_date, :subscription_status
 
     def index
@@ -492,36 +492,35 @@ class MemberSubscriptionsController < ApplicationController
       @plan_filter   = '1' unless @plan_filter.present?
       @member_search = filter_search
 
-      iswhere = "ms_compcode ='#{@compcodes}'"
+      relation = TrnMemberSubscription.where(ms_compcode: @compcodes)
 
       if filter_search.present?
-        # Search subscription no directly
-        sub_match = "ms_sbscrptn_no LIKE '%#{filter_search}%'"
+        like = "%#{filter_search}%"
 
         # Search member name and contact
         matching_ids = MstMembersList
                         .where("mmbr_compcode = ? AND (mmbr_name LIKE ? OR mmbr_contact LIKE ?)",
-                                @compcodes, "%#{filter_search}%", "%#{filter_search}%")
+                                @compcodes, like, like)
                         .pluck(:id)
 
         if matching_ids.present?
-          iswhere += " AND (#{sub_match} OR ms_member_id IN (#{matching_ids.join(',')}))"
+          relation = relation.where("ms_sbscrptn_no LIKE ? OR ms_member_id IN (?)", like, matching_ids)
         else
-          iswhere += " AND (#{sub_match})"
+          relation = relation.where("ms_sbscrptn_no LIKE ?", like)
         end
       end
 
       if @status_filter == 'E'
-        iswhere += " AND ms_end_date < '#{Date.today}'"
+        relation = relation.where("ms_end_date < ?", Date.today)
       else
-        iswhere += " AND ms_end_date >= '#{Date.today}'"
+        relation = relation.where("ms_end_date >= ?", Date.today)
       end
 
       if @plan_filter.present?
-        iswhere += " AND ms_plan_id = '#{@plan_filter}'"
+        relation = relation.where(ms_plan_id: @plan_filter.to_s)
       end
 
-      stdob = TrnMemberSubscription.where(iswhere).order("ms_end_date ASC")
+      stdob = relation.order("ms_end_date ASC")
 
       member_ids = stdob.map(&:ms_member_id).uniq
       plan_ids   = stdob.map(&:ms_plan_id).uniq

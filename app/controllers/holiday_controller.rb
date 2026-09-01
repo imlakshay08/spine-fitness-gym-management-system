@@ -1,7 +1,7 @@
 class HolidayController < ApplicationController
     before_action      :require_login
     before_action :get_user_access_permissions
-    skip_before_action :verify_authenticity_token,:only=>[:index,:ajax_process]
+    include SoftCsrfProtection
     helper_method :check_existing_uses
     def index
         @compcodes      = session[:loggedUserCompCode] 
@@ -152,26 +152,26 @@ class HolidayController < ApplicationController
              session[:req_holiday_list] = nil
           end
           filter_search = params[:holiday_list] !=nil && params[:holiday_list] != '' ? params[:holiday_list].to_s.strip : session[:req_holiday_list].to_s.strip       
-          iswhere       = "holiday_compcode ='#{@compcodes}'"
+          relation      = MstHoliday.where(holiday_compcode: @compcodes)
           if filter_search !=nil && filter_search !=''
-            iswhere +=" AND ( holiday_descp LIKE '%#{filter_search}%')"
+            relation = relation.where("holiday_descp LIKE ?", "%#{filter_search}%")
             @holiday_list_search       = filter_search
             session[:req_holiday_list] = filter_search
           end     
         
-          stdob =  MstHoliday.where(iswhere).order("holiday_date ASC")
+          stdob =  relation.order("holiday_date ASC")
           return stdob
 
     end
 
     def print_holiday_list
         @compcodes      = session[:loggedUserCompCode] 
-        iswhere         = "cat_compcode ='#{@compcodes}'"
+        relation        = MstHoliday.where(cat_compcode: @compcodes)
         filter_search   = session[:req_holiday_list]   
         # if filter_search !=nil && filter_search !=''
         #     iswhere +=" AND ( cat_code LIKE '%#{filter_search}%' OR cat_descp LIKE '%#{filter_search}%')"
         #   end    
-        stdob =  MstHoliday.where(iswhere).order("holiday_date ASC")
+        stdob =  relation.order("holiday_date ASC")
         return stdob
     end
 
