@@ -68,13 +68,47 @@ module WhatsappTemplates
           The full report is attached.
         MSG
       end
+    },
+    "staff_alert" => {
+      label:       "Staff Alert",
+      description: "Sent to gym staff when something in the software needs fixing",
+      icon:        "fa-solid fa-triangle-exclamation",
+      tone:        "danger",
+      body: ->(name, headline, details, action) do
+        <<~MSG.strip
+          Hi #{name}, this is an alert from the Spine Fitness software.
+
+          Problem: #{headline}
+          Details: #{details}
+          What to do: #{action}
+
+          Please take care of this as soon as you can.
+        MSG
+      end
+    },
+    "staff_weekly_list" => {
+      label:       "Staff Weekly List",
+      description: "Monday list of members to call and data to fix",
+      icon:        "fa-solid fa-list-check",
+      tone:        "info",
+      body: ->(name, period, to_call, to_fix, numbers) do
+        <<~MSG.strip
+          Hi #{name}, here is this week's list from the Spine Fitness software (#{period}).
+
+          Members to call: #{to_call}
+          Fingerprint problems to fix: #{to_fix}
+          Wrong phone numbers to correct: #{numbers}
+
+          The full list with names and numbers is attached.
+        MSG
+      end
     }
   }.freeze
 
   # Templates that are not messages to a member. The WhatsApp Logs screen is a
   # member communication history, so these are kept out of it (the rows are
   # still written, for audit and debugging).
-  INTERNAL = %w[gym_owner_report].freeze
+  INTERNAL = %w[gym_owner_report staff_alert staff_weekly_list].freeze
 
   def self.internal?(name)
     INTERNAL.include?(name.to_s)

@@ -194,6 +194,8 @@ Rails.application.routes.draw do
   get 'cron/sync_subscription_status'  => 'cron#sync_subscription_status'
   get 'cron/send_owner_daily_report'   => 'cron#send_owner_daily_report'
   get 'cron/send_owner_monthly_report' => 'cron#send_owner_monthly_report'
+  get 'cron/check_biometric'           => 'cron#check_biometric'
+  get 'cron/send_staff_weekly'         => 'cron#send_staff_weekly'
   get  '/webhooks/meta' => 'webhooks/meta#verify'
   post '/webhooks/meta' => 'webhooks/meta#receive'
   resources :cron

@@ -25,6 +25,21 @@ class CronController < ApplicationController
     render plain: run_owner_report(:monthly, month)
   end
 
+  # Hit every 15 minutes. Only speaks up while the gym is open, and at most
+  # once every 2 hours for the same problem.
+  def check_biometric
+    return head :unauthorized unless params[:token] == ENV['CRON_SECRET']
+
+    render plain: run_staff_alert(:biometric)
+  end
+
+  # Hit Monday at 12:00 IST (06:30 UTC).
+  def send_staff_weekly
+    return head :unauthorized unless params[:token] == ENV['CRON_SECRET']
+
+    render plain: run_staff_alert(:weekly)
+  end
+
   def sync_subscription_status
     return head :unauthorized unless valid_cron_token?
 
@@ -62,6 +77,16 @@ class CronController < ApplicationController
   # response body. The cron service's own execution log then shows whether the
   # report actually went out — the first run of this failed silently because
   # nothing anywhere recorded that it had not been called at all.
+  def run_staff_alert(kind)
+    summary = StaffAlertWhatsappJob.perform_now(kind, compcode_param)
+    "OK - #{summary}"
+  rescue StandardError => e
+    Rails.logger.error "[StaffAlert] #{kind} failed: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace&.first(5)&.join("
+")
+    "ERROR - #{e.class}: #{e.message}"
+  end
+
   def run_owner_report(kind, on)
     summary = OwnerReportWhatsappJob.perform_now(kind, compcode_param, on)
     "OK - #{summary}"
