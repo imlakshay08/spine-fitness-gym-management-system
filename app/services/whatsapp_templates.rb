@@ -114,7 +114,13 @@ module WhatsappTemplates
   # Templates that are not messages to a member. The WhatsApp Logs screen is a
   # member communication history, so these are kept out of it (the rows are
   # still written, for audit and debugging).
-  INTERNAL = %w[gym_owner_report alert_for_staff staff_weekly_list].freeze
+  #
+  # 'staff_alert' is the name the staff alert used before it was renamed to
+  # 'alert_for_staff' to get a fresh Meta approval. Alerts sent under the old
+  # name are still in the log, so the old name has to stay on this list
+  # permanently — dropping it at the rename is exactly what made those alerts
+  # appear on the WhatsApp Logs screen as "Deleted member" rows.
+  INTERNAL = %w[gym_owner_report alert_for_staff staff_alert staff_weekly_list].freeze
 
   def self.internal?(name)
     INTERNAL.include?(name.to_s)

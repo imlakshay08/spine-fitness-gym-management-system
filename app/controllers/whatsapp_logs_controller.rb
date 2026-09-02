@@ -71,13 +71,21 @@ class WhatsappLogsController < ApplicationController
     scope.order(Arel.sql("wl_sent_at DESC, id DESC"))
   end
 
-  # Owner reports go to the gym owner, not to a member, so they would show up
-  # here as "Unknown member" noise. Excluded from both the table and the totals
-  # so the two always agree.
+  # Owner reports and staff alerts go to the owner or to a trainer, not to a
+  # member, so they would show up here as "Deleted member" noise. Excluded from
+  # both the table and the totals so the two always agree.
+  #
+  # Two guards, deliberately. The template list is the readable one, but it is
+  # a list of names and a name can change — renaming the staff alert once
+  # already let a batch of alerts through. The member-id check is structural:
+  # every message to a member records that member's id, and nothing internal
+  # ever does, so anything without one is not member correspondence whatever
+  # its template ends up being called.
   def member_facing_logs
     TrnWhatsappLog
       .where(wl_compcode: @compcodes)
       .where.not(wl_template_name: WhatsappTemplates::INTERNAL)
+      .where("wl_member_id IS NOT NULL AND wl_member_id <> ''")
   end
 
   def reset_filters
