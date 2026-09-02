@@ -7,15 +7,27 @@ module Alerts
   class BiometricWatch
     STALE_AFTER = 20.minutes
 
-    # What staff should actually do, in the order they should do it: look at
-    # the dashboard first, restart only if it is red, and escalate if a restart
-    # does not fix it. Sent as a template variable, so this wording can change
-    # without Meta having to re-approve the template.
+    # The name staff actually use for the machine, not an internal one.
+    SERVICE = 'Fingerprint Biometric Device'.freeze
+
+    # What an outage means on the floor. Kept concrete — staff need to know
+    # members are being blocked at the door AND that attendance is being lost,
+    # because the second part is invisible until somebody checks a report.
+    IMPACT = 'Members are not able to enter the gym with their fingerprint, ' \
+             'and their attendance is not being recorded.'.freeze
+
+    # What to do, in the order to do it, naming the exact screen and the exact
+    # thing to look for. Every step says where to look, what it should say, and
+    # what to do when it does not.
+    #
+    # Sent as a template variable, so this wording can be changed freely — Meta
+    # only re-approves the fixed text around {{1}}..{{4}}, never the values.
     RECOVERY_STEPS = [
-      'Open the Spine Fitness dashboard and check the Biometric Bridge status.',
+      'Open the spine-fitness.com dashboard and check the Biometric Bridge status.',
       'It should be green and say Online.',
-      'If it is red, restart the laptop and make sure the biometric software starts again.',
-      'If it is still red after restarting, please call Lakshay.'
+      'If it is red, restart the laptop and make sure the biometric bridge starts again ' \
+      'and shows green and Online on the dashboard.',
+      'If it is still red after restarting the laptop, please call Lakshay.'
     ].join(' ').freeze
 
     IST = 'Asia/Kolkata'.freeze
@@ -31,17 +43,17 @@ module Alerts
       beat = TrnBridgeHeartbeat.where(bh_compcode: @compcode).order(bh_last_seen: :desc).first
 
       if beat.nil?
-        return alert('Biometric entry system',
-                     'No signal has ever been received from the entry machine.',
+        return alert(SERVICE,
+                     "No signal has ever been received from the fingerprint machine. #{IMPACT}",
                      RECOVERY_STEPS)
       end
 
       last_seen = beat.bh_last_seen
       return nil if last_seen > STALE_AFTER.ago
 
-      alert('Biometric entry system',
+      alert(SERVICE,
             "No signal since #{last_seen.in_time_zone(IST).strftime('%l:%M %p').strip}, " \
-            "about #{ago_in_words(last_seen)} ago. Members cannot enter using fingerprint.",
+            "about #{ago_in_words(last_seen)} ago. #{IMPACT}",
             RECOVERY_STEPS)
     end
 

@@ -17,7 +17,12 @@ class StaffAlertWhatsappJob < ApplicationJob
   WEEKLY_TEMPLATE = 'staff_weekly_list'.freeze
 
   DEFAULT_STAFF_IDS = '4,2'.freeze            # Vishal Tyagi, Vineet (Mani)
-  DEFAULT_EXTRA     = '9871946454:Lakshay'.freeze
+
+  # People who get staff alerts but are not rows in mst_staff_lists. Poonam is
+  # here because an outage costs her money and she asked to see it — this is
+  # the floor alert only. Her owner report stays separate and stays private to
+  # her and Lakshay; nothing about it is shared with the staff recipients.
+  DEFAULT_EXTRA = '9871946454:Lakshay,9990899992:Poonam'.freeze
 
   # An outage that lasts all morning should not send a message every 15 minutes.
   REPEAT_AFTER = 2.hours
