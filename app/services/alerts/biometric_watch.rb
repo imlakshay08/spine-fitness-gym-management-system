@@ -20,15 +20,32 @@ module Alerts
     # thing to look for. Every step says where to look, what it should say, and
     # what to do when it does not.
     #
+    # Written differently for who is reading it. Staff are standing in the gym,
+    # so they are told to fix it. The owner is not, so hers opens with who to
+    # call and then describes the same fix in the third person — she can read
+    # it straight down the phone to them. %{staff} is filled in from the Staff
+    # List when the message is sent, so it stays correct if a trainer changes.
+    #
     # Sent as a template variable, so this wording can be changed freely — Meta
     # only re-approves the fixed text around {{1}}..{{4}}, never the values.
-    RECOVERY_STEPS = [
-      'Open the spine-fitness.com dashboard and check the Biometric Bridge status.',
-      'It should be green and say Online.',
-      'If it is red, restart the laptop and make sure the biometric bridge starts again ' \
-      'and shows green and Online on the dashboard.',
-      'If it is still red after restarting the laptop, please call Lakshay.'
-    ].join(' ').freeze
+    RECOVERY_STEPS = {
+      staff: [
+        'Open the spine-fitness.com dashboard and check the Biometric Bridge status.',
+        'It should be green and say Online.',
+        'If it is red, restart the laptop and make sure the biometric bridge starts again ' \
+        'and shows green and Online on the dashboard.',
+        'If it is still red after restarting the laptop, please call Lakshay.'
+      ].join(' ').freeze,
+
+      owner: [
+        'Call %{staff} at the gym and ask them to restart the laptop.',
+        'They should open the spine-fitness.com dashboard and check the Biometric Bridge status.',
+        'It should be green and say Online.',
+        'If it is red, they should restart the laptop and make sure the biometric bridge ' \
+        'starts again and shows green and Online on the dashboard.',
+        'If it is still red after restarting the laptop, please call Lakshay.'
+      ].join(' ').freeze
+    }.freeze
 
     IST = 'Asia/Kolkata'.freeze
 
@@ -44,8 +61,7 @@ module Alerts
 
       if beat.nil?
         return alert(SERVICE,
-                     "No signal has ever been received from the fingerprint machine. #{IMPACT}",
-                     RECOVERY_STEPS)
+                     "No signal has ever been received from the fingerprint machine. #{IMPACT}")
       end
 
       last_seen = beat.bh_last_seen
@@ -53,14 +69,16 @@ module Alerts
 
       alert(SERVICE,
             "No signal since #{last_seen.in_time_zone(IST).strftime('%l:%M %p').strip}, " \
-            "about #{ago_in_words(last_seen)} ago. #{IMPACT}",
-            RECOVERY_STEPS)
+            "about #{ago_in_words(last_seen)} ago. #{IMPACT}")
     end
 
     private
 
-    def alert(service, status, action)
-      { kind: 'BIO', service: service, status: status, action: action }
+    # :action carries both wordings; the sender picks the one for whoever it is
+    # writing to, so one outage produces one set of facts and two sets of
+    # instructions.
+    def alert(service, status)
+      { kind: 'BIO', service: service, status: status, action: RECOVERY_STEPS }
     end
 
     def ago_in_words(time)

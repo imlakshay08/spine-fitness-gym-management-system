@@ -18,11 +18,17 @@ class StaffAlertWhatsappJob < ApplicationJob
 
   DEFAULT_STAFF_IDS = '4,2'.freeze            # Vishal Tyagi, Vineet (Mani)
 
-  # People who get staff alerts but are not rows in mst_staff_lists. Poonam is
-  # here because an outage costs her money and she asked to see it — this is
-  # the floor alert only. Her owner report stays separate and stays private to
-  # her and Lakshay; nothing about it is shared with the staff recipients.
-  DEFAULT_EXTRA = '9871946454:Lakshay,9990899992:Poonam'.freeze
+  # People who get staff alerts but are not rows in mst_staff_lists, as
+  # "number:Name:role". The role picks which set of instructions the biometric
+  # alert carries: :staff are at the gym and are told to fix it, :owner is not
+  # and is told who to call. Anything without a role is treated as :staff.
+  #
+  # Lakshay is listed twice on purpose — he gets the staff wording and the
+  # owner wording for the same outage, so he can see exactly what each of them
+  # was told. Poonam is here because an outage costs her money and she asked to
+  # see it; this is the floor alert only, and her owner report stays separate
+  # and stays private to her and Lakshay.
+  DEFAULT_EXTRA = '9871946454:Lakshay:staff,9871946454:Lakshay:owner,9990899992:Poonam:owner'.freeze
 
   # An outage that lasts all morning should not send a message every 15 minutes.
   REPEAT_AFTER = 2.hours
@@ -49,14 +55,45 @@ class StaffAlertWhatsappJob < ApplicationJob
       return log('bridge still down, but staff were told within the last 2 hours')
     end
 
-    sent = recipients.map do |number, name|
+    names = gym_staff_names
+
+    sent = recipients.map do |number, name, role|
+      steps  = alert[:action][role] || alert[:action][:staff]
+      action = steps.gsub('%{staff}') { names }
+
       deliver(compcode, ALERT_TEMPLATE, alert[:kind], number,
-              [name, alert[:service], alert[:status], alert[:action]])
+              [name, alert[:service], alert[:status], action])
     end
 
     summary = "biometric alert: #{sent.count(true)}/#{sent.size} sent"
     log(summary)
     summary
+  end
+
+  # Who to name in the owner's "call them at the gym" line. Read from the Staff
+  # List in the order STAFF_ALERT_IDS lists them, so the manager comes first,
+  # and keeping any nickname in brackets — Poonam knows Vineet as Mani.
+  def gym_staff_names
+    rows  = MstStaffList.where(id: staff_ids).index_by { |s| s.id.to_s }
+    names = staff_ids.filter_map { |id| short_name(rows[id]&.stf_name) }
+
+    return 'the trainers' if names.empty?
+    return names.first    if names.size == 1
+
+    "#{names[0..-2].join(', ')} and #{names.last}"
+  end
+
+  def short_name(full)
+    base = full.to_s.split.first
+    return nil if base.blank?
+
+    nickname = full.to_s[/\([^)]*\)/]
+    nickname ? "#{base} #{nickname}" : base
+  end
+
+  def staff_ids
+    @staff_ids ||= ENV.fetch('STAFF_ALERT_IDS', DEFAULT_STAFF_IDS)
+                      .split(',').map(&:strip).reject(&:blank?)
   end
 
   # ── Monday list ───────────────────────────────────────────────────────────
@@ -69,7 +106,7 @@ class StaffAlertWhatsappJob < ApplicationJob
 
     to_fix = data[:not_recorded].size + data[:not_enrolled].size
 
-    sent = recipients.map do |number, name|
+    sent = weekly_recipients.map do |number, name, _role|
       deliver(compcode, WEEKLY_TEMPLATE, 'WEEK', number,
               [name, data[:period], plural(data[:absent].size),
                plural(to_fix), plural(data[:bad_numbers].size)],
@@ -88,25 +125,37 @@ class StaffAlertWhatsappJob < ApplicationJob
 
   # ── recipients ────────────────────────────────────────────────────────────
 
+  # [number, greeting name, role]. A number may appear once per role, so one
+  # person can be sent both wordings of the same outage.
   def recipients
     @recipients ||= begin
-      ids  = ENV.fetch('STAFF_ALERT_IDS', DEFAULT_STAFF_IDS).split(',').map(&:strip).reject(&:blank?)
-      list = MstStaffList.where(id: ids).map do |staff|
+      rows = MstStaffList.where(id: staff_ids).index_by { |s| s.id.to_s }
+      list = staff_ids.filter_map do |id|
+        staff  = rows[id]
+        next if staff.nil?
+
         number = staff.stf_contact.to_s.gsub(/\D/, '')
         next if number.length < 10
 
-        [number, staff.stf_name.to_s.split.first.presence || 'there']
-      end.compact
-
-      ENV.fetch('STAFF_ALERT_EXTRA', DEFAULT_EXTRA).split(',').each do |entry|
-        number, name = entry.to_s.split(':', 2).map { |part| part.to_s.strip }
-        next if number.blank?
-
-        list << [number, name.presence || 'there']
+        [number, staff.stf_name.to_s.split.first.presence || 'there', :staff]
       end
 
-      list.uniq { |number, _| number }
+      ENV.fetch('STAFF_ALERT_EXTRA', DEFAULT_EXTRA).split(',').each do |entry|
+        number, name, role = entry.to_s.split(':', 3).map { |part| part.to_s.strip }
+        next if number.blank?
+
+        list << [number, name.presence || 'there', (role.presence || 'staff').to_sym]
+      end
+
+      list.uniq { |number, _, role| [number, role] }
     end
+  end
+
+  # The Monday list has one wording, so it goes out once per person however
+  # many roles they hold — Lakshay is on the biometric alert twice but must not
+  # get the same PDF twice.
+  def weekly_recipients
+    recipients.uniq { |number, _, _| number }
   end
 
   # ── sending ───────────────────────────────────────────────────────────────
