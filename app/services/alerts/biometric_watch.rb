@@ -33,8 +33,7 @@ module Alerts
         'Open the spine-fitness.com dashboard and check the Biometric Bridge status.',
         'It should be green and say Online.',
         'If it is red, restart the laptop and make sure the biometric bridge starts again ' \
-        'and shows green and Online on the dashboard.',
-        'If it is still red after restarting the laptop, please call Lakshay.'
+        'and shows green and Online on the dashboard.'
       ].join(' ').freeze,
 
       owner: [
@@ -42,8 +41,7 @@ module Alerts
         'They should open the spine-fitness.com dashboard and check the Biometric Bridge status.',
         'It should be green and say Online.',
         'If it is red, they should restart the laptop and make sure the biometric bridge ' \
-        'starts again and shows green and Online on the dashboard.',
-        'If it is still red after restarting the laptop, please call Lakshay.'
+        'starts again and shows green and Online on the dashboard.'
       ].join(' ').freeze
     }.freeze
 
