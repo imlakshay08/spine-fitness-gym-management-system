@@ -13,7 +13,7 @@ require 'tempfile'
 class StaffAlertWhatsappJob < ApplicationJob
   queue_as :default
 
-  ALERT_TEMPLATE  = 'staff_alert'.freeze
+  ALERT_TEMPLATE  = 'alert_for_staff'.freeze
   WEEKLY_TEMPLATE = 'staff_weekly_list'.freeze
 
   DEFAULT_STAFF_IDS = '4,2'.freeze            # Vishal Tyagi, Vineet (Mani)
@@ -46,7 +46,7 @@ class StaffAlertWhatsappJob < ApplicationJob
 
     sent = recipients.map do |number, name|
       deliver(compcode, ALERT_TEMPLATE, alert[:kind], number,
-              [name, alert[:headline], alert[:details], alert[:action]])
+              [name, alert[:service], alert[:status], alert[:action]])
     end
 
     summary = "biometric alert: #{sent.count(true)}/#{sent.size} sent"

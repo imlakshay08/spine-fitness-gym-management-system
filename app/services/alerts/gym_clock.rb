@@ -4,9 +4,10 @@ module Alerts
   class GymClock
     IST = 'Asia/Kolkata'.freeze
 
-    # 5:30 AM – 12:30 PM and 4:30 PM – 10:30 PM
-    WINDOWS = [[5 * 60 + 30, 12 * 60 + 30],
-               [16 * 60 + 30, 22 * 60 + 30]].freeze
+    # The hours the biometric is expected to be running, taken from watching
+    # when it actually reports in: 6:30–11:30 AM and 5:00–9:30 PM.
+    WINDOWS = [[6 * 60 + 30, 11 * 60 + 30],
+               [17 * 60,     21 * 60 + 30]].freeze
 
     def self.now
       Time.current.in_time_zone(IST)
@@ -18,7 +19,7 @@ module Alerts
     end
 
     def self.window_text
-      '5:30 AM to 12:30 PM and 4:30 PM to 10:30 PM'
+      '6:30 AM to 11:30 AM and 5:00 PM to 9:30 PM'
     end
   end
 end

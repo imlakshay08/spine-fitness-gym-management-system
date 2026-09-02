@@ -6,7 +6,19 @@ module Alerts
   # single missed beat or a slow network never wakes anybody up.
   class BiometricWatch
     STALE_AFTER = 20.minutes
-    IST         = 'Asia/Kolkata'.freeze
+
+    # What staff should actually do, in the order they should do it: look at
+    # the dashboard first, restart only if it is red, and escalate if a restart
+    # does not fix it. Sent as a template variable, so this wording can change
+    # without Meta having to re-approve the template.
+    RECOVERY_STEPS = [
+      'Open the Spine Fitness dashboard and check the Biometric Bridge status.',
+      'It should be green and say Online.',
+      'If it is red, restart the laptop and make sure the biometric software starts again.',
+      'If it is still red after restarting, please call Lakshay.'
+    ].join(' ').freeze
+
+    IST = 'Asia/Kolkata'.freeze
 
     def initialize(compcode: 'SF')
       @compcode = compcode
@@ -19,24 +31,24 @@ module Alerts
       beat = TrnBridgeHeartbeat.where(bh_compcode: @compcode).order(bh_last_seen: :desc).first
 
       if beat.nil?
-        return alert('The biometric machine has never connected',
-                     'The software has not received any signal from the machine.',
-                     'Please check the laptop is on, and that the biometric software is running.')
+        return alert('Biometric entry system',
+                     'No signal has ever been received from the entry machine.',
+                     RECOVERY_STEPS)
       end
 
       last_seen = beat.bh_last_seen
       return nil if last_seen > STALE_AFTER.ago
 
-      alert('The biometric machine is not connected',
+      alert('Biometric entry system',
             "No signal since #{last_seen.in_time_zone(IST).strftime('%l:%M %p').strip}, " \
-            "about #{ago_in_words(last_seen)} ago. Members cannot be let in by fingerprint.",
-            'Please restart the laptop, then check the biometric software has started again.')
+            "about #{ago_in_words(last_seen)} ago. Members cannot enter using fingerprint.",
+            RECOVERY_STEPS)
     end
 
     private
 
-    def alert(headline, details, action)
-      { kind: 'BIO', headline: headline, details: details, action: action }
+    def alert(service, status, action)
+      { kind: 'BIO', service: service, status: status, action: action }
     end
 
     def ago_in_words(time)

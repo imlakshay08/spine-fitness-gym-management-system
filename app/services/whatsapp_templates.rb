@@ -69,20 +69,26 @@ module WhatsappTemplates
         MSG
       end
     },
-    "staff_alert" => {
+    "alert_for_staff" => {
       label:       "Staff Alert",
       description: "Sent to gym staff when something in the software needs fixing",
       icon:        "fa-solid fa-triangle-exclamation",
       tone:        "danger",
-      body: ->(name, headline, details, action) do
+      # Worded to match Meta's "System outages" utility example: a service
+      # status notification tied to the recipient's own account, naming the
+      # affected service, with no promotional or persuasive content. The
+      # earlier generic "Problem / Details / What to do" phrasing was
+      # classified as Marketing, which subjected it to the per-recipient
+      # marketing cap — one alert was dropped undelivered because of it.
+      body: ->(name, service, status, action) do
         <<~MSG.strip
-          Hi #{name}, this is an alert from the Spine Fitness software.
+          Hi #{name}, we have detected a service outage on your Spine Fitness account.
 
-          Problem: #{headline}
-          Details: #{details}
-          What to do: #{action}
+          Affected service: #{service}
+          Current status: #{status}
+          Recommended action: #{action}
 
-          Please take care of this as soon as you can.
+          We apologize for the inconvenience.
         MSG
       end
     },
@@ -108,7 +114,7 @@ module WhatsappTemplates
   # Templates that are not messages to a member. The WhatsApp Logs screen is a
   # member communication history, so these are kept out of it (the rows are
   # still written, for audit and debugging).
-  INTERNAL = %w[gym_owner_report staff_alert staff_weekly_list].freeze
+  INTERNAL = %w[gym_owner_report alert_for_staff staff_weekly_list].freeze
 
   def self.internal?(name)
     INTERNAL.include?(name.to_s)
