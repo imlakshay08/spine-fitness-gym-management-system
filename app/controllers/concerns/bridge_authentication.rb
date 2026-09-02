@@ -22,6 +22,14 @@
 module BridgeAuthentication
   extend ActiveSupport::Concern
 
+  # Soft-mode log throttling. Shared across every controller that includes this
+  # concern, and per Puma process — which is fine, since the point is only to
+  # keep the log readable enough to spot an unexpected caller.
+  QUIET_FOR  = 15.minutes
+  SEEN_LIMIT = 500                       # so a caller rotating IPs cannot grow this forever
+  SEEN       = {}
+  SEEN_LOCK  = Mutex.new
+
   included do
     before_action :authenticate_bridge!
   end
@@ -44,10 +52,39 @@ module BridgeAuthentication
       head :unauthorized
       false
     else
-      Rails.logger.warn "[BridgeAuth] UNAUTHENTICATED #{request.path} from #{request.remote_ip} " \
-                        "(allowed — soft mode; set BIOMETRIC_AUTH_ENFORCE=true to reject)"
+      log_soft_mode
       true
     end
+  end
+
+  # The bridge polls /api/sync_needed every 7 seconds, so logging every
+  # unauthenticated call buries the one thing stage 1 exists to reveal: a
+  # caller that is NOT the gym laptop. Each path+IP pair is logged the first
+  # time it is seen and then at most once every QUIET_FOR, carrying a count of
+  # the calls suppressed in between so nothing is silently dropped.
+  def log_soft_mode
+    key       = "#{request.path}|#{request.remote_ip}"
+    should_log = false
+    suppressed = 0
+
+    SEEN_LOCK.synchronize do
+      SEEN.clear if SEEN.size > SEEN_LIMIT
+      entry = SEEN[key]
+
+      if entry.nil? || entry[:at] < QUIET_FOR.ago
+        should_log = true
+        suppressed = entry ? entry[:count] : 0
+        SEEN[key]  = { at: Time.current, count: 0 }
+      else
+        entry[:count] += 1
+      end
+    end
+
+    return unless should_log
+
+    tail = suppressed.positive? ? " [#{suppressed} more since the last line]" : ""
+    Rails.logger.warn "[BridgeAuth] UNAUTHENTICATED #{request.path} from #{request.remote_ip} " \
+                      "(allowed — soft mode; set BIOMETRIC_AUTH_ENFORCE=true to reject)#{tail}"
   end
 
   def valid_bridge_token?(expected)

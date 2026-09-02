@@ -28,14 +28,14 @@ class CronController < ApplicationController
   # Hit every 15 minutes. Only speaks up while the gym is open, and at most
   # once every 2 hours for the same problem.
   def check_biometric
-    return head :unauthorized unless params[:token] == ENV['CRON_SECRET']
+    return head :unauthorized unless valid_cron_token?
 
     render plain: run_staff_alert(:biometric)
   end
 
   # Hit Monday at 12:00 IST (06:30 UTC).
   def send_staff_weekly
-    return head :unauthorized unless params[:token] == ENV['CRON_SECRET']
+    return head :unauthorized unless valid_cron_token?
 
     render plain: run_staff_alert(:weekly)
   end
