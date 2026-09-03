@@ -208,6 +208,7 @@ Rails.application.routes.draw do
   post  'whatsapp_logs/index'   => 'whatsapp_logs#index'
   get   'whatsapp_logs/search'  => 'whatsapp_logs#index'
   post  'whatsapp_logs/search'  => 'whatsapp_logs#index'
+  get   'notifications'         => 'notifications#index'
   get   'whatsapp_logs'         => 'whatsapp_logs#index'
   post  'whatsapp_logs'         => 'whatsapp_logs#index'
   resources :whatsapp_logs

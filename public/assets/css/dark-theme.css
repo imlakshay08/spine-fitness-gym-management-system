@@ -1739,3 +1739,20 @@ table#members_table tr.ml-row-removed:hover td{opacity:1}
   .ml-view-switch{width:100%}
   .ml-view-btn{flex:1;justify-content:center}
 }
+
+/* ── header notification bell ─────────────────────────────────────────────
+   Items carry a title and an explanatory line, so the stock single-line
+   dropdown rows need room to breathe and a scroll once there are a few. */
+.spine-notif-list{max-height:320px;overflow-y:auto}
+.spine-notif-list .spine-notif-item a{padding:10px 14px;white-space:normal;line-height:1.45}
+.spine-notif-list .spine-notif-item b{font-weight:600}
+.spine-notif-list .spine-notif-item small{opacity:.75;display:block;margin-top:2px}
+.spine-notif-list .spine-notif-item .notification-icon{margin-right:8px}
+
+/* A red left edge for act-now items, amber for today's work, nothing for the
+   standing lists — so urgency is readable without counting badges. */
+.spine-notif-list .spine-notif-alert{border-left:3px solid #e5455f}
+.spine-notif-list .spine-notif-warn{border-left:3px solid #f0a336}
+.spine-notif-list .spine-notif-info{border-left:3px solid transparent}
+
+.spine-notif-empty a{padding:14px;opacity:.7;white-space:normal}

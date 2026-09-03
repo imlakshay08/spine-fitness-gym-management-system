@@ -35,40 +35,21 @@
 					<!-- start notification dropdown -->
 					<li class="dropdown dropdown-extended dropdown-notification" id="header_notification_bar">
 						<a class="dropdown-toggle" data-bs-toggle="dropdown" data-hover="dropdown"
-							data-close-others="true">
+							data-close-others="true" id="spineNotifToggle">
 							<i data-feather="bell"></i>
-							<span class="badge headerBadgeColor1"> 2 </span>
+							<span class="badge headerBadgeColor1" id="spineNotifBadge" style="display:none;">0</span>
 						</a>
 						<ul class="dropdown-menu">
 							<li class="external">
 								<h3><span class="bold">Notifications</span></h3>
-								<span class="notification-label purple-bgcolor">New 2</span>
+								<span class="notification-label purple-bgcolor" id="spineNotifSummary">Checking…</span>
 							</li>
 							<li>
-								<ul class="dropdown-menu-list small-slimscroll-style" style="height:120px;" data-handle-color="#637283">
-									<li>
-										<a href="javascript:;">
-											<span class="time">just now</span>
-											<span class="details">
-												<span class="notification-icon circle deepPink-bgcolor"><i
-														class="fa fa-check"></i></span>
-												Congratulations!. </span>
-										</a>
-									</li>
-								
-									</li>
-								
-									<li>
-										<a href="javascript:;">
-											<span class="time">15 mins</span>
-											<span class="details">
-												<span class="notification-icon circle yellow"><i
-														class="fa fa-warning"></i></span>4th Semester fees! </span>
-										</a>
-									</li>
-								
+								<ul class="dropdown-menu-list small-slimscroll-style spine-notif-list"
+								    id="spineNotifList" data-handle-color="#637283">
+									<li class="spine-notif-empty"><a href="javascript:;">
+										<span class="details">Loading…</span></a></li>
 								</ul>
-								
 							</li>
 						</ul>
 					</li>
@@ -94,7 +75,7 @@
 								<%
 								  if session[:autherizedUserType] && session[:autherizedUserType].to_s == 'adm'
 								%>
-									<li>
+									<li class = "hidden">
 										<a href="<%=root_url%>company">
 											<i class="fa fa-cog mr5 text-info"></i>Institute</a>
 									</li>
