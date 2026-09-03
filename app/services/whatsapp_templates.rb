@@ -97,19 +97,21 @@ module WhatsappTemplates
       description: "Members whose membership is finishing — sent only on days there are some",
       icon:        "fa-solid fa-user-clock",
       tone:        "warning",
-      # Written for Vishal and Mani, not for a manager. Short sentences, no
-      # word longer than it has to be, and every line says who to talk to and
-      # how much to ask for. The three lists arrive as one line each because
-      # Meta rejects newlines inside a parameter — the line breaks below are
-      # fixed template text.
-      body: ->(name, ending_today, ending_soon, just_finished) do
+      # Mirrors the approved Meta template body exactly, including the blank
+      # line between each list — that spacing is what keeps it readable on a
+      # phone. Each list arrives as one parameter because Meta rejects newlines
+      # inside a parameter value; the line breaks here are fixed template text.
+      #
+      # The template also carries a footer ("Spine Fitness Gym, Dwarka") which
+      # Meta renders itself and which is not part of the body.
+      body: ->(name, ending_today, just_finished) do
         <<~MSG.strip
           Good morning #{name}.
 
-          Please talk to these members. Ask them to pay and start their new membership.
+          Gym Membership Subscriptions :-
 
           Finishing today: #{ending_today}
-          Finishing in next 3 days: #{ending_soon}
+
           Finished yesterday, gate will stop them now: #{just_finished}
 
           Thank you.

@@ -137,7 +137,6 @@ class StaffAlertWhatsappJob < ApplicationJob
 
     values = [
       Alerts::ExpiryDigest.line(data[:ending_today]),
-      Alerts::ExpiryDigest.line(data[:ending_soon]),
       Alerts::ExpiryDigest.line(data[:just_finished])
     ]
 
