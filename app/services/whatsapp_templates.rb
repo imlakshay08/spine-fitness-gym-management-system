@@ -92,6 +92,30 @@ module WhatsappTemplates
         MSG
       end
     },
+    "staff_morning_list" => {
+      label:       "Staff Morning List",
+      description: "Members whose membership is finishing — sent only on days there are some",
+      icon:        "fa-solid fa-user-clock",
+      tone:        "warning",
+      # Written for Vishal and Mani, not for a manager. Short sentences, no
+      # word longer than it has to be, and every line says who to talk to and
+      # how much to ask for. The three lists arrive as one line each because
+      # Meta rejects newlines inside a parameter — the line breaks below are
+      # fixed template text.
+      body: ->(name, ending_today, ending_soon, just_finished) do
+        <<~MSG.strip
+          Good morning #{name}.
+
+          Please talk to these members. Ask them to pay and start their new membership.
+
+          Finishing today: #{ending_today}
+          Finishing in next 3 days: #{ending_soon}
+          Finished yesterday, gate will stop them now: #{just_finished}
+
+          Thank you.
+        MSG
+      end
+    },
     "staff_weekly_list" => {
       label:       "Staff Weekly List",
       description: "Monday list of members to call and data to fix",
@@ -120,7 +144,8 @@ module WhatsappTemplates
   # name are still in the log, so the old name has to stay on this list
   # permanently — dropping it at the rename is exactly what made those alerts
   # appear on the WhatsApp Logs screen as "Deleted member" rows.
-  INTERNAL = %w[gym_owner_report alert_for_staff staff_alert staff_weekly_list].freeze
+  INTERNAL = %w[gym_owner_report alert_for_staff staff_alert staff_weekly_list
+                staff_morning_list].freeze
 
   def self.internal?(name)
     INTERNAL.include?(name.to_s)

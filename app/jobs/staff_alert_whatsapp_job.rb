@@ -13,8 +13,9 @@ require 'tempfile'
 class StaffAlertWhatsappJob < ApplicationJob
   queue_as :default
 
-  ALERT_TEMPLATE  = 'alert_for_staff'.freeze
-  WEEKLY_TEMPLATE = 'staff_weekly_list'.freeze
+  ALERT_TEMPLATE   = 'alert_for_staff'.freeze
+  WEEKLY_TEMPLATE  = 'staff_weekly_list'.freeze
+  MORNING_TEMPLATE = 'staff_morning_list'.freeze
 
   DEFAULT_STAFF_IDS = '4,2'.freeze            # Vishal Tyagi, Vineet (Mani)
 
@@ -37,6 +38,7 @@ class StaffAlertWhatsappJob < ApplicationJob
     case kind.to_sym
     when :biometric then run_biometric(compcode)
     when :weekly    then run_weekly(compcode)
+    when :morning   then run_morning(compcode)
     else "unknown alert kind #{kind}"
     end
   ensure
@@ -119,6 +121,42 @@ class StaffAlertWhatsappJob < ApplicationJob
     summary
   end
 
+  # ── morning list ──────────────────────────────────────────────────────────
+
+  # Sent only on days there is somebody to talk to. Roughly 1.3 memberships end
+  # per day and two days a week have none at all, so an unconditional daily
+  # message would be empty often enough to teach staff to ignore the thread —
+  # and the outage alert arrives on that same thread.
+  def run_morning(compcode)
+    data = Alerts::ExpiryDigest.new(compcode: compcode).call
+    return log('no memberships finishing — nothing to send') if data[:total].zero?
+
+    if sent_recently?(compcode, MORNING_TEMPLATE, 'MORN', 12.hours)
+      return log('morning list already went out today')
+    end
+
+    values = [
+      Alerts::ExpiryDigest.line(data[:ending_today]),
+      Alerts::ExpiryDigest.line(data[:ending_soon]),
+      Alerts::ExpiryDigest.line(data[:just_finished])
+    ]
+
+    sent = morning_recipients.map do |number, name, _role|
+      deliver(compcode, MORNING_TEMPLATE, 'MORN', number, [name] + values)
+    end
+
+    summary = "morning list: #{sent.count(true)}/#{sent.size} sent, #{data[:total]} member(s)"
+    log(summary)
+    summary
+  end
+
+  # Only the people who are actually at the gym. Poonam is deliberately not on
+  # this one — it is a desk worklist, not something she can act on from home —
+  # so it goes to the :staff role, which is Vishal, Mani and Lakshay.
+  def morning_recipients
+    recipients.select { |_, _, role| role == :staff }.uniq { |number, _, _| number }
+  end
+
   def plural(count)
     "#{count} member#{'s' if count != 1}"
   end
@@ -188,11 +226,11 @@ class StaffAlertWhatsappJob < ApplicationJob
     success
   end
 
-  def sent_recently?(compcode, template, kind_code)
+  def sent_recently?(compcode, template, kind_code, within = REPEAT_AFTER)
     TrnWhatsappLog
       .where(wl_compcode: compcode, wl_template_name: template, wl_subscription_id: kind_code)
       .where.not(wl_status: 'FAILED')
-      .where('wl_sent_at >= ?', REPEAT_AFTER.ago)
+      .where('wl_sent_at >= ?', within.ago)
       .exists?
   end
 

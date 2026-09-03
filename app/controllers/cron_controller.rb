@@ -40,6 +40,14 @@ class CronController < ApplicationController
     render plain: run_staff_alert(:weekly)
   end
 
+  # Hit daily at 06:15 IST (00:45 UTC), before the morning shift starts. Sends
+  # nothing on days when no membership is finishing, which is most days.
+  def send_staff_morning
+    return head :unauthorized unless valid_cron_token?
+
+    render plain: run_staff_alert(:morning)
+  end
+
   def sync_subscription_status
     return head :unauthorized unless valid_cron_token?
 

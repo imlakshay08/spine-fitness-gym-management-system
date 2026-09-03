@@ -14,7 +14,7 @@ This document is the on-ramp for anyone touching the codebase for the first time
 |---|---|
 | Language | Ruby **3.1.4** |
 | Web framework | Rails **7.1.3+** (`config.load_defaults 5.1` — kept on Rails 5.1 defaults) |
-| Database | **MySQL 8** via `mysql2 ~> 0.5` |
+| Database | **MySQL 9.4** (Railway `mysql:9.4` image) via `mysql2 ~> 0.5` |
 | App server | **Puma** (>= 5.0) |
 | Frontend templating | ERB |
 | JS framework | **jQuery + Bootstrap 5** (Hotwire gems present but not used in views) |
@@ -37,16 +37,19 @@ This document is the on-ramp for anyone touching the codebase for the first time
               │                                       │
               ▼                                       ▼
        ┌──────────────┐                       ┌──────────────────┐
-       │   Render     │                       │   cron-job.org   │
-       │ (Rails app)  │◄──── hits /cron/* ────│ (10:00 IST daily)│
+       │  Cloudflare  │                       │   cron-job.org   │
+       │      ↓       │                       │  6 schedules,    │
+       │   Railway    │◄──── hits /cron/* ────│  every 15 min →  │
+       │ (Rails app)  │                       │  monthly         │
        │  Puma + Ruby │                       └──────────────────┘
        └──────┬───────┘
-              │ mysql2 over TLS
+              │ mysql2 (private network, same Railway project)
               ▼
        ┌──────────────┐         ┌────────────────────────────┐
-       │  CleverCloud │         │ Meta WhatsApp Cloud API     │
+       │   Railway    │         │ Meta WhatsApp Cloud API     │
        │    MySQL     │         │ graph.facebook.com/v19.0    │
-       └──────────────┘         └──────────────┬──────────────┘
+       │ mysql-volume │         └──────────────┬──────────────┘
+       └──────────────┘
                                                │ webhook
               ▲                                ▼
               │                       /webhooks/meta (Rails)
@@ -66,10 +69,26 @@ This document is the on-ramp for anyone touching the codebase for the first time
        └──────────────────────┘
 ```
 
-- **Web tier:** single Puma process on **Render**.
-- **Database:** managed **MySQL** on **CleverCloud** (production credentials are env-var driven: `MYSQL_ADDON_*`).
-- **Local development:** uses `127.0.0.1:3306` MySQL, `database: spinefitness_bckup3` for both dev and test ([config/database.yml](config/database.yml)).
-- **Cron:** external service [cron-job.org](https://cron-job.org) hits `/cron/send_expiry_whatsapp` and `/cron/sync_subscription_status` daily with a `?token=…` URL parameter (validated against `ENV['CRON_SECRET']`).
+- **Web tier:** single Puma process on **Railway** (built by Nixpacks — see [nixpacks.toml](nixpacks.toml)), served through **Cloudflare**. Because Cloudflare and Railway both sit in front of Rails, `request.remote_ip` is the real client IP for external callers but the gym bridge appears on a rotating set of addresses in one `/24`.
+- **Database:** **MySQL 9.4 running as a second Railway service** in the same project, backed by a persistent `mysql-volume`. Two ways in:
+  - **Private:** `mysql.railway.internal` (IPv4 + IPv6) — how the Rails service connects, over Railway's internal network.
+  - **Public TCP proxy:** `zephyr.proxy.rlwy.net:31443 → 3306` — how TablePlus connects from a laptop. This means **the database is reachable from the public internet**, with the MySQL credentials as the only thing in front of it. Convenient for the hand-run SQL in [db/manual/](db/manual/); worth deleting from the service's Networking settings when it is not actively needed.
+
+  The app's own connection env vars are still named `MYSQL_ADDON_HOST` / `PORT` / `USER` / `PASSWORD` / `DB` — that prefix is CleverCloud's convention, left over from an earlier host. The names are legacy; the values point at Railway. Railway also injects `MYSQLHOST` / `MYSQLUSER` / `MYSQLPASSWORD` / `MYSQLPORT` / `MYSQLDATABASE` and `MYSQL_URL`, which the app does not read.
+- **Backups:** Railway's Backups tab on the MySQL service. This is the only backup mechanism — there is no application-level dump.
+- **Local development:** uses `127.0.0.1:3306` MySQL, `database: spinefitness_bckup5` for both dev and test ([config/database.yml](config/database.yml)). Both dev and production connect with `encoding: utf8mb4` — `utf8` maps to utf8mb3 and silently drops 4-byte emoji arriving from WhatsApp.
+- **Cron:** external service [cron-job.org](https://cron-job.org) hits six endpoints with a `?token=…` URL parameter (validated against `ENV['CRON_SECRET']` in constant time):
+
+  | Endpoint | Schedule (IST) |
+  |---|---|
+  | `/cron/send_expiry_whatsapp` | daily 10:00 |
+  | `/cron/send_owner_daily_report` | daily 22:30 |
+  | `/cron/send_owner_monthly_report` | 1st of month 09:00 |
+  | `/cron/check_biometric` | every 15 minutes |
+  | `/cron/send_staff_weekly` | Monday 12:00 |
+  | `/cron/sync_subscription_status` | **not scheduled — see §5** |
+
+  cron-job.org schedules are entered in **UTC**. The report and alert endpoints run their job with `perform_now` and return the outcome in the response body, so the cron service's execution log records whether the message was actually sent — an earlier version used `perform_later` and failed silently for a week.
 - **Background jobs:** ActiveJob queue adapter is `:async`, so `perform_later` runs in-process on the Puma worker. There is **no Sidekiq/Redis** — see [config/application.rb:16](config/application.rb#L16).
 
 ### 1.3 External Integrations & APIs
@@ -90,9 +109,24 @@ This document is the on-ramp for anyone touching the codebase for the first time
 
 Required for production:
 - `MYSQL_ADDON_HOST`, `MYSQL_ADDON_PORT`, `MYSQL_ADDON_USER`, `MYSQL_ADDON_PASSWORD`, `MYSQL_ADDON_DB`
+- `SECRET_KEY_BASE`
 - `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_WEBHOOK_TOKEN`
 - `CRON_SECRET`
-- `INTERAKT_API_KEY` (legacy, no longer required at runtime)
+
+Messaging (all have working defaults in code, so the app runs without them):
+- `OWNER_WHATSAPP_NUMBERS` — comma list of `number:Name` pairs for the owner report
+- `STAFF_ALERT_IDS` — `mst_staff_lists` ids that receive staff alerts (default `4,2`)
+- `STAFF_ALERT_EXTRA` — comma list of `number:Name:role` for people not in the staff table. `role` is `staff` or `owner` and picks which set of recovery instructions the biometric alert carries; a number may appear once per role, so one person can receive both wordings.
+
+Security switches — every one defaults to the permissive setting, so unsetting it is the rollback (see SECURITY_FIXES.md):
+- `BIOMETRIC_API_TOKEN`, `BIOMETRIC_AUTH_ENFORCE`
+- `CSRF_ENFORCE`
+- `WHATSAPP_APP_SECRET` (enables Meta webhook signature checking)
+- `FORCE_SSL`, `SECURE_COOKIES`, `CSP_ENFORCE`
+- `DEVICE_SERIAL`, `DEVICE_SERIALS`
+
+Legacy / optional:
+- `INTERAKT_API_KEY`, `INTERAKT_WEBHOOK_ENABLED` (legacy, not required at runtime)
 - `SESSION_CLEANUP_ON_BOOT` (set to `"true"` once after deploy to prune stale `sessions` rows)
 
 ---
@@ -151,7 +185,7 @@ This codebase is built as **multi-tenant by company code**, even though the prod
 | Table | Purpose | Key columns |
 |---|---|---|
 | `mst_companies` | Tenants (one row per gym/company). Holds branding, GST, address, signature, settings flags. | `cmp_companycode` (unique), `cmp_companyname`, many `enum('Y','N')` flags |
-| `mst_members_lists` | Gym members (the primary "customer" entity). | `mmbr_compcode`, `mmbr_code` (M00001…), `mmbr_name`, `mmbr_contact` |
+| `mst_members_lists` | Gym members (the primary "customer" entity). | `mmbr_compcode`, `mmbr_code` (M00001…), `mmbr_name`, `mmbr_contact`, plus soft-delete columns `mmbr_status` (`A` on roll / `R` removed), `mmbr_removed_at`, `mmbr_removed_by`, `mmbr_remove_reason` |
 | `mst_membership_plans` | Plan catalog (Monthly, Quarterly, Half-yearly, Yearly, Open). | `plan_name`, `plan_duration_months`, `plan_final_amount`, `plan_mrp_amount`, `plan_is_open` |
 | `mst_staff_lists` | Gym staff (front desk, cleaners, etc). | `stf_code`, `stf_name`, `stf_designation` |
 | `mst_trainer_lists` | Trainers (separated from staff because they have specialities & salary type). | `trn_name`, `trn_speciality`, `trn_salary_amount` |
@@ -175,13 +209,17 @@ This codebase is built as **multi-tenant by company code**, even though the prod
 | `trn_user_rights` | Companion to `trn_user_accesses` for finer-grained controls (defined but lightly used). |  |
 | `trn_issue_amounts` | Cash/UPI issued **to staff** (treated like petty cash advance). | `ia_staff_id`, `ia_date`, `ia_amount`, `ia_type` |
 | `trn_stock_inventories` | Stock in/out ledger. | `si_stock_id`, `si_trans_type` (`IN`/`OUT`), `si_quantity` |
+| `trn_whatsapp_inbox` | Inbound WhatsApp messages, staff replies, media and emoji reactions — the data behind the `/whatsapp_inbox` conversation view. | `wi_direction` (`IN`/`OUT`), `wi_from`, `wi_body`, `wi_wamid`, `wi_reaction_to`, `wi_media_id`, `wi_media_mime`, `wi_reply_text`, `wi_seen_at`, `wi_removed_at` |
+| `trn_bridge_heartbeats` | Last-seen ping from the Python bridge on the gym laptop. One row per device; drives the dashboard status pill and the outage watchdog. | `bh_compcode`, `bh_device_sn`, `bh_last_seen`, `bh_bridge_version` |
+| `trn_renewal_requests` | **Unused.** Columns are shaped for an online renewal + payment-gateway flow (`rr_provider_order_id`, `rr_provider_payment_id`) that was never wired up — no model, no controller, no route references it. | — |
+| `biometric_id_allocations` | Reserves device user ids so two enrollments cannot claim the same slot. | |
 | `trn_reminder_logs` | Per-subscription reminder log (legacy; superseded by `trn_whatsapp_logs`). |  |
 
 #### System tables
 
 | Table | Purpose |
 |---|---|
-| `users` | Authenticated users (admin/staff). Password stored as **MD5 hex** in `userpassword`. Includes `usercompcode` (tenant), `usertype`, `listmodule` (CSV of allowed modules), `landing_pagemodule`, plus dozens of fields inherited from the ERP base. |
+| `users` | Authenticated users (admin/staff). Passwords are **bcrypt** in `password_digest`, with the legacy MD5 `userpassword` column kept as the rollback path — each account upgrades on its next successful login (`using_bcrypt` flags which have). All password logic lives in `app/models/user.rb`. Includes `usercompcode` (tenant), `usertype`, `listmodule` (CSV of allowed modules), `landing_pagemodule`, plus dozens of fields inherited from the ERP base. |
 | `sessions` | DB-backed session table from `activerecord-session_store`. Active session storage is the cookie store; this table is the older backup. The boot-time cleaner in [config/initializers/session_cleanup.rb](config/initializers/session_cleanup.rb) prunes rows older than 2 days when `SESSION_CLEANUP_ON_BOOT=true`. |
 | `schema_migrations`, `ar_internal_metadata` | Rails internals. |
 
@@ -261,15 +299,22 @@ app/
 │   ├── holiday_controller.rb
 │   ├── house_list_controller.rb      # (legacy, unused)
 │   ├── common_process_controller.rb  # Catch-all for misc AJAX
-│   ├── cron_controller.rb            # Endpoints called by cron-job.org
+│   ├── cron_controller.rb            # Six endpoints called by cron-job.org
+│   ├── whatsapp_logs_controller.rb   # Member message history + delivery stats
+│   ├── whatsapp_inbox_controller.rb  # Two-way conversation view
 │   ├── pages_controller.rb           # Privacy page
+│   ├── concerns/
+│   │   ├── bridge_authentication.rb  # Bearer token for /api/*, staged by env var
+│   │   └── soft_csrf_protection.rb   # Staged CSRF
 │   ├── api/
 │   │   ├── biometric_attendances_controller.rb   # POST /api/biometric_attendances
 │   │   ├── biometric_mappings_controller.rb      # POST /api/biometric_mappings (+ save_template)
+│   │   ├── member_mappings_controller.rb         # GET /api/sync_needed, /api/device_audit
+│   │   ├── bridge_heartbeats_controller.rb       # POST /api/bridge_heartbeat
 │   │   ├── access_status_controller.rb           # GET /api/access_status
 │   │   └── adms_controller.rb                    # /iclock/* for native ZK ADMS protocol
 │   └── webhooks/
-│       ├── meta_controller.rb        # Meta WhatsApp status webhook
+│       ├── meta_controller.rb        # Meta status webhook + inbound messages/media/reactions
 │       └── interakt_controller.rb    # Legacy Interakt webhook
 │
 ├── models/                           # Almost all are EMPTY class bodies
@@ -298,16 +343,36 @@ app/
 │
 ├── jobs/
 │   ├── application_job.rb
-│   ├── membership_expiry_whatsapp_job.rb  # The main scheduled job
-│   └── sync_subscription_status_job.rb
+│   ├── membership_expiry_whatsapp_job.rb   # Expiring / expired reminders
+│   ├── subscription_receipt_whatsapp_job.rb # Receipt text + PDF on renewal
+│   ├── owner_report_whatsapp_job.rb        # Daily + monthly owner report
+│   ├── staff_alert_whatsapp_job.rb         # Biometric alert + Monday list
+│   └── sync_subscription_status_job.rb     # ⚠ deliberately unscheduled — see §5
 │
 ├── services/
+│   ├── whatsapp_templates.rb         # ★ Single source of truth for all templates
 │   ├── meta/send_whatsapp.rb         # ★ Active WhatsApp sender (Meta Cloud API)
+│   ├── alerts/
+│   │   ├── gym_clock.rb              # Opening hours — alerts only fire when open
+│   │   ├── biometric_watch.rb        # Bridge liveness + per-audience instructions
+│   │   └── staff_digest.rb           # Monday absentee / data-quality split
+│   ├── reports/
+│   │   ├── gym_report_base.rb        # Shared IST date maths and member sets
+│   │   ├── daily_gym_report.rb
+│   │   ├── monthly_gym_report.rb
+│   │   ├── gym_report_pdf.rb
+│   │   └── staff_followup_pdf.rb
+│   ├── receipts/subscription_receipt_pdf.rb
 │   ├── interakt/send_whatsapp.rb     # Legacy Interakt sender
 │   ├── subscription_reminder.rb      # Legacy reminder service (CallMeBot)
 │   └── whatsapp_service.rb           # Legacy (CallMeBot)
 │
-└── pdfs/                             # Empty (Prawn classes are referenced but not present here)
+└── pdfs/                             # Empty — Prawn classes live in services/reports and services/receipts
+
+db/
+└── manual/                           # Hand-run SQL for production, applied via TablePlus.
+                                      # Schema changes are NOT applied by `rails db:migrate`
+                                      # on the server; each file here has been run by hand.
 
 lib/
 └── erp_module/
@@ -430,14 +495,22 @@ Business logic is split unevenly:
 
 3. **Controller actions.** All actual gym logic — subscription end-date calculation, partial-payment due tracking, biometric attendance acceptance — lives in the per-controller `create` / `index` actions and small private methods within them.
 
-4. **Service objects (only for outbound integrations).**
-   - [app/services/meta/send_whatsapp.rb](app/services/meta/send_whatsapp.rb) — `Meta::SendWhatsapp.send_template(phone:, template:, body_values:)`
-   - [app/services/interakt/send_whatsapp.rb](app/services/interakt/send_whatsapp.rb) — legacy
-   - Service objects are the only "modern Rails" idiom present; everything else is procedural.
+4. **Service objects.** Originally only for outbound integrations; since the 2026-08 messaging work they also hold the report and alert logic, which is the one part of the app written in a modern idiom.
+   - [app/services/meta/send_whatsapp.rb](app/services/meta/send_whatsapp.rb) — `send_template(phone:, template:, body_values:, document:)`, `upload_media`
+   - [app/services/whatsapp_templates.rb](app/services/whatsapp_templates.rb) — **single source of truth** for all six templates: wording, label, icon, parameter order. The sender and the WhatsApp Logs screen both read from it so they cannot drift. `INTERNAL` lists the templates that are not member correspondence (owner reports, staff alerts) and are therefore hidden from the logs screen.
+   - `app/services/reports/` — `GymReportBase` (shared IST date maths and member sets), `DailyGymReport`, `MonthlyGymReport`, `GymReportPdf`, `StaffFollowupPdf`
+   - `app/services/alerts/` — `GymClock` (when the gym is open: 06:30–11:30 and 17:00–21:30 IST, **mornings only on Sunday**; it is the sole gate on whether an outage alert fires, and it resolves everything in IST so the day-of-week is never decided by the caller's zone), `BiometricWatch` (is the bridge alive, and what should each audience do about it), `StaffDigest` (the Monday absentee/data-quality split)
+   - [app/services/receipts/subscription_receipt_pdf.rb](app/services/receipts/subscription_receipt_pdf.rb)
+   - Legacy, unused: `interakt/send_whatsapp.rb`, `whatsapp_service.rb`, `subscription_reminder.rb` (CallMeBot era)
 
-5. **Jobs (only for scheduled batch work).**
-   - [app/jobs/membership_expiry_whatsapp_job.rb](app/jobs/membership_expiry_whatsapp_job.rb) — sends "expiring in 3 days" and "expired" template messages
-   - [app/jobs/sync_subscription_status_job.rb](app/jobs/sync_subscription_status_job.rb) — flips `ms_status` from `ACTIVE` to `EXPIRED` after `ms_end_date`
+5. **Jobs (scheduled batch work).** All are invoked with `perform_now` from `CronController` so the outcome reaches the cron service's log.
+   - [app/jobs/membership_expiry_whatsapp_job.rb](app/jobs/membership_expiry_whatsapp_job.rb) — "expiring in 3 days" and "expired" reminders
+   - [app/jobs/subscription_receipt_whatsapp_job.rb](app/jobs/subscription_receipt_whatsapp_job.rb) — receipt text + PDF, fired on subscription create/renew
+   - [app/jobs/owner_report_whatsapp_job.rb](app/jobs/owner_report_whatsapp_job.rb) — daily and monthly owner reports
+   - [app/jobs/staff_alert_whatsapp_job.rb](app/jobs/staff_alert_whatsapp_job.rb) — biometric outage alert and the Monday list; resolves recipients from `mst_staff_lists` plus `STAFF_ALERT_EXTRA`
+   - [app/jobs/sync_subscription_status_job.rb](app/jobs/sync_subscription_status_job.rb) — flips `ms_status` `ACTIVE` → `EXPIRED`. **Not scheduled on purpose** — see §5.
+
+**Prawn 1.2.1 caveat:** only the built-in AFM fonts are available, and `normalize_encoding` silently rewrites any character outside WinAnsi to `_`. The rupee sign `₹` is one of them, so every PDF and message writes `Rs.` instead. `·`, `—` and `•` are safe.
 
 ### 3.5 Frontend Stack & Patterns
 
@@ -474,7 +547,9 @@ Modules roughly map 1-to-1 with controllers and sidebar items.
 | **Create User / Change Password** | `create_user`, `change_password` | User admin. |
 | **Log Audit** | `log_audit` | Browse `trn_audit_trials`. |
 | **Company** | `company` | Tenant settings (logo, signature, declaration text). |
-| **Cron endpoints** | `cron` | `/cron/send_expiry_whatsapp` (token-gated), `/cron/sync_subscription_status`. |
+| **WhatsApp Logs** | `whatsapp_logs` | Member communication history with delivery status, filters and summary cards. Two guards keep internal traffic out: the `WhatsappTemplates::INTERNAL` name list, and a structural `wl_member_id IS NOT NULL` check — every member message records a member id and nothing internal does, so a template rename cannot leak owner reports or staff alerts onto the screen again. |
+| **WhatsApp Inbox** | `whatsapp_inbox` | Two-way conversation view. Merges inbound messages, staff replies and automated sends into one IST-ordered timeline; polls every 5s; renders images, video, audio, documents, stickers and reactions; enforces Meta's 24-hour customer service window before allowing a free-form reply. |
+| **Cron endpoints** | `cron` | Six token-gated endpoints — see §1.2 for the schedule table. |
 | **Biometric API** | `api/biometric_attendances`, `api/biometric_mappings`, `api/access_status` | The contract with the Python bridge. |
 | **ADMS endpoint** | `api/adms` | Native ZKTeco "ADMS" push protocol fallback at `/iclock/cdata`. |
 | **Webhooks** | `webhooks/meta`, `webhooks/interakt` | Inbound WhatsApp delivery-status events. |
@@ -567,7 +642,7 @@ This is the section to read **before** trying to "fix" anything.
 | **String-interpolated SQL filters** | `where(field: value)` | `iswhere = "mmbr_code LIKE '%#{filter}%'"` then `Model.where(iswhere)` | Quick-and-dirty filter building. **This is SQL-injection-shaped** if user input ever lands directly in `iswhere`. Most filters are bounded (admin-only UI, integer params, etc.) but anything coming from `params[:search]` should be reviewed. |
 | **`ajax_process` action router** | RESTful `create` / `update` / etc. | Single action dispatching on `params[:identity]` | Lets multiple AJAX endpoints share one route per controller without expanding `routes.rb`. |
 | **`add_X` instead of `new` + `edit`** | `GET /resource/new`, `GET /resource/:id/edit` | `GET /x_list/add_x` (both new and edit, distinguished by `params[:id]`) | One form template covers both modes. |
-| **`/x_list/:id/deletes` (GET) for destroy** | `DELETE /resource/:id` | GET `/x_list/:id/deletes` calls `destroy` | Avoids needing a JS-built DELETE request. **Not idempotent-safe** — a link prefetcher could delete. |
+| ~~**`/x_list/:id/deletes` (GET) for destroy**~~ | `DELETE /resource/:id` | Resolved 2026-08-30 | Those routes are now `delete` and `alertChecked()` submits a real form with `_method=delete`. Kept here so the old pattern is not reintroduced by copying an older controller. |
 | **Spelled "referesh"** | `refresh` | `referesh_member_list`, etc. | Typo in the original ERP base; copied verbatim throughout. Don't "fix" without grepping — it's in route paths, action names, and JS. |
 | **17 `Rails.application.routes.draw` blocks** | One block | One per module in [config/routes.rb](config/routes.rb) | Visually groups routes by module. Functionally equivalent to one block. |
 | **Session-based search persistence** | URL params / Turbo | `session[:req_member_list]`, `session[:req_member_search]`, … | Filters survive across navigation without query strings. Reset by hitting the `referesh_*` action. |
@@ -575,7 +650,7 @@ This is the section to read **before** trying to "fix" anything.
 | **`get_*_detail(id)` helper methods on `ApplicationController`** | Active Record associations | `get_member_detail(id)`, `get_plan_detail(id)` in views | Stand-ins for missing model associations. They're exposed via `helper_method`. |
 | **Dashboard preloads & in-memory hash maps** | Active Record's `includes(...)` | Manually-built `@members_map`, `@plans_map`, `@payments_map` keyed by string id | Without associations, this is the working pattern to avoid N+1 queries — see `DashboardController#preload_members/plans/payments`. |
 | **ActiveJob async adapter in production** | Sidekiq / GoodJob | `config.active_job.queue_adapter = :async` | One Puma worker, low job volume (≤2 batches/day). No external broker needed. ⚠️ Jobs are lost on deploy/restart while in-flight. |
-| **Cron via `cron-job.org` + plain HTTP** | `whenever` gem / Sidekiq-cron | External HTTPS GET with `?token=` shared secret | Render's free plan has no built-in scheduler; external cron is the simplest fit. |
+| **Cron via `cron-job.org` + plain HTTP** | `whenever` gem / Sidekiq-cron | External HTTPS GET with `?token=` shared secret | There is no scheduler in the Railway service; external cron is the simplest fit, and its execution log doubles as the delivery record. |
 | **No bundler for JS** | esbuild / importmap / webpacker | Pre-built `public/assets/js/...` files | Carried forward; no build pipeline runs in CI. |
 | **Per-page JS file auto-loaded by controller name** | Sprockets `javascript_include_tag` per page | `<script src="…/package/<%=page_linked%>.js">` | Convention-over-configuration shortcut: `member_list_controller` ↔ `member_list.js`. |
 | **`page_linked` rename**: dashboard → `dashboard_liv` | n/a | One-off rename in `ApplicationController#page_linked` | Likely historical from a "live dashboard" rename; left in. |
@@ -583,6 +658,24 @@ This is the section to read **before** trying to "fix" anything.
 | **The Interakt → Meta migration is half-undone** | n/a | `wl_interakt_msg_id` now stores Meta `wamid`, the Interakt controller still exists | Column was kept to avoid an ALTER on a busy table. Treat it as "wa_message_id" semantically. |
 | **`ENGINE=MyISAM` mixed with InnoDB** | Pick one | System tables InnoDB, business tables MyISAM | Inherited base used MyISAM; new system tables created later defaulted to InnoDB. |
 | **`mbm_finger_template` as JSON-in-LONGTEXT** | Active Storage / dedicated blob | `mapping.update(mbm_finger_template: params[:templates].to_json)` | Keeps the entire stack stateful in MySQL — no S3/Active Storage dependency. Acceptable because templates are small (a few KB) and only ~200 of them exist. |
+| **A cron endpoint that must never be scheduled** | Run every job you write | `/cron/sync_subscription_status` exists and is deliberately left off the schedule | See below. |
+
+### Why `sync_subscription_status` is not scheduled
+
+It rewrites every subscription whose `ms_end_date` has passed from `ACTIVE` to
+`EXPIRED`. That sounds like housekeeping, and it would break renewals.
+
+`MembershipExpiryWhatsappJob`'s `:expired` branch looks for subscriptions that
+are **still `ACTIVE` but already past their end date** — that combination is
+the definition of someone who needs a renewal nudge. The sync job overwrites
+exactly that set, so running it would leave the 10:00 job finding nothing, with
+no error and no log line.
+
+Nothing else depends on the flag. Gate access
+([api/access_status_controller.rb](app/controllers/api/access_status_controller.rb)),
+the subscription list filter, and every report compute from `ms_end_date`
+directly, which is self-correcting at midnight. Treat `ms_status` as accurate
+only at the moment a row is written, and never query on it.
 
 ---
 
@@ -705,11 +798,20 @@ here so the pattern is not reintroduced.
 3. ~~**String-interpolated SQL in filters.**~~ Resolved 2026-08-30: every `iswhere` filter now uses bound parameters. If you add a search box, chain `.where("col LIKE ?", ...)` — never interpolate.
 4. ~~**GET `/x_list/:id/deletes`.**~~ Resolved 2026-08-30: those routes are `delete` and `alertChecked()` submits a real form.
 5. **`generate_code` race condition.** Two simultaneous saves can produce duplicate codes. Add a unique index + retry, or use a sequence table.
-6. **`:async` ActiveJob adapter.** In-flight WhatsApp sends are lost on deploy/restart. Acceptable today because the job idempotently re-checks `trn_whatsapp_logs` on next run.
+6. **`:async` ActiveJob adapter.** In-flight WhatsApp sends are lost on deploy/restart. Acceptable for the expiry job, which idempotently re-checks `trn_whatsapp_logs` on the next run; **less acceptable** for receipts, which fire once on subscription creation and have no retry.
+6a. **No test suite.** `test/` holds only the generated scaffolding. Everything in the 2026-08 messaging work was verified with throwaway `rails runner` scripts against the dev database. This is the single largest risk to changing the app safely.
+6b. **MyISAM under money.** A subscription and its `trn_payments` row are two writes with no transaction between them (§2.5). If the process dies in between, the subscription exists and the payment does not, silently. Converting the `trn_*` tables to InnoDB is mostly mechanical and worth doing.
+6c. **Timezone discipline.** Never assign `Time.zone = …` in a request. It is thread-local and Puma reuses threads, so it leaks into whichever request runs next on that thread — this corrupted 146 attendance rows by +5:30 before it was found. Use `Time.current.in_time_zone(IST_ZONE)` and parse device timestamps explicitly with `ActiveSupport::TimeZone['Asia/Kolkata']`.
+6d. **`sql_mode` differs between dev and production.** Local WAMP runs with an empty `sql_mode`; production is strict. A migration that passes locally can fail on production with `Incorrect datetime value: '0000-00-00'`. Test schema changes against a strict session, and keep the hand-run SQL in [db/manual/](db/manual/).
 7. **`ErpModule::Common` references non-existent models.** Some methods will `NameError` if accidentally called. Treat the module as dead code except for the few methods (`get_local_dated`, `formatted_times`) actually in use.
 8. ~~**Hard-coded Bunny.net access key.**~~ Resolved 2026-08-30: the Bunny methods had no callers and were deleted along with the key. See SECURITY_FIXES.md.
 9. ~~**Hard-coded device serial**~~ in `MemberListController#save_manual_mapping` and `Api::AdmsController#process_attendance`. Resolved 2026-08-30: it now comes from `ENV['DEVICE_SERIAL']`, falling back to the serial the bridge last reported (`ApplicationController#primary_device_sn`).
+10. **`CRON_SECRET` is still a guessable word.** Every scheduled endpoint is protected by it alone. Rotating it means editing six URLs in cron-job.org and one Railway variable.
+11. **Bridge authentication is still in soft mode.** `BIOMETRIC_API_TOKEN` is set, but the gym laptop does not send it, so `BIOMETRIC_AUTH_ENFORCE` cannot be turned on without stopping attendance. Requires an in-person visit — see SECURITY_FIXES.md step 5.
+12. **`ms_status` is unreliable and has one consumer.** 270 rows read `ACTIVE` while already past `ms_end_date`. Nothing that matters trusts it: gate access, list filters and reports all compute from `ms_end_date`. Only the "expired" reminder reads it, and it does so deliberately — see §5.
+13. **`escape_data_string` in `application_controller.rb`** contains `if type == 'DT' || 'NB'`, which is always true. Dead code with no callers, but it produces a Ruby warning on every boot.
 
 ---
 
-*Last updated: 2026-05-20.*
+*Last updated: 2026-09-02 — verified against the live schema, the Railway
+deployment, and the running cron schedule.*

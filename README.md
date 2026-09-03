@@ -1,6 +1,6 @@
 # Spine Fitness — Production Gym Management System
 
-A full-stack gym management platform built with Ruby on Rails, deployed in production and actively used by a real gym in Dwarka, New Delhi. Replaced physical notebooks with a centralized digital platform managing 200+ members, biometric attendance, automated WhatsApp notifications, and gate access control.
+A full-stack gym management platform built with Ruby on Rails, deployed in production and actively used by a real gym in Dwarka, New Delhi. Replaced physical notebooks with a centralized digital platform managing 250+ members, biometric attendance, two-way WhatsApp messaging, automated owner reporting, and gate access control.
 
 **🔗 Live:** [spine-fitness.com](https://spine-fitness.com)
 
@@ -32,13 +32,13 @@ A centralized web platform where gym administrators manage everything digitally 
 | Layer | Technology |
 |---|---|
 | **Backend** | Ruby on Rails 7.1, Ruby 3.1.4 |
-| **Database** | MySQL (CleverCloud) |
-| **Frontend** | Hotwire (Turbo + Stimulus), jQuery, Bootstrap |
-| **Hosting** | Render |
+| **Database** | MySQL — a Railway service with a persistent volume (env vars still carry the legacy `MYSQL_ADDON_*` names from a previous host) |
+| **Frontend** | jQuery + Bootstrap 5, ERB, per-page AJAX (Hotwire gems present but unused) |
+| **Hosting** | Railway (Nixpacks), behind Cloudflare |
 | **Biometric Bridge** | Python 3 (pyzk + Flask) — runs on gym laptop |
-| **WhatsApp API** | Meta WhatsApp Cloud API (direct integration) |
-| **PDF Reports** | Prawn |
-| **Scheduling** | cron-job.com |
+| **WhatsApp API** | Meta WhatsApp Cloud API (direct integration, two-way) |
+| **PDF Reports** | Prawn 1.2.1 + prawn-table |
+| **Scheduling** | cron-job.org (six endpoints) |
 | **Hardware** | ZKTeco fingerprint biometric device |
 
 ---
@@ -48,14 +48,16 @@ A centralized web platform where gym administrators manage everything digitally 
 ```
 Gym Admin (Browser)
    │
-   ▼
-Ruby on Rails Application (Render)
+   ▼  Cloudflare
+Ruby on Rails Application (Railway)
    │
-   ├── MySQL Database (CleverCloud)
+   ├── MySQL (Railway service, mysql-volume)
    │
-   ├── WhatsApp Messaging (Meta Cloud API)
+   ├── WhatsApp Messaging (Meta Cloud API) ──► members, owner, staff
+   │      ▲
+   │      └── webhook: delivery receipts + inbound replies
    │
-   ├── Scheduled Jobs (cron-job.com)
+   ├── Scheduled Jobs (cron-job.org — 6 endpoints)
    │
    └── REST API: POST /api/biometric_attendances
                     ▲
@@ -138,6 +140,50 @@ Webhook → trn_whatsapp_logs updated: QUEUED → DELIVERED → READ
 
 Full delivery tracking via webhook — messages are tracked through their complete lifecycle.
 
+**Six scheduled endpoints**, all token-gated (`?token=…` against `CRON_SECRET`):
+
+| Endpoint | Schedule (IST) | What it does |
+|---|---|---|
+| `/cron/send_expiry_whatsapp` | daily 10:00 | "expiring in 3 days" + "expired" reminders |
+| `/cron/send_owner_daily_report` | daily 22:30 | Owner's day summary + PDF |
+| `/cron/send_owner_monthly_report` | 1st of month | Owner's month summary + PDF |
+| `/cron/check_biometric` | every 15 min | Biometric outage watchdog |
+| `/cron/send_staff_weekly` | Mon 12:00 | Staff follow-up list + PDF |
+| `/cron/sync_subscription_status` | *not scheduled* | Flips `ms_status` to EXPIRED — deliberately unscheduled, see note below |
+
+The report and alert endpoints run **synchronously** and return their outcome in the response body (`OK - biometric alert: 5/5 sent`), so the cron service's own execution log shows whether the message actually went out.
+
+> **Note on `sync_subscription_status`:** it is intentionally not scheduled. The "expired" reminder searches for subscriptions that are still `ACTIVE` but past their end date — exactly the rows this job rewrites — so running it would silently stop renewal reminders. Nothing else reads `ms_status`; gate access, list filters and reports all derive from `ms_end_date`.
+
+### Two-Way WhatsApp Inbox
+
+A full conversation view at `/whatsapp_inbox` — inbound member messages, staff replies, and automated sends merged into one timeline in IST order, polled every 5 seconds. Handles images, video, audio, documents, stickers and emoji reactions, with Meta's 24-hour customer service window enforced before a free-form reply is allowed.
+
+### Subscription Receipts
+
+The moment a subscription is created or renewed, the member gets a formatted WhatsApp confirmation **and** a Prawn-generated PDF receipt attached.
+
+### Owner Reports
+
+Daily (22:30) and monthly (1st) business summaries delivered to the owner as WhatsApp text plus a PDF — collections, new subscriptions, visits with member names and entry times, expiring memberships. Written in deliberately plain language with no technical terms. Kept out of the WhatsApp Logs screen, which is a member-communication history.
+
+### Staff Alerts & Biometric Watchdog
+
+The Python bridge posts a heartbeat; `Alerts::BiometricWatch` raises an alert when it goes quiet for 20 minutes **while the gym is open**, throttled to one message per two hours. Staff get instructions to fix it themselves; the owner gets a version telling her who to call. A Monday list of members absent 14+ days ships as a PDF of names and numbers.
+
+Opening hours live in `Alerts::GymClock` and are the only gate on whether an alert fires:
+
+| | Morning | Evening |
+|---|---|---|
+| Mon–Sat | 06:30–11:30 IST | 17:00–21:30 IST |
+| **Sunday** | 06:30–11:30 IST | **closed** |
+
+Everything is evaluated in IST regardless of the caller's zone, so a UTC timestamp gives the same answer as its IST equivalent — including which day of the week it is.
+
+### Member Removal (Soft Delete)
+
+Staff can remove a member without destroying history. `mmbr_status` flips `A` → `R`, biometric mappings are deactivated, and gate access is revoked at all four decision points — while subscriptions, payments and attendance stay intact and resolvable. Reversible via restore.
+
 ### Admin Dashboard
 
 Single-screen overview: active/expiring/expired member counts, today's collections, due payments, attendance feed, inventory status. Bulk preloading with hash maps to avoid N+1 queries with 200+ members.
@@ -175,7 +221,9 @@ trn_member_subscriptions
 trn_member_attendances
 trn_member_biometric_mappings   ← includes finger template backup (LONGTEXT)
 trn_payments
-trn_whatsapp_logs
+trn_whatsapp_logs               ← outbound message lifecycle
+trn_whatsapp_inbox              ← inbound messages, replies, media, reactions
+trn_bridge_heartbeats           ← last-seen ping from the gym laptop
 trn_audit_trials
 ```
 
@@ -192,13 +240,16 @@ trn_user_rights
 
 ```
 biometric_bridge/
-├── bridge.py           # Main attendance polling loop
-├── sync_access.py      # Nightly gate access sync (delete/restore templates)
-├── enroll_api.py       # Flask API for web-triggered fingerprint enrollment
-├── config.py           # Device IP, Rails URL, company code
-├── requirements.txt    # pyzk, requests, flask, flask-cors
-└── start_bridge.vbs    # Silent auto-start on Windows boot (no terminal window)
+├── bridge.py             # Main attendance polling loop + heartbeat POST
+├── sync_access.py        # Nightly gate access sync (delete/restore templates)
+├── enroll_api.py         # Flask API for web-triggered fingerprint enrollment
+├── config.py             # Device IP, Rails URL, company code
+├── config.example.py     # Template — copy to config_local.py on the gym laptop
+├── requirements.txt      # pyzk, requests, flask, flask-cors
+└── start_bridge.vbs      # Silent auto-start on Windows boot (no terminal window)
 ```
+
+The bridge authenticates to `/api/*` with a bearer token (`BIOMETRIC_API_TOKEN`). Rails currently runs this in **soft mode** — unauthenticated calls are allowed and logged — until the gym laptop is updated in person. See `SECURITY_FIXES.md` step 5.
 
 ---
 
@@ -225,10 +276,11 @@ python bridge.py
 
 **Spine Fitness Gym** — Dwarka Sector 22, New Delhi
 
-- 200+ registered members
-- 100+ active members
+- 250+ registered members
 - Biometric attendance running daily
-- Automated WhatsApp reminders sent every morning at 10 AM
+- Automated WhatsApp reminders every morning at 10 AM
+- Nightly owner report and Monday staff follow-up list, both as PDFs
+- Biometric outages detected within 20 minutes and messaged to staff
 - Expired members physically blocked at the gate
 - Zero notebooks in use
 
