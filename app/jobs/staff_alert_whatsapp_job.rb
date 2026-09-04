@@ -106,7 +106,7 @@ class StaffAlertWhatsappJob < ApplicationJob
     renderer = Reports::StaffFollowupPdf.new(data: data, company: company)
     media_id = upload(renderer)
 
-    to_fix = data[:not_recorded].size + data[:not_enrolled].size
+    to_fix = data[:not_recorded].size + data[:no_fingerprint].size
 
     sent = weekly_recipients.map do |number, name, _role|
       deliver(compcode, WEEKLY_TEMPLATE, 'WEEK', number,

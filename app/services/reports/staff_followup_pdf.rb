@@ -42,9 +42,9 @@ module Reports
       pdf.fill_color 'FFFFFF'
       pdf.text_box 'SPINE FITNESS', at: [14, pdf.cursor - 12], width: 300, size: 14, style: :bold
       pdf.fill_color 'C8CAD0'
-      pdf.text_box 'Weekly list for gym staff', at: [14, pdf.cursor - 29], width: 300, size: 8
+      pdf.text_box 'Monday list for gym staff', at: [14, pdf.cursor - 29], width: 300, size: 8
       pdf.fill_color ACCENT
-      pdf.text_box 'THINGS TO CHECK', at: [pdf.bounds.width - 250, pdf.cursor - 12],
+      pdf.text_box 'WORK FOR THIS WEEK', at: [pdf.bounds.width - 250, pdf.cursor - 12],
                    width: 236, size: 12, style: :bold, align: :right
       pdf.fill_color 'FFFFFF'
       pdf.text_box @d[:period].to_s, at: [pdf.bounds.width - 250, pdf.cursor - 29],
@@ -55,10 +55,10 @@ module Reports
 
     def counters
       tiles = [
-        ['Members to call',        @d[:absent].size,       'not come for 14 days'],
-        ['Fingerprint not working', @d[:not_recorded].size, 'never recorded by machine'],
-        ['Not registered',         @d[:not_enrolled].size, 'no fingerprint on machine'],
-        ['Wrong phone numbers',    @d[:bad_numbers].size,  'not getting our messages']
+        ['Call these members', @d[:absent].size,         'did not come for 14 days'],
+        ['No fingerprint',     @d[:no_fingerprint].size, 'cannot open the gate'],
+        ['Finger not working', @d[:not_recorded].size,   'machine never saw them'],
+        ['Wrong phone number', @d[:bad_numbers].size,    'our message did not reach']
       ]
       gap = 8
       width = (pdf.bounds.width - (gap * (tiles.size - 1))) / tiles.size
@@ -119,45 +119,51 @@ module Reports
     end
 
     def call_list
-      section('Members to call', 'They have a running membership but have not come for 14 days')
+      section('Call these members', 'They are paying, but they did not come for 14 days.')
       table(['Member', 'Phone', 'Last came', 'Days ago'],
-            @d[:absent].map { |m| [m[:name], m[:phone].presence || '—',
+            @d[:absent].map { |m| [m[:name], m[:phone].presence || 'no number',
                                    m[:last_seen]&.strftime('%d %b %Y').to_s, m[:days_ago].to_s] },
             widths: [0.36, 0.24, 0.24, 0.16],
-            empty: 'Everyone has come in the last 14 days.')
+            empty: 'Good. Everyone came in the last 14 days.')
     end
 
     def machine_problems
-      section('Fingerprint is not working for these members',
-              'Registered on the machine, but it has never recorded them entering')
-      table(['Member', 'Phone'],
-            @d[:not_recorded].map { |m| [m[:name], m[:phone].presence || '—'] },
-            widths: [0.6, 0.4],
-            empty: 'No problem found.')
+      section('Add fingerprint for these members',
+              'They are paying, but the machine has no finger for them. ' \
+              'They cannot open the gate. Someone has to let them in every time.')
+      table(['Member', 'Phone', 'Paid till', 'Days left'],
+            @d[:no_fingerprint].map { |m| [m[:name], m[:phone].presence || 'no number',
+                                           m[:valid_till]&.strftime('%d %b %Y').to_s,
+                                           m[:days_left].to_s] },
+            widths: [0.34, 0.24, 0.24, 0.18],
+            empty: 'Good. Every paying member has a fingerprint.')
 
-      section('These members have no fingerprint registered',
-              'They cannot open the door on their own — please register them')
+      section('Fingerprint is not working',
+              'Their finger is on the machine, but the machine has never seen them. ' \
+              'Please scan the finger again.')
       table(['Member', 'Phone'],
-            @d[:not_enrolled].map { |m| [m[:name], m[:phone].presence || '—'] },
+            @d[:not_recorded].map { |m| [m[:name], m[:phone].presence || 'no number'] },
             widths: [0.6, 0.4],
-            empty: 'Everyone is registered.')
+            empty: 'Good. No problem.')
     end
 
     def wrong_numbers
-      section('These members are not getting our WhatsApp messages',
-              'The number saved in the software is most likely wrong — please check and correct it')
+      section('Fix these phone numbers',
+              'Our WhatsApp did not reach them. The number is wrong. ' \
+              'Please ask them and change it in the software.')
       table(['Member', 'Number we have', 'Failed', 'Last tried'],
-            @d[:bad_numbers].map { |m| [m[:name], m[:phone].presence || '—',
+            @d[:bad_numbers].map { |m| [m[:name], m[:phone].presence || 'no number',
                                         "#{m[:failures]} times", m[:last_try]&.strftime('%d %b %Y').to_s] },
             widths: [0.36, 0.24, 0.18, 0.22],
-            empty: 'All members are receiving our messages.')
+            empty: 'Good. All members are getting our messages.')
     end
 
     def footer_note
       pdf.move_down 4
       pdf.fill_color MUTED
-      pdf.text 'Members are counted from those with a running membership. ' \
-               'Please update anything you fix in the software so this list stays correct.',
+      pdf.text 'This list has only members who are paying now. ' \
+               'After you fix something, please change it in the software. ' \
+               'Then next Monday the list will be correct.',
                size: 7.5
       pdf.fill_color INK
     end

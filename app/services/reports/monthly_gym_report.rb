@@ -249,8 +249,22 @@ module Reports
         expiring_count: expiring_next_month.size,
         at_risk:       money(at_risk),
         lapsed_45:     lapsed_within(45).size,
-        active:        active_member_ids.size
+        active:        active_member_ids.size,
+        no_fingerprint: no_fingerprint_count
       }
+    end
+
+    # Paying members the machine has no finger for. They cannot open the gate
+    # themselves, so staff have to let them in by hand every time — which also
+    # means the expiry check at the door is not protecting those entries.
+    # A count only: the owner cannot register a fingerprint, the names belong
+    # on the staff list.
+    def no_fingerprint_count
+      enrolled = TrnMemberBiometricMapping
+                   .where(mbm_compcode: compcode, mbm_is_active: 'Y')
+                   .distinct.pluck(:mbm_member_id).map(&:to_s).to_set
+
+      active_member_ids.count { |id| !enrolled.include?(id.to_s) }
     end
   end
 end

@@ -402,6 +402,23 @@ module Reports
             widths: [0.42, 0.28, 0.30],
             empty: 'No membership finishes next month.')
       more_note(o[:expiring], 20)
+
+      fingerprint_note(o)
+    end
+
+    # One line, no names. A paying member with no fingerprint has to be let in
+    # by hand every time, which is both a service problem for them and a hole
+    # in the door check — so the owner should see the number. Fixing it is the
+    # staff's job, and the names are on their Monday list.
+    def fingerprint_note(outlook)
+      count = outlook[:no_fingerprint].to_i
+      return if count.zero?
+
+      section('Members who cannot use the fingerprint machine')
+      callout("#{count} paying #{count == 1 ? 'member has' : 'members have'} no fingerprint on the machine. " \
+              "Staff have to open the gate for #{count == 1 ? 'them' : 'them'} by hand every time. " \
+              'The names are on the staff list every Monday.',
+              tone: RED)
     end
   end
 end

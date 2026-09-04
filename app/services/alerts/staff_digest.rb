@@ -13,11 +13,11 @@ module Alerts
       {
         generated_at:  in_ist(Time.current),
         period:        today.strftime('%d %b %Y'),
-        absent:        absent_members,
-        not_recorded:  enrolled_but_unseen,
-        not_enrolled:  never_enrolled,
-        bad_numbers:   failing_numbers,
-        active_total:  active_member_ids.size
+        absent:         absent_members,
+        not_recorded:   enrolled_but_unseen,
+        no_fingerprint: no_fingerprint,
+        bad_numbers:    failing_numbers,
+        active_total:   active_member_ids.size
       }
     end
 
@@ -67,12 +67,26 @@ module Alerts
         .sort_by { |m| m[:name].to_s }
     end
 
-    # No fingerprint registered at all — they cannot get in on their own.
-    def never_enrolled
-      active_with_last_seen
-        .select { |id, seen| seen.blank? && !enrolled_ids.include?(id.to_s) && contactable?(id) }
-        .map { |id, _| { name: member_name(id), phone: member_phone(id) } }
-        .sort_by { |m| m[:name].to_s }
+    # Paying, but the machine has no fingerprint for them — so they cannot open
+    # the gate on their own and somebody has to let them in every single time.
+    #
+    # Deliberately not filtered by "never seen" or by `contactable?`. An
+    # earlier version required both, which hid most of the list: it missed
+    # anyone whose mapping was removed after they had already been coming, and
+    # it dropped members with no phone number saved — who are the worst case,
+    # because they can neither get in by themselves nor be messaged about it.
+    def no_fingerprint
+      active_member_ids
+        .reject { |id| enrolled_ids.include?(id.to_s) }
+        .map do |id|
+          ends_on = latest_end_dates[id]
+
+          { name:       member_name(id),
+            phone:      member_phone(id),
+            valid_till: ends_on,
+            days_left:  ends_on ? (ends_on - today).to_i : nil }
+        end
+        .sort_by { |m| -(m[:days_left] || 0) }
     end
 
     # Messages that keep failing are nearly always a wrong phone number.

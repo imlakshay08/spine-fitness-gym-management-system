@@ -118,9 +118,10 @@ module Notifications
       [
         expiring_item(expiry[:ending_today]),
         lapsed_item(expiry[:just_finished]),
-        list_item(:not_enrolled, staff[:not_enrolled], 'user-x',
-                  'with no fingerprint registered',
-                  'They cannot get in without someone opening the gate.', '/member_list'),
+        list_item(:no_fingerprint, staff[:no_fingerprint], 'user-x',
+                  'are paying but have no fingerprint',
+                  'They cannot open the gate — someone has to let them in every time.',
+                  '/member_list'),
         list_item(:never_seen, staff[:not_recorded], 'help-circle',
                   'whose fingerprint has never worked',
                   'Registered on the machine, but no entry has ever been recorded.', '/member_list'),
